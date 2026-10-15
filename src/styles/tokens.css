@@ -1,0 +1,219 @@
+/*
+ * Скоуп — дизайн-токены.
+ * Сгенерировано из Figma (файл Skoup.ru, коллекции Primitives / Color / Spacing / Radius / Adaptive).
+ * Не редактировать вручную: значения правятся в Figma и перегенерируются.
+ *
+ * Adaptive-токены: значения Mobile (393) → Desktop (1440) интерполируются через clamp(),
+ * поэтому на 393 и 1440 вёрстка совпадает с макетом один в один.
+ */
+
+:root {
+  /* ── Primitives ─────────────────────────────── */
+  --gray-0: #ffffff;
+  --gray-25: #fbfbfb;
+  --gray-50: #f7f7f7;
+  --gray-75: #f4f4f4;
+  --gray-100: #e0e0e0;
+  --gray-300: #aaaaaa;
+  --gray-400: #939393;
+  --gray-450: #888888;
+  --gray-800: #2e2e2e;
+  --gray-850: #262626;
+  --gray-880: #1f1f1f;
+  --gray-900: #1a1a1a;
+  --gray-950: #151515;
+  --blue-50: #e5f9ff;
+  --blue-400: #4db4ff;
+  --blue-500: #4f82ff;
+  --green-50: #e8ffe2;
+  --green-500: #00bb4b;
+  --violet-50: #ffedff;
+  --orange-500: #f19500;
+  --pink-500: #e050ba;
+  --red-400: #ff4d58;
+  --red-500: #ff1a29;
+  --alpha-white-6: rgb(255 255 255 / 6%);
+  --alpha-pink-8: rgb(249 161 242 / 8%);
+  --alpha-orange-8: rgb(229 193 120 / 8%);
+  --alpha-green-8: rgb(158 227 180 / 8%);
+  --alpha-red-8: rgb(253 147 147 / 8%);
+  --alpha-blue-8: rgb(158 195 227 / 8%);
+  --alpha-mint-8: rgb(142 238 255 / 8%);
+  --brand-uzum: #7000ff;
+  --brand-aliexpress: #e43225;
+  --brand-round: #4ceb73;
+  --brand-vk: #0077ff;
+
+  /* ── Color (семантика) ──────────────────────── */
+  --color-text-primary: var(--gray-950);
+  --color-text-secondary: var(--gray-450);
+  --color-text-primary-inversion: var(--gray-0);
+  --color-text-secondary-inversion: var(--gray-300);
+  --color-text-accent-1: var(--green-500);
+  --color-text-accent-2: var(--blue-500);
+  --color-text-accent-2-hover: var(--blue-400);
+  --color-text-accent-3: var(--orange-500);
+  --color-text-accent-4: var(--pink-500);
+  --color-text-error: var(--red-500);
+  --color-text-brand-uzum: var(--brand-uzum);
+  --color-text-brand-aliexpress: var(--brand-aliexpress);
+  --color-text-brand-round: var(--brand-round);
+  --color-text-brand-vk: var(--brand-vk);
+
+  --color-surface-primary: var(--gray-0);
+  --color-surface-secondary: var(--gray-50);
+  --color-surface-tertiary: var(--gray-25);
+  --color-surface-primary-inversion: var(--gray-950);
+  --color-surface-secondary-inversion: var(--gray-880);
+  --color-surface-inversion-subtle: var(--alpha-white-6);
+
+  --color-element-primary: var(--gray-950);
+  --color-element-primary-inversion: var(--gray-0);
+  --color-element-secondary: var(--gray-400);
+  --color-element-secondary-inversion: var(--gray-900);
+  --color-element-border: var(--gray-75);
+  --color-element-border-2: var(--gray-100);
+  --color-element-border-2-error: var(--red-400);
+  --color-element-border-inversion: var(--gray-850);
+  --color-element-blue: var(--blue-500);
+  --color-element-success: var(--green-500);
+  --color-element-orange: var(--orange-500);
+  --color-element-pink: var(--pink-500);
+
+  --color-background-purple: var(--alpha-pink-8);
+  --color-background-orange: var(--alpha-orange-8);
+  --color-background-green: var(--alpha-green-8);
+  --color-background-red: var(--alpha-red-8);
+  --color-background-blue: var(--alpha-blue-8);
+  --color-background-mint: var(--alpha-mint-8);
+  --color-tint-violet: var(--violet-50);
+  --color-tint-green: var(--green-50);
+  --color-tint-blue: var(--blue-50);
+
+  --color-static-white: var(--gray-0);
+  --color-static-black: var(--gray-850);
+  --color-static-dark: var(--gray-800);
+  --color-static-grey: var(--gray-400);
+
+  /* ── Spacing (статичные) ────────────────────── */
+  --space-0: 0px;
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-14: 14px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-28: 28px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-44: 44px;
+  --space-48: 48px;
+  --space-56: 56px;
+  --space-64: 64px;
+  --space-80: 80px;
+  --space-96: 96px;
+  --space-100: 100px;
+  --space-120: 120px;
+  --space-160: 160px;
+
+  /* ── Radius ─────────────────────────────────── */
+  --radius-0: 0px;
+  --radius-4: 4px;
+  --radius-8: 8px;
+  --radius-12: 12px;
+  --radius-16: 16px;
+  --radius-20: 20px;
+  --radius-24: 24px;
+  --radius-28: 28px;
+  --radius-32: 32px;
+  --radius-full: 999px;
+
+  /* ── Adaptive: лэйаут (Mobile 393 → Desktop 1440) ── */
+  --layout-page-width: 1440px;
+  --layout-page-padding: clamp(12px, -0.011px + 3.056vw, 44px);      /* 12 → 44 */
+  --layout-section-padding: clamp(56px, 39.484px + 4.202vw, 100px);  /* 56 → 100 */
+
+  /* ── Adaptive: зазоры ── */
+  --gap-xl: clamp(48px, 35.989px + 3.056vw, 80px);   /* 48 → 80 */
+  --gap-l: clamp(40px, 30.991px + 2.292vw, 64px);    /* 40 → 64 */
+  --gap-s: clamp(24px, 20.997px + 0.764vw, 32px);    /* 24 → 32 */
+  --gap-xs: clamp(16px, 12.997px + 0.764vw, 24px);   /* 16 → 24 */
+  --gap-2xs: clamp(12px, 10.499px + 0.382vw, 16px);  /* 12 → 16 */
+  --gap-3xs: clamp(8px, 6.499px + 0.382vw, 12px);    /* 8 → 12 */
+  --gap-4xs: clamp(6px, 5.249px + 0.191vw, 8px);     /* 6 → 8 */
+
+  /* ── Adaptive: размеры компонентов ── */
+  --size-button-height: clamp(52px, 50.499px + 0.382vw, 56px);                 /* 52 → 56 */
+  --size-step-padding: clamp(0px, 27.507px - 1.91vw, 20px);                     /* 20 → 0 */
+  --size-fact-gap: clamp(24px, 8.986px + 3.82vw, 64px);                         /* 24 → 64 */
+  --size-format-illustration: clamp(100px, 87.989px + 3.056vw, 132px);          /* 100 → 132 */
+  --size-format-gap: clamp(24px, -4.527px + 7.259vw, 100px);                    /* 24 → 100 */
+  --size-format-padding: clamp(24px, 16.493px + 1.91vw, 44px);                  /* 24 → 44 */
+  --size-case-media-height: clamp(402px, 282.636px + 30.372vw, 720px);          /* 402 → 720 */
+  --size-service-illustration-width: clamp(260px, 250.241px + 2.483vw, 286px);  /* 260 → 286 */
+  --size-service-illustration-height: clamp(182px, 175.244px + 1.719vw, 200px); /* 182 → 200 */
+  --size-service-padding: clamp(20px, 18.499px + 0.382vw, 24px);                /* 20 → 24 */
+  --size-service-card-height: clamp(404px, 375.473px + 7.259vw, 480px);         /* 404 → 480 */
+  --surface-step-card: transparent;
+
+  /* ── Adaptive: типографика ── */
+  --typography-family-sans: "Manrope", system-ui, sans-serif;
+  --typography-family-mono: "Geist Mono", ui-monospace, monospace;
+
+  --typography-h1-size: clamp(40px, 24.986px + 3.82vw, 80px);              /* 40 → 80 */
+  --typography-h1-line-height: clamp(46px, 25.731px + 5.158vw, 100px);     /* 46 → 100 */
+  --typography-h1-letter-spacing: clamp(-2px, -0.625px - 0.096vw, -1px);   /* -1 → -2 */
+  --typography-h2-size: clamp(32px, 22.991px + 2.292vw, 56px);             /* 32 → 56 */
+  --typography-h2-line-height: clamp(38px, 26.739px + 2.865vw, 68px);      /* 38 → 68 */
+  --typography-h2-letter-spacing: clamp(-0.6px, -0.462px - 0.01vw, -0.5px);
+  --typography-h3-size: clamp(24px, 19.496px + 1.146vw, 36px);             /* 24 → 36 */
+  --typography-h3-line-height: clamp(30px, 23.244px + 1.719vw, 48px);      /* 30 → 48 */
+  --typography-h3-letter-spacing: clamp(-0.6px, -0.187px - 0.029vw, -0.3px);
+  --typography-h4-size: clamp(22px, 18.997px + 0.764vw, 30px);             /* 22 → 30 */
+  --typography-h4-line-height: clamp(28px, 24.997px + 0.764vw, 36px);      /* 28 → 36 */
+  --typography-h4-letter-spacing: clamp(-0.6px, -0.187px - 0.029vw, -0.3px);
+  --typography-h5-size: clamp(20px, 17.748px + 0.573vw, 26px);             /* 20 → 26 */
+  --typography-h5-line-height: clamp(26px, 23.748px + 0.573vw, 32px);      /* 26 → 32 */
+  --typography-h5-letter-spacing: clamp(-0.4px, -0.125px - 0.019vw, -0.2px);
+
+  --typography-body-l-size: clamp(18px, 15.748px + 0.573vw, 24px);         /* 18 → 24 */
+  --typography-body-l-line-height: clamp(26px, 23.748px + 0.573vw, 32px);  /* 26 → 32 */
+  --typography-body-l-letter-spacing: 0px;
+  --typography-body-m-size: clamp(16px, 14.499px + 0.382vw, 20px);         /* 16 → 20 */
+  --typography-body-m-line-height: clamp(22px, 21.249px + 0.191vw, 24px);  /* 22 → 24 */
+  --typography-body-m-letter-spacing: 0px;
+  --typography-body-s-size: clamp(14px, 13.249px + 0.191vw, 16px);         /* 14 → 16 */
+  --typography-body-s-line-height: clamp(18px, 17.249px + 0.191vw, 20px);  /* 18 → 20 */
+  --typography-body-s-letter-spacing: clamp(-0.4px, -0.125px - 0.019vw, -0.2px);
+  --typography-body-xs-size: clamp(13px, 12.625px + 0.096vw, 14px);        /* 13 → 14 */
+  --typography-body-xs-line-height: clamp(16px, 15.249px + 0.191vw, 18px); /* 16 → 18 */
+  --typography-body-xs-letter-spacing: clamp(-0.4px, -0.125px - 0.019vw, -0.2px);
+
+  --typography-button-xl-size: clamp(18px, 15.748px + 0.573vw, 24px);         /* 18 → 24 */
+  --typography-button-xl-line-height: clamp(24px, 20.997px + 0.764vw, 32px);  /* 24 → 32 */
+  --typography-button-xl-letter-spacing: clamp(0.5px, 0.444px + 0.014vw, 0.65px);
+  --typography-button-l-size: clamp(16px, 14.499px + 0.382vw, 20px);          /* 16 → 20 */
+  --typography-button-l-line-height: clamp(22px, 19.748px + 0.573vw, 28px);   /* 22 → 28 */
+  --typography-button-l-letter-spacing: clamp(0.5px, 0.444px + 0.014vw, 0.65px);
+  --typography-button-s-size: clamp(14px, 13.249px + 0.191vw, 16px);          /* 14 → 16 */
+  --typography-button-s-line-height: clamp(18px, 17.249px + 0.191vw, 20px);   /* 18 → 20 */
+  --typography-button-s-letter-spacing: clamp(0.5px, 0.444px + 0.014vw, 0.65px);
+
+  --typography-caption-size: clamp(12px, 10.499px + 0.382vw, 16px);         /* 12 → 16 */
+  --typography-caption-line-height: clamp(16px, 14.499px + 0.382vw, 20px);  /* 16 → 20 */
+  --typography-caption-letter-spacing: 0px;
+  --typography-display-size: clamp(32px, 22.991px + 2.292vw, 56px);         /* 32 → 56 */
+  --typography-display-line-height: clamp(38px, 26.739px + 2.865vw, 68px);  /* 38 → 68 */
+  --typography-display-letter-spacing: clamp(-0.6px, -0.462px - 0.01vw, -0.5px);
+}
+
+/* Mobile-only значения, которые нельзя интерполировать (цвета, структура) */
+@media (max-width: 767px) {
+  :root {
+    --surface-step-card: var(--alpha-white-6);
+  }
+}

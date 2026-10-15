@@ -1,0 +1,30 @@
+/* Текстовые стили — один в один с текстовыми стилями Figma (Header/H1 → .t-h1 и т. д.) */
+
+.t-h1, .t-h2, .t-h3, .t-h4, .t-h5,
+.t-body-l, .t-body-m, .t-body-s, .t-body-xs {
+  font-family: var(--typography-family-sans);
+  font-weight: 500;
+}
+
+.t-button-xl, .t-button-l, .t-button-s, .t-caption, .t-display {
+  font-family: var(--typography-family-mono);
+  font-weight: 500;
+}
+
+.t-h1 { font-size: var(--typography-h1-size); line-height: var(--typography-h1-line-height); letter-spacing: var(--typography-h1-letter-spacing); }
+.t-h2 { font-size: var(--typography-h2-size); line-height: var(--typography-h2-line-height); letter-spacing: var(--typography-h2-letter-spacing); }
+.t-h3 { font-size: var(--typography-h3-size); line-height: var(--typography-h3-line-height); letter-spacing: var(--typography-h3-letter-spacing); }
+.t-h4 { font-size: var(--typography-h4-size); line-height: var(--typography-h4-line-height); letter-spacing: var(--typography-h4-letter-spacing); }
+.t-h5 { font-size: var(--typography-h5-size); line-height: var(--typography-h5-line-height); letter-spacing: var(--typography-h5-letter-spacing); }
+
+.t-body-l  { font-size: var(--typography-body-l-size);  line-height: var(--typography-body-l-line-height);  letter-spacing: var(--typography-body-l-letter-spacing); }
+.t-body-m  { font-size: var(--typography-body-m-size);  line-height: var(--typography-body-m-line-height);  letter-spacing: var(--typography-body-m-letter-spacing); }
+.t-body-s  { font-size: var(--typography-body-s-size);  line-height: var(--typography-body-s-line-height);  letter-spacing: var(--typography-body-s-letter-spacing); }
+.t-body-xs { font-size: var(--typography-body-xs-size); line-height: var(--typography-body-xs-line-height); letter-spacing: var(--typography-body-xs-letter-spacing); }
+
+.t-button-xl { font-size: var(--typography-button-xl-size); line-height: var(--typography-button-xl-line-height); letter-spacing: var(--typography-button-xl-letter-spacing); text-transform: uppercase; }
+.t-button-l  { font-size: var(--typography-button-l-size);  line-height: var(--typography-button-l-line-height);  letter-spacing: var(--typography-button-l-letter-spacing);  text-transform: uppercase; }
+.t-button-s  { font-size: var(--typography-button-s-size);  line-height: var(--typography-button-s-line-height);  letter-spacing: var(--typography-button-s-letter-spacing);  text-transform: uppercase; }
+
+.t-caption { font-size: var(--typography-caption-size); line-height: var(--typography-caption-line-height); letter-spacing: var(--typography-caption-letter-spacing); text-transform: uppercase; }
+.t-display { font-size: var(--typography-display-size); line-height: var(--typography-display-line-height); letter-spacing: var(--typography-display-letter-spacing); font-weight: 300; }
