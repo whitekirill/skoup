@@ -28,6 +28,7 @@
 - Шрифты self-hosted: Manrope 500, Geist Mono 300/500 (кириллица + латиница, woff2, preload).
 - Картинки: обложки кейсов в двух кадрированиях (Desktop / Mobile) → `<picture>` AVIF/WebP, lazy. Халфтон-иллюстрации — SVG.
 - UI-анимации кнопок и меню — по скиллу `better-ui` (`.claude/skills`): transitions, не keyframes; press `scale: 0.96` 150ms ease-out (не для disabled); hover только под `@media (hover: hover)`; движение — только под `prefers-reduced-motion: no-preference`.
+- Вордмарк SKOUP в футере в макете — WebGPU-шейдер «Shape-based particles»; пока статичный кадр из Figma (`src/components/Wordmark.astro`), эффект отложен.
 - Анимации (позже): отдельные острова Astro, GSAP/Motion One или canvas/WebGL для халфтона, обязательно `prefers-reduced-motion`.
 
 ## Адаптив

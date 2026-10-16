@@ -19,7 +19,9 @@ node tests/compare.mjs desktop 0 836   # вьюпорт, диапазон по Y
 node tests/compare.mjs mobile 0 934
 ```
 
-Результат «сайт | Figma | diff» — в `tests/screens/diff/`.
+Результат «сайт | Figma | diff» — в `tests/screens/diff/`. Если страница сдвинута относительно макета, четвёртый аргумент — начало того же участка в Figma: `node tests/compare.mjs mobile 6038 6960 6070`.
+
+Координаты элементов для отладки: `node tests/measure.mjs 1440 "<js-выражение>"`.
 
 ## Деплой
 
