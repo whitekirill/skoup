@@ -85,6 +85,17 @@ const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], f
     object-fit: cover;
   }
 
+  /* При наведении обложка скругляется до 32px — как hover-скругление кнопок */
+  @media (hover: hover) {
+    .case__media {
+      transition: border-radius 300ms cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .case:hover .case__media {
+      border-radius: var(--radius-32);
+    }
+  }
+
   @media (hover: hover) and (prefers-reduced-motion: no-preference) {
     .case__media img {
       transition: scale 400ms cubic-bezier(0.2, 0, 0, 1);
