@@ -1,0 +1,106 @@
+---
+/**
+ * CaseCard (Figma 411:10525): Media (Desktop / Mobile — отдельные кадрирования), Logo, Client, Title.
+ * Ступенька в сетке на десктопе — offset (padding-top spacing/160).
+ */
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  title: string;
+  client: string;
+  logo: string;
+  media: { desktop: ImageMetadata; mobile: ImageMetadata; alt: string };
+  /** На всю ширину сетки (обложка 1352) */
+  wide?: boolean;
+  /** Ступенька сверху на десктопе */
+  offset?: boolean;
+}
+
+const { title, client, logo, media, wide = false, offset = false } = Astro.props;
+
+const desktopWidths = wide ? [1352, 2704] : [660, 1320];
+const mobileWidths = [369, 738];
+const desktopSizes = wide ? '(max-width: 1440px) 94vw, 1352px' : '(max-width: 1440px) 46vw, 660px';
+
+const build = (src: ImageMetadata, widths: number[], format: 'avif' | 'webp') =>
+  Promise.all(widths.map((width) => getImage({ src, width, format }))).then((images) =>
+    images.map((image, i) => `${image.src} ${widths[i]}w`).join(', '),
+  );
+
+const [mobileAvif, mobileWebp, desktopAvif, desktopWebp] = await Promise.all([
+  build(media.mobile, mobileWidths, 'avif'),
+  build(media.mobile, mobileWidths, 'webp'),
+  build(media.desktop, desktopWidths, 'avif'),
+  build(media.desktop, desktopWidths, 'webp'),
+]);
+const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], format: 'webp' });
+---
+
+<article class:list={['case', { 'case--offset': offset }]}>
+  <picture class="case__media">
+    <source media="(max-width: 767px)" type="image/avif" srcset={mobileAvif} sizes="100vw" />
+    <source media="(max-width: 767px)" type="image/webp" srcset={mobileWebp} sizes="100vw" />
+    <source type="image/avif" srcset={desktopAvif} sizes={desktopSizes} />
+    <source type="image/webp" srcset={desktopWebp} sizes={desktopSizes} />
+    <img
+      src={fallback.src}
+      alt={media.alt}
+      width={media.desktop.width / 2}
+      height={media.desktop.height / 2}
+      loading="lazy"
+      decoding="async"
+    />
+  </picture>
+  <div class="case__text">
+    <p class="case__client">
+      <img src={logo} alt="" width="24" height="24" loading="lazy" decoding="async" />
+      <span class="t-caption">{client}</span>
+    </p>
+    <h3 class="case__title t-h4">{title}</h3>
+  </div>
+</article>
+
+<style>
+  .case {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    min-width: 0;
+  }
+
+  .case--offset {
+    padding-top: var(--space-160);
+  }
+
+  .case__media img {
+    width: 100%;
+    height: var(--size-case-media-height);
+    object-fit: cover;
+  }
+
+  .case__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-2xs);
+  }
+
+  .case__client {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    color: var(--color-text-secondary);
+  }
+
+  .case__client img {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+  }
+
+  @media (max-width: 767px) {
+    .case--offset {
+      padding-top: 0;
+    }
+  }
+</style>

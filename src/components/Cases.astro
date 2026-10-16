@@ -1,0 +1,107 @@
+---
+/** «Реальные задачи банков и финтеха…» (Figma: desktop 376:8498, mobile 391:3156) */
+import CaseCard from './CaseCard.astro';
+import WordsHeading from './WordsHeading.astro';
+import uzum from '../assets/logos/case-uzum.svg?url';
+import aliexpress from '../assets/logos/case-aliexpress.svg?url';
+import round from '../assets/logos/case-round.svg?url';
+import kilde from '../assets/logos/case-kilde.svg?url';
+import atmDesktop from '../assets/cases/atm-desktop.png';
+import atmMobile from '../assets/cases/atm-mobile.png';
+import installmentsDesktop from '../assets/cases/installments-desktop.png';
+import installmentsMobile from '../assets/cases/installments-mobile.png';
+import loansDesktop from '../assets/cases/business-loans-desktop.png';
+import loansMobile from '../assets/cases/business-loans-mobile.png';
+import cardDesktop from '../assets/cases/card-loans-desktop.png';
+import cardMobile from '../assets/cases/card-loans-mobile.png';
+import investorDesktop from '../assets/cases/investor-desktop.png';
+import investorMobile from '../assets/cases/investor-mobile.png';
+
+const atm = {
+  title: 'Банкоматы и их поиск в приложении',
+  client: 'Uzum Bank · 700+ банкоматов',
+  logo: uzum,
+  media: { desktop: atmDesktop, mobile: atmMobile, alt: 'Экран банкомата Uzum Bank с предложением карты' },
+};
+const installments = {
+  title: 'Рассрочка и оплата частями',
+  client: 'AliExpress · 30 млн+ покупателей',
+  logo: aliexpress,
+  media: { desktop: installmentsDesktop, mobile: installmentsMobile, alt: 'Карточки товаров AliExpress с ценами' },
+};
+const loans = {
+  title: 'Кредиты для бизнеса онлайн',
+  client: 'Банк «Раунд» · Бизнес-кредиты',
+  logo: round,
+  media: { desktop: loansDesktop, mobile: loansMobile, alt: 'Интерфейс кредитного калькулятора банка «Раунд» на мониторе' },
+};
+const card = {
+  title: 'Карта и микрозаймы',
+  client: 'Uzum Bank · $421 млн кредитный портфель',
+  logo: uzum,
+  media: { desktop: cardDesktop, mobile: cardMobile, alt: 'Карта Uzum над экраном приложения на телефоне' },
+};
+const investor = {
+  title: 'Кабинет инвестора',
+  client: 'Kilde · $270 млн+ инвестиций',
+  logo: kilde,
+  media: { desktop: investorDesktop, mobile: investorMobile, alt: 'Экран кабинета инвестора Kilde с балансом портфеля' },
+};
+---
+
+<section class="cases container" id="cases" aria-labelledby="cases-title">
+  <WordsHeading
+    id="cases-title"
+    words={['Реальные', 'задачи']}
+    muted={['банков', 'и финтеха', 'и', 'как', 'мы', 'решили', 'их', 'в рамках', 'закона']}
+  />
+
+  <div class="cases__grid">
+    <div class="cases__row">
+      <CaseCard {...atm} />
+      <CaseCard {...installments} offset />
+    </div>
+    <CaseCard {...loans} wide />
+    <div class="cases__row">
+      <CaseCard {...card} />
+      <CaseCard {...investor} offset />
+    </div>
+  </div>
+</section>
+
+<style>
+  .cases {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-l);
+    padding-block: var(--layout-section-padding);
+  }
+
+  .cases__grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-96);
+  }
+
+  .cases__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    gap: var(--space-32);
+  }
+
+  @media (max-width: 767px) {
+    .cases {
+      gap: var(--space-32);
+    }
+
+    .cases__grid,
+    .cases__row {
+      gap: var(--space-40);
+    }
+
+    .cases__row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

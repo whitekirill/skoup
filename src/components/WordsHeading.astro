@@ -1,0 +1,36 @@
+---
+/**
+ * H2 из макета, где слова — отдельные слои с фиксированным зазором (gap-4xs: 6 → 8),
+ * а вторая часть фразы — вторичным цветом. Группы слов из одного слоя («и финтеха») не переносятся.
+ */
+interface Props {
+  id: string;
+  words: string[];
+  muted?: string[];
+}
+
+const { id, words, muted = [] } = Astro.props;
+const group = (w: string) => (w.includes(' ') ? `<span class="nowrap">${w}</span>` : w);
+const html =
+  words.map(group).join(' ') +
+  (muted.length ? ` <span class="words__muted">${muted.map(group).join(' ')}</span>` : '');
+---
+
+<h2 class="words t-h2" id={id} set:html={html} />
+
+<style>
+  .words {
+    max-width: 896px;
+    /* пробел Manrope = 0.2em; поправка на letter-spacing — как в Hero */
+    word-spacing: calc(var(--gap-4xs) - 0.2em - 2.25 * var(--typography-h2-letter-spacing));
+  }
+
+  .words :global(.words__muted) {
+    color: var(--color-text-secondary);
+  }
+
+  .words :global(.nowrap) {
+    white-space: nowrap;
+    word-spacing: normal;
+  }
+</style>

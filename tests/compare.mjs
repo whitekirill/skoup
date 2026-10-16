@@ -35,7 +35,12 @@ const h = y1 - y0;
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: vp.width, height: 900 }, deviceScaleFactor: 1 });
 await page.goto(`http://localhost:${port}/`, { waitUntil: 'networkidle' });
-await page.evaluate(() => document.fonts.ready);
+await page.evaluate(async () => {
+  // lazy-картинки грузим сразу, иначе полностраничный скриншот их не увидит
+  document.querySelectorAll('img[loading="lazy"]').forEach((img) => (img.loading = 'eager'));
+  await document.fonts.ready;
+  await Promise.all([...document.images].map((img) => img.decode().catch(() => {})));
+});
 const shot = PNG.sync.read(await page.screenshot({ fullPage: true, animations: 'disabled' }));
 await browser.close();
 server.close();
