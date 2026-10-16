@@ -23,7 +23,9 @@ node tests/compare.mjs mobile 0 934
 
 Координаты элементов для отладки: `node tests/measure.mjs 1440 "<js-выражение>"`.
 
-Живая иллюстрация первого экрана: `node tests/hero-anim.mjs desktop|mobile [папка]` — кадры появления, ховер и замер кадров. Сверка с Figma (`compare.mjs`) идёт с reduced motion, по статичной картинке.
+Живая иллюстрация первого экрана: `node tests/hero-anim.mjs desktop|mobile [папка]` — кадры сборки, наведение, шлейф, касание и замер кадров. Сверка с Figma (`compare.mjs`) идёт с reduced motion, по статичной картинке.
+
+Сверка отдельного блока со скриншотом ноды Figma: `node tests/compare-node.mjs 1440 ".services" tests/screens/figma/node-376-8149.png`.
 
 ## Деплой
 

@@ -33,12 +33,11 @@ const { title, description, illustration } = Astro.props;
     scroll-snap-align: start;
   }
 
-  /* В макете иллюстрация 286×200 на обоих брейкпоинтах, на мобильном обрезается краем карточки */
+  /* 286×200 → 260×182 на мобильном; SVG прибит к левому верхнему углу (xMinYMin) */
   .service__illustration {
     flex-shrink: 0;
-    width: 286px;
-    max-width: none;
-    height: 200px;
+    width: var(--size-service-illustration-width);
+    height: var(--size-service-illustration-height);
   }
 
   .service__body {

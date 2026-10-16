@@ -1,23 +1,25 @@
-// Извлекает точки халфтон-иллюстрации первого экрана из SVG (экспорт из Figma) для canvas-анимации.
-// SVG растеризуется в Chromium в 4x без внешних масок-фейдов (их повторяет код: фейды привязаны
-// к месту, а монеты при анимации двигаются). Каждая точка — связная область; берём центр, площадь
-// и цвет. Координаты переводятся в систему кадра «Art» из Figma (там точки — квадраты без поворота),
-// и каждая точка привязывается к монете по силуэтам монет из того же кадра (Coin 1…5, Face + Body).
-// Запуск: node scripts/hero-dots.mjs → src/data/hero-dots-{desktop,mobile}.json
-import { chromium } from '@playwright/test';
-import { PNG } from 'pngjs';
+// Точки иллюстрации первого экрана — ровно из макета, без растеризации.
+// Источник — экспорт нод Figma в SVG (scripts/figma-hero/*.svg: десктоп 382:18621, мобилка 392:9520).
+// Каждая точка — подпуть в слоях «Dots L0…L3 · shade 0…3» (Shading (gray)): берём центр, размер и тон.
+//
+// Тон в покое — серый той же яркости, что и итоговый цвет точки в макете (серый слой × зелёный
+// градиент multiply), чтобы контраст совпадал. Точки привязываются к монетам по силуэтам из
+// кадра Art (Coin 1…5: Face + Body); разлетающиеся точки дальше EDGE от силуэта отбрасываются.
+//
+// Пишет: src/data/hero-dots-{desktop,mobile}.json (для canvas) и src/assets/hero/hero-{desktop,mobile}.svg
+// (статичная серая картинка: без JS, reduced motion, до первого кадра).
+// Запуск: node scripts/hero-dots.mjs
 import fs from 'node:fs';
+import { optimize } from 'svgo';
 
-const SCALE = 4;
-
-// Кадр Art в координатах SVG: начало и поворот (Figma: «Hero illustration · Монеты ₽» → Fade → Art).
-// Монеты — верхняя грань (Face) и габарит тела (Body) в координатах Art, из get_metadata.
 const sources = {
   desktop: {
-    svg: 'src/assets/hero/hero-desktop.svg',
-    strip: [' mask="url(#c)"', ' mask="url(#e)"', ' opacity=".9"'],
-    origin: [58.2, 235.1],
+    svg: 'scripts/figma-hero/desktop.svg',
+    // кадр Art в координатах SVG: начало и поворот (rect «Color gradient» лежит ровно на нём)
+    origin: [58.2178, 235.115],
     angle: 30,
+    gradient: { x1: 142.468, y1: 1072.18, x2: 899.516, y2: 234.024 },
+    edge: 6,
     coins: [
       { face: [-12.517, 510.395, 409.863, 409.863], body: [-12.52, 475.342, 427.392, 440.221] },
       { face: [195.571, 409.824, 449.273, 281.566], body: [195.571, 434.701, 444.77, 461.314] },
@@ -27,10 +29,11 @@ const sources = {
     ],
   },
   mobile: {
-    svg: 'src/assets/hero/hero-mobile.svg',
-    strip: [' opacity=".9"', '<path fill="url(#d)" d="M0 276h393v120H0z"/>'],
-    origin: [-98, -70.4],
-    angle: 2.4,
+    svg: 'scripts/figma-hero/mobile.svg',
+    origin: [-97.9873, -70.3639],
+    angle: 2.38698,
+    gradient: { x1: -51.7684, y1: 388.843, x2: 363.539, y2: -70.962 },
+    edge: 3,
     coins: [
       { face: [-6.867, 279.997, 171.311, 171.311], body: [-6.868, 260.768, 172.115, 190.524] },
       { face: [107.288, 224.825, 157.847, 229.987], body: [107.29, 238.472, 177.488, 201.23] },
@@ -41,121 +44,149 @@ const sources = {
   },
 };
 
-// Тело монеты = верхняя грань, протянутая до габарита Body. Возвращает вектор протяжки.
+const MULTIPLY = 0.42;
+const STOPS = [[0, [0x47, 0xf6, 0x3b]], [0.5, [0x8a, 0xff, 0xaf]], [1, [0x2c, 0xff, 0xb9]]];
+const SHADES = { '#B3B3BD': 0, '#C7C7CF': 1, '#E0E0E6': 2, '#F0F0F2': 3 };
+
+// Подпути SVG-пути. Экспорт Figma пишет только абсолютные M/C/L/Z — каждый подпуть начинается с M.
+// Точки подпути (концы и контрольные) — для габарита скруглённого квадрата этого хватает.
+function subpaths(d) {
+  return d.split(/(?=M)/).filter(Boolean).map((src) => {
+    const nums = src.match(/-?(?:\d*\.\d+|\d+\.?)(?:e[-+]?\d+)?/g).map(Number);
+    const pts = [];
+    for (let i = 0; i + 1 < nums.length; i += 2) pts.push([nums[i], nums[i + 1]]);
+    return { pts, src: src.trim() };
+  });
+}
+
 function sweep({ face: [fx, fy, fw, fh], body: [bx, by, bw, bh] }) {
   const dx = bx < fx - 0.5 ? bx - fx : bx + bw - (fx + fw);
   const dy = by < fy - 0.5 ? by - fy : by + bh - (fy + fh);
   return [dx, dy];
 }
 
-function insideCoin(coin, u, v, pad = 0) {
+// Насколько точка вне силуэта монеты (0 — внутри), в единицах SVG
+function outside(coin, u, v) {
   const [fx, fy, fw, fh] = coin.face;
   const [dx, dy] = coin.sweep;
-  const rx = fw / 2 + pad, ry = fh / 2 + pad;
+  let best = Infinity;
   for (let t = 0; t <= 1; t += 1 / 16) {
     const cx = fx + fw / 2 + dx * t, cy = fy + fh / 2 + dy * t;
-    if (((u - cx) / rx) ** 2 + ((v - cy) / ry) ** 2 <= 1) return true;
+    const rx = fw / 2, ry = fh / 2;
+    const k = Math.hypot((u - cx) / rx, (v - cy) / ry);
+    best = Math.min(best, Math.max(0, k - 1) * Math.min(rx, ry));
   }
-  return false;
+  return best;
 }
 
-const browser = await chromium.launch();
+function gradientAt(g, angle, origin, x, y) {
+  // градиент задан в системе прямоугольника, повёрнутого на −angle вокруг origin
+  const r = (angle * Math.PI) / 180;
+  const px = x - origin[0], py = y - origin[1];
+  const lx = origin[0] + px * Math.cos(r) - py * Math.sin(r);
+  const ly = origin[1] + px * Math.sin(r) + py * Math.cos(r);
+  const vx = g.x2 - g.x1, vy = g.y2 - g.y1;
+  const t = Math.min(1, Math.max(0, ((lx - g.x1) * vx + (ly - g.y1) * vy) / (vx * vx + vy * vy)));
+  const i = t < 0.5 ? 0 : 1;
+  const k = (t - STOPS[i][0]) / (STOPS[i + 1][0] - STOPS[i][0]);
+  return STOPS[i][1].map((c, j) => c + (STOPS[i + 1][1][j] - c) * k);
+}
+
+const hex = (n) => n.toString(16).padStart(2, '0');
+
 for (const [name, src] of Object.entries(sources)) {
-  let markup = fs.readFileSync(src.svg, 'utf8');
-  for (const s of src.strip) {
-    if (!markup.includes(s)) throw new Error(`${name}: нет фрагмента ${s}`);
-    markup = markup.replace(s, '');
-  }
+  const markup = fs.readFileSync(src.svg, 'utf8');
   const [, w, h] = markup.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/).map(Number);
-  const page = await browser.newPage({ viewport: { width: Math.ceil(w), height: Math.ceil(h) }, deviceScaleFactor: SCALE });
-  await page.setContent(`<style>html,body{margin:0;background:transparent}svg{display:block}</style>${markup}`);
-  const png = PNG.sync.read(await page.screenshot({ omitBackground: true }));
-  await page.close();
-
-  const { width, height, data } = png;
-  const seen = new Uint8Array(width * height);
-  const stack = [];
-  const raw = [];
-  for (let start = 0; start < width * height; start++) {
-    if (seen[start] || data[start * 4 + 3] < 8) continue;
-    let sa = 0, sx = 0, sy = 0, sr = 0, sg = 0, sb = 0, n = 0;
-    stack.push(start);
-    seen[start] = 1;
-    while (stack.length) {
-      const i = stack.pop();
-      const x = i % width, y = (i / width) | 0;
-      const a = data[i * 4 + 3] / 255;
-      n++;
-      sa += a; sx += (x + 0.5) * a; sy += (y + 0.5) * a;
-      sr += data[i * 4] * a; sg += data[i * 4 + 1] * a; sb += data[i * 4 + 2] * a;
-      if (x > 0) visit(i - 1);
-      if (x < width - 1) visit(i + 1);
-      if (y > 0) visit(i - width);
-      if (y < height - 1) visit(i + width);
-    }
-    raw.push({ x: sx / sa / SCALE, y: sy / sa / SCALE, area: sa / SCALE ** 2, n, r: sr / sa, g: sg / sa, b: sb / sa });
-  }
-  function visit(j) {
-    if (seen[j] || data[j * 4 + 3] < 8) return;
-    seen[j] = 1;
-    stack.push(j);
-  }
-
-  // Точки, обрезанные краем SVG, отбрасываем: в покое их не видно, а в движении они были бы обрубками
-  const dots = raw.filter((d) => d.area > 0.15 && d.x > 1 && d.y > 1 && d.x < w - 1 && d.y < h - 1);
-
   const rad = (src.angle * Math.PI) / 180;
   const cos = Math.cos(rad), sin = Math.sin(rad);
   const [ox, oy] = src.origin;
   const coins = src.coins.map((c) => ({ ...c, sweep: sweep(c) }));
-  for (const d of dots) {
-    // SVG → Art: x = ox + u·cos + v·sin, y = oy − u·sin + v·cos
-    const px = d.x - ox, py = d.y - oy;
-    d.u = px * cos - py * sin;
-    d.v = px * sin + py * cos;
-    d.s = Math.sqrt(d.area);
-    // верхняя монета (позже в слоях) перекрывает нижние
-    d.coin = -1;
-    for (const pad of [0, 12, 30, 80]) {
-      for (let c = coins.length - 1; c >= 0 && d.coin < 0; c--) if (insideCoin(coins[c], d.u, d.v, pad)) d.coin = c;
-      if (d.coin >= 0) break;
-    }
-    if (d.coin < 0) {
-      let best = Infinity;
-      coins.forEach((c, i) => {
-        const dd = (c.face[0] + c.face[2] / 2 - d.u) ** 2 + (c.face[1] + c.face[3] / 2 - d.v) ** 2;
-        if (dd < best) { best = dd; d.coin = i; }
-      });
-    }
-  }
 
-  const palette = [];
-  const key = new Map();
-  const out = [];
-  for (const d of dots) {
-    const rgb = [Math.round(d.r), Math.round(d.g), Math.round(d.b)];
-    const k = rgb.join();
-    if (!key.has(k)) { key.set(k, palette.length); palette.push(rgb); }
-    out.push(Math.round(d.u * 10), Math.round(d.v * 10), Math.round(d.s * 10), key.get(k), d.coin);
+  const layers = [...markup.matchAll(/<path id="Dots L(\d) [^"]*" d="([^"]+)" fill="(#[0-9A-F]{6})"\/>/g)];
+  if (layers.length !== 13) throw new Error(`${name}: ожидалось 13 слоёв Shading (gray), найдено ${layers.length}`);
+
+  const dots = [];
+  const sizeSum = [0, 0, 0, 0], sizeN = [0, 0, 0, 0];
+  for (const [, level, d, fill] of layers) {
+    const shade = SHADES[fill];
+    const base = [1, 3, 5].map((k) => parseInt(fill.slice(k, k + 2), 16));
+    for (const sp of subpaths(d)) {
+      // габарит в кадре Art (там точки — квадраты без поворота)
+      let u0 = Infinity, u1 = -Infinity, v0 = Infinity, v1 = -Infinity;
+      for (const [x, y] of sp.pts) {
+        const px = x - ox, py = y - oy;
+        const u = px * cos - py * sin, v = px * sin + py * cos;
+        u0 = Math.min(u0, u); u1 = Math.max(u1, u); v0 = Math.min(v0, v); v1 = Math.max(v1, v);
+      }
+      const u = (u0 + u1) / 2, v = (v0 + v1) / 2;
+      const x = ox + u * cos + v * sin, y = oy - u * sin + v * cos;
+      // серый той же яркости, что итоговый цвет в макете
+      const g = gradientAt(src.gradient, src.angle, src.origin, x, y);
+      const mixed = base.map((c, j) => c * (1 - MULTIPLY + (MULTIPLY * g[j]) / 255));
+      const gray = Math.round(0.2126 * mixed[0] + 0.7152 * mixed[1] + 0.0722 * mixed[2]);
+      // монета: верхняя (последняя) из тех, в чей силуэт попадает точка, иначе ближайшая
+      let coin = -1, dist = Infinity;
+      for (let c = coins.length - 1; c >= 0; c--) {
+        const o = outside(coins[c], u, v);
+        if (o === 0 && coin < 0) { coin = c; dist = 0; }
+        if (coin < 0 && o < dist) dist = o;
+      }
+      if (coin < 0) {
+        let best = Infinity;
+        coins.forEach((c, i) => { const o = outside(c, u, v); if (o < best) { best = o; coin = i; } });
+      }
+      const size = Math.max(u1 - u0, v1 - v0);
+      sizeSum[level] += size; sizeN[level]++;
+      dots.push({ x, y, u, v, level: +level, shade, gray, coin, dist, src: sp.src });
+    }
   }
+  const kept = dots.filter((d) => d.dist <= src.edge);
+  const sizes = sizeSum.map((s, i) => +(s / sizeN[i]).toFixed(2));
+
+  // JSON для canvas: x, y (центр в координатах SVG ×10), слой (размер), тон макета, серый, монета
   const json = {
     width: w,
     height: h,
     origin: src.origin,
     angle: src.angle,
-    // центр верхней грани каждой монеты (Art) — ось поворота при появлении
+    sizes,
     coins: coins.map((c) => [+(c.face[0] + c.face[2] / 2).toFixed(1), +(c.face[1] + c.face[3] / 2).toFixed(1)]),
-    palette,
-    dots: out,
+    dots: kept.flatMap((d) => [Math.round(d.x * 10), Math.round(d.y * 10), d.level, d.shade, d.gray, d.coin]),
   };
-  const file = `src/data/hero-dots-${name}.json`;
-  fs.writeFileSync(file, JSON.stringify(json));
-  const sizes = dots.map((d) => d.s).sort((a, b) => a - b);
-  const perCoin = coins.map((_, i) => dots.filter((d) => d.coin === i).length);
+  fs.writeFileSync(`src/data/hero-dots-${name}.json`, JSON.stringify(json));
+
+  // Статичная серая картинка: те же точки и фейды, без цветного градиента
+  const byGray = new Map();
+  for (const d of kept) {
+    if (!byGray.has(d.gray)) byGray.set(d.gray, []);
+    byGray.get(d.gray).push(d.src);
+  }
+  const paths = [...byGray].map(([g, list]) => `<path fill="#${hex(g).repeat(3)}" d="${list.join('')}"/>`).join('');
+  const defs = markup.slice(markup.indexOf('<defs>'), markup.indexOf('</defs>') + 7)
+    .replace(/<linearGradient id="paint\d_linear_1_15402" x1="[-\d.]+" y1="[-\d.]+" x2="[-\d.]+" y2="[-\d.]+" gradientUnits="userSpaceOnUse">\s*<stop stop-color="#47F63B"\/>[\s\S]*?<\/linearGradient>/, '')
+    .replace(/<clipPath[\s\S]*?<\/clipPath>/, '');
+  let body;
+  if (name === 'desktop') {
+    const m0 = markup.match(/<mask id="mask0_1_15402"[\s\S]*?<\/mask>/)[0];
+    const m1 = markup.match(/<mask id="mask1_1_15402"[\s\S]*?<\/mask>/)[0];
+    body = `${m0}<g mask="url(#mask0_1_15402)">${m1}<g mask="url(#mask1_1_15402)"><g opacity="0.9">${paths}</g></g></g>`;
+  } else {
+    const fade = markup.match(/<rect id="Fade &#194;&#183; bottom"[^>]*\/>/)[0];
+    body = `<g opacity="0.9">${paths}</g>${fade}`;
+  }
+  const out = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" fill="none" viewBox="0 0 ${w} ${h}">${body}${defs}</svg>`;
+  const { data } = optimize(out, {
+    multipass: true,
+    floatPrecision: 2,
+    plugins: [{ name: 'preset-default', params: { overrides: { cleanupIds: { minify: true } } } }],
+  });
+  fs.writeFileSync(`src/assets/hero/hero-${name}.svg`, data);
+
+  const grays = kept.map((d) => d.gray);
   console.log(
-    `${name}: ${dots.length} точек (отброшено ${raw.length - dots.length}), ${palette.length} цветов, ` +
-      `сторона ${sizes[0].toFixed(1)}…${sizes.at(-1).toFixed(1)} (медиана ${sizes[sizes.length >> 1].toFixed(1)}), ` +
-      `по монетам ${perCoin.join('/')}, ${(fs.statSync(file).size / 1024).toFixed(1)} KB`,
+    `${name}: ${kept.length} точек из ${dots.length} (за контуром отброшено ${dots.length - kept.length}), ` +
+      `размеры ${sizes.join('/')}, серый ${Math.min(...grays)}…${Math.max(...grays)}, ` +
+      `по монетам ${coins.map((_, i) => kept.filter((d) => d.coin === i).length).join('/')}, ` +
+      `JSON ${(fs.statSync(`src/data/hero-dots-${name}.json`).size / 1024).toFixed(1)} KB, SVG ${(data.length / 1024).toFixed(1)} KB`,
   );
 }
-await browser.close();

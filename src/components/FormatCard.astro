@@ -8,25 +8,14 @@ interface Props {
   payment: string;
   illustration: string;
   /** Сдвиг точек внутри рамки иллюстрации, как в макете (доля ширины) */
-  illustrationShift?: number;
 }
 
-const { title, description, terms, payment, illustration, illustrationShift = 0 } = Astro.props;
+const { title, description, terms, payment, illustration } = Astro.props;
 ---
 
 <article class="format">
   <div class="format__top">
-    <div class="format__illustration">
-      <img
-        src={illustration}
-        alt=""
-        width="185"
-        height="185"
-        loading="lazy"
-        decoding="async"
-        style={illustrationShift ? `translate: ${illustrationShift * 100}% 0` : undefined}
-      />
-    </div>
+    <img class="format__illustration" src={illustration} alt="" width="132" height="132" loading="lazy" decoding="async" />
     <h3 class="t-h3">{title}</h3>
     <p class="format__description t-body-m">{description}</p>
   </div>
@@ -51,19 +40,10 @@ const { title, description, terms, payment, illustration, illustrationShift = 0 
     gap: var(--gap-s);
   }
 
-  /* Рамка 132 (100 на мобильном), точки выходят за неё на 20% с каждой стороны */
+  /* 132 → 100 на мобильном; SVG прибит к левому верхнему углу (xMinYMin) */
   .format__illustration {
-    position: relative;
     width: var(--size-format-illustration);
     height: var(--size-format-illustration);
-  }
-
-  .format__illustration img {
-    position: absolute;
-    inset: -20%;
-    width: 140%;
-    max-width: none;
-    height: 140%;
   }
 
   .format__description,

@@ -1,227 +1,413 @@
-// Живая иллюстрация первого экрана: халфтон-точки монет на <canvas>.
-// Появление — монеты по очереди снизу вверх выезжают с лёгким поворотом и встают на место,
-// точки собираются из лёгкого шума. Дальше — медленное покачивание монет вдоль диагонали,
-// мягкая волна размера и отклик на курсор (точки растут и переливаются в бирюзово-синий).
-// Данные — scripts/hero-dots.mjs. Фейды из макета повторены здесь: они привязаны к месту, а не к монетам.
+// Живая иллюстрация первого экрана: точки монет из макета (scripts/hero-dots.mjs) на WebGL2,
+// один инстанс-вызов на кадр, все буферы выделены заранее — в кадре ничего не аллоцируется.
+//
+// В покое — серая, как статичная картинка; монеты плывут по диагонали, по точкам идёт волна размера.
+// Загрузка — точки собираются в силуэт за ~1,2 с.
+// Курсор/касание: точки в радиусе отталкиваются и растут (пружина с лёгким перелётом), окрашиваются
+// живым градиентом и гаснут за ~800 мс; вся иллюстрация слегка подкрашивается; за быстрым курсором
+// тянется шлейф, от точки входа расходится волна. Фейды из макета привязаны к месту, а не к монетам.
 
 export interface HeroDots {
   width: number;
   height: number;
   origin: [number, number];
   angle: number;
+  sizes: number[];
   coins: [number, number][];
-  palette: [number, number, number][];
+  /** x·10, y·10 (центр, координаты SVG), слой (размер), тон макета 0…3, серый, монета */
   dots: number[];
 }
 
-interface Look {
-  /** прозрачность группы и фейды из макета, x/y — в координатах SVG */
-  mask: (x: number, y: number) => number;
-  /** амплитуды в единицах SVG */
-  rise: number;
-  noise: number;
-  float: number;
-  radius: number;
-  push: number;
-}
+type Kind = 'desktop' | 'mobile';
 
 const clamp01 = (t: number) => (t < 0 ? 0 : t > 1 ? 1 : t);
 const smooth = (t: number) => t * t * (3 - 2 * t);
-const easeOut = (t: number) => 1 - (1 - t) ** 4;
+const easeOut = (t: number) => 1 - (1 - t) ** 3;
 
-// Градиенты масок из SVG (hero-desktop.svg: mask #c и #e)
-const desktopMask = (x: number, y: number) => {
-  const tc = (y + 304) / 1363.5;
-  const c = tc <= 0.7 ? 1 : 1 - clamp01((tc - 0.7) / 0.1);
-  const dx = 1361.1, dy = -1445.9;
-  const te = (x * dx + (y - 1059.5) * dy) / (dx * dx + dy * dy);
-  const e = te <= 0.2 ? (clamp01(te) / 0.2) * 0.3 : te <= 0.4 ? 0.3 + ((te - 0.2) / 0.2) * 0.7 : 1;
-  return 0.9 * c * e;
+// Фейды из макета (desktop: маски «Fade · bottom» и «Fade · start», mobile: белый фейд снизу) + opacity 0.9
+function maskDesktop(x: number, y: number) {
+  const tb = (y + 304) / 1363.55;
+  const b = tb <= 0.650306 ? 1 : 1 - clamp01((tb - 0.650306) / (0.814583 - 0.650306));
+  const dx = 1361.06, dy = -1445.927;
+  const ts = (x * dx + (y - 1059.55) * dy) / (dx * dx + dy * dy);
+  const s = ts <= 0 ? 0 : ts <= 0.22 ? (ts / 0.22) * 0.35 : ts <= 0.42 ? 0.35 + ((ts - 0.22) / 0.2) * 0.65 : 1;
+  return 0.9 * b * s;
+}
+const maskMobile = (_x: number, y: number) => 0.9 * (1 - clamp01((y - 276) / 120));
+
+// Цвет при наведении — градиент иконки 411:11739, тени — для тёмных тонов
+const FLOW = [0x26ff9b, 0x17ffc2, 0x5cffb4, 0x95ffdf].map((c) => [(c >> 16) / 255, ((c >> 8) & 255) / 255, (c & 255) / 255]);
+const SHADOW = [0x01916a, 0x16c78b].map((c) => [(c >> 16) / 255, ((c >> 8) & 255) / 255, (c & 255) / 255]);
+
+const CFG = {
+  desktop: { mask: maskDesktop, radius: 180, rise: 50, noise: 36, float: 6 },
+  mobile: { mask: maskMobile, radius: 110, rise: 24, noise: 16, float: 3 },
 };
-// hero-mobile.svg: белый фейд снизу 276…396
-const mobileMask = (_x: number, y: number) => 0.9 * (1 - clamp01((y - 276) / 120));
 
-const LOOKS: Record<'desktop' | 'mobile', Look> = {
-  desktop: { mask: desktopMask, rise: 140, noise: 14, float: 5, radius: 150, push: 5 },
-  mobile: { mask: mobileMask, rise: 70, noise: 7, float: 2.5, radius: 0, push: 0 },
-};
+const ASSEMBLE = { stagger: 70, duration: 850, dotDelay: 120 };
+const SPRING = { k: 180, c: 2 * 0.55 * Math.sqrt(180) }; // ζ = 0.55 — лёгкий перелёт
+const TRAIL = 10, TRAIL_LIFE = 0.32;
+const WAVES = 3, WAVE_LIFE = 1.1, WAVE_SPEED = 520, WAVE_WIDTH = 70;
 
-// Курсор: бирюзовый (mint) в ореоле → голубой (blue-400) в центре
-const MINT = [142, 238, 255];
-const BLUE = [77, 180, 255];
+const VERT = `#version 300 es
+in vec2 a_corner;
+in vec4 a_geo;
+in vec4 a_col;
+uniform vec2 u_view;
+uniform float u_px;
+out vec2 v_local;
+out float v_half;
+out vec4 v_col;
+void main() {
+  float h = a_geo.z * 0.5;
+  vec2 l = a_corner * (h + 1.0 / u_px);
+  float c = cos(a_geo.w), s = sin(a_geo.w);
+  vec2 p = a_geo.xy + vec2(l.x * c + l.y * s, -l.x * s + l.y * c);
+  gl_Position = vec4(p.x / u_view.x * 2.0 - 1.0, 1.0 - p.y / u_view.y * 2.0, 0.0, 1.0);
+  v_local = l;
+  v_half = h;
+  v_col = a_col;
+}`;
 
-const ENTER = { stagger: 140, duration: 1300, dotDelay: 260 };
+// Скруглённый квадрат (радиус 0.28 стороны — как в точках макета), сглаживание по SDF
+const FRAG = `#version 300 es
+precision highp float;
+in vec2 v_local;
+in float v_half;
+in vec4 v_col;
+uniform float u_px;
+out vec4 o;
+void main() {
+  float r = v_half * 0.56;
+  vec2 q = abs(v_local) - vec2(v_half - r);
+  float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+  float a = clamp(0.5 - d * u_px, 0.0, 1.0) * v_col.a;
+  o = vec4(v_col.rgb * a, a);
+}`;
 
-export function mountHeroArt(canvas: HTMLCanvasElement, data: HeroDots, kind: 'desktop' | 'mobile', hoverTarget: HTMLElement | null) {
-  const ctx = canvas.getContext('2d', { alpha: true });
-  if (!ctx) return () => {};
-  const look = LOOKS[kind];
+function compile(gl: WebGL2RenderingContext) {
+  const prog = gl.createProgram()!;
+  for (const [type, src] of [[gl.VERTEX_SHADER, VERT], [gl.FRAGMENT_SHADER, FRAG]] as const) {
+    const sh = gl.createShader(type)!;
+    gl.shaderSource(sh, src);
+    gl.compileShader(sh);
+    gl.attachShader(prog, sh);
+  }
+  gl.linkProgram(prog);
+  return gl.getProgramParameter(prog, gl.LINK_STATUS) ? prog : null;
+}
+
+/** Возвращает функцию остановки или null, если нет WebGL2 с аппаратным ускорением (остаётся статичная картинка). */
+export function mountHeroArt(canvas: HTMLCanvasElement, data: HeroDots, kind: Kind, target: HTMLElement, onLost: () => void) {
+  // Без аппаратного ускорения (программный WebGL) анимация грузит процессор — остаётся статичная картинка
+  const gl = canvas.getContext('webgl2', { antialias: false, premultipliedAlpha: true, alpha: true, failIfMajorPerformanceCaveat: true });
+  if (!gl) return null;
+  // программный рендер (SwiftShader, llvmpipe) флаг выше пропускает — проверяем по имени
+  const info = gl.getExtension('WEBGL_debug_renderer_info');
+  if (info && /swiftshader|llvmpipe|softpipe|software|basic render/i.test(gl.getParameter(info.UNMASKED_RENDERER_WEBGL))) return null;
+  const prog = compile(gl);
+  if (!prog) return null;
+  const cfg = CFG[kind];
   const rad = (data.angle * Math.PI) / 180;
-  const cos = Math.cos(rad), sin = Math.sin(rad);
-  const [ox, oy] = data.origin;
+  const dirX = Math.cos(rad), dirY = -Math.sin(rad); // диагональ монет на экране
 
-  const n = data.dots.length / 5;
-  const U = new Float32Array(n), V = new Float32Array(n), S = new Float32Array(n);
-  const JX = new Float32Array(n), JY = new Float32Array(n), D = new Float32Array(n);
-  const C = new Uint16Array(n);
-  const byCoin: number[][] = data.coins.map(() => []);
-  // детерминированный шум, чтобы появление выглядело одинаково
-  let seed = 7;
-  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  // --- данные точек
+  const n = data.dots.length / 6;
+  const X0 = new Float32Array(n), Y0 = new Float32Array(n), S = new Float32Array(n), G = new Float32Array(n);
+  const SH = new Uint8Array(n), CO = new Uint8Array(n);
+  const JX = new Float32Array(n), JY = new Float32Array(n), DL = new Float32Array(n), PR = new Float32Array(n);
+  const OX = new Float32Array(n), OY = new Float32Array(n), VX = new Float32Array(n), VY = new Float32Array(n);
+  const SC = new Float32Array(n).fill(1), SV = new Float32Array(n), HEAT = new Float32Array(n);
+  let seed = 11;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < n; i++) {
-    U[i] = data.dots[i * 5] / 10;
-    V[i] = data.dots[i * 5 + 1] / 10;
-    S[i] = data.dots[i * 5 + 2] / 10;
-    C[i] = data.dots[i * 5 + 3];
-    const a = rnd() * Math.PI * 2, r = (0.4 + 0.6 * rnd()) * look.noise;
+    const k = i * 6;
+    X0[i] = data.dots[k] / 10;
+    Y0[i] = data.dots[k + 1] / 10;
+    S[i] = data.sizes[data.dots[k + 2]];
+    SH[i] = data.dots[k + 3];
+    G[i] = data.dots[k + 4] / 255;
+    CO[i] = data.dots[k + 5];
+    const a = rnd() * Math.PI * 2, r = (0.3 + 0.7 * rnd()) * cfg.noise;
     JX[i] = Math.cos(a) * r;
     JY[i] = Math.sin(a) * r;
-    D[i] = rnd() * ENTER.dotDelay;
-    byCoin[data.dots[i * 5 + 4]].push(i);
+    DL[i] = rnd() * ASSEMBLE.dotDelay;
+    PR[i] = X0[i] * dirX + Y0[i] * dirY; // проекция на диагональ — фаза волны и градиента
   }
-  const fills = data.palette.map(([r, g, b]) => `rgb(${r} ${g} ${b})`);
+  const [ox, oy] = data.origin;
+  const cosA = Math.cos(rad), sinA = Math.sin(rad);
   const coins = data.coins.map(([u, v], i) => ({
-    // центр монеты на экране (SVG) — ось поворота при появлении
-    x: ox + u * cos + v * sin,
-    y: oy - u * sin + v * cos,
-    dots: byCoin[i],
-    tilt: (i % 2 ? -1 : 1) * (7 + (i % 3) * 2),
+    x: ox + u * cosA + v * sinA,
+    y: oy - u * sinA + v * cosA,
+    tilt: ((i % 2 ? -1 : 1) * (5 + (i % 3)) * Math.PI) / 180,
     phase: i * 1.3,
+    // покадровое состояние монеты
+    c: 1, s: 0, tx: 0, ty: 0, p: 0, local: 0,
   }));
 
-  let scale = 1, dpr = 1;
+  // --- GPU
+  const inst = new Float32Array(n * 8);
+  const quad = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const vao = gl.createVertexArray();
+  gl.bindVertexArray(vao);
+  const aCorner = gl.getAttribLocation(prog, 'a_corner');
+  gl.enableVertexAttribArray(aCorner);
+  gl.vertexAttribPointer(aCorner, 2, gl.FLOAT, false, 0, 0);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, inst.byteLength, gl.DYNAMIC_DRAW);
+  for (const [name, off] of [['a_geo', 0], ['a_col', 16]] as const) {
+    const loc = gl.getAttribLocation(prog, name);
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 4, gl.FLOAT, false, 32, off);
+    gl.vertexAttribDivisor(loc, 1);
+  }
+  gl.useProgram(prog);
+  const uView = gl.getUniformLocation(prog, 'u_view');
+  const uPx = gl.getUniformLocation(prog, 'u_px');
+  gl.uniform2f(uView, data.width, data.height);
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
+  let scale = 1;
   const resize = () => {
     const w = canvas.clientWidth;
     if (!w) return;
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     scale = w / data.width;
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(data.height * scale * dpr);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniform1f(uPx, scale * dpr);
   };
   resize();
-  const ro = new ResizeObserver(() => { resize(); if (!running) draw(performance.now()); });
+  const ro = new ResizeObserver(() => { resize(); if (!running) frame(performance.now()); });
   ro.observe(canvas);
 
-  // Курсор в координатах SVG, сглаженный
-  const pointer = { x: 0, y: 0, tx: 0, ty: 0, amt: 0, on: false };
-  const onMove = (e: PointerEvent) => {
-    if (e.pointerType !== 'mouse') return;
+  // --- ввод: координаты в единицах SVG
+  const ptr = { x: 0, y: 0, px: 0, py: 0, on: false, amt: 0, lastT: 0 };
+  const trail = new Float32Array(TRAIL * 4); // x, y, время, сила
+  let trailHead = 0;
+  const waves = new Float32Array(WAVES * 3); // x, y, время (−1 — свободна)
+  for (let i = 0; i < WAVES; i++) waves[i * 3 + 2] = -1;
+  let waveHead = 0;
+  let clock = 0; // секунды с начала
+
+  const toLocal = (e: PointerEvent) => {
     const r = canvas.getBoundingClientRect();
-    pointer.tx = (e.clientX - r.left) / scale;
-    pointer.ty = (e.clientY - r.top) / scale;
-    if (!pointer.on) { pointer.x = pointer.tx; pointer.y = pointer.ty; }
-    pointer.on = true;
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    return x >= 0 && y >= 0 && x <= r.width && y <= r.height ? [x / scale, y / scale] : null;
   };
-  const onLeave = () => { pointer.on = false; };
-  const hover = look.radius > 0 && hoverTarget && matchMedia('(hover: hover) and (pointer: fine)').matches;
-  if (hover) {
-    hoverTarget.addEventListener('pointermove', onMove, { passive: true });
-    hoverTarget.addEventListener('pointerleave', onLeave);
-  }
+  const enter = (x: number, y: number) => {
+    ptr.on = true;
+    ptr.x = ptr.px = x;
+    ptr.y = ptr.py = y;
+    waves[waveHead * 3] = x;
+    waves[waveHead * 3 + 1] = y;
+    waves[waveHead * 3 + 2] = clock;
+    waveHead = (waveHead + 1) % WAVES;
+  };
+  const onMove = (e: PointerEvent) => {
+    const p = toLocal(e);
+    if (!p) { ptr.on = false; return; }
+    if (!ptr.on) enter(p[0], p[1]);
+    else { ptr.x = p[0]; ptr.y = p[1]; }
+  };
+  const onDown = (e: PointerEvent) => { if (e.pointerType !== 'mouse') onMove(e); };
+  const onUp = (e: PointerEvent) => { if (e.pointerType !== 'mouse') ptr.on = false; };
+  const onLeave = () => { ptr.on = false; };
+  target.addEventListener('pointermove', onMove, { passive: true });
+  target.addEventListener('pointerdown', onDown, { passive: true });
+  target.addEventListener('pointerup', onUp, { passive: true });
+  target.addEventListener('pointercancel', onLeave, { passive: true });
+  target.addEventListener('pointerleave', onLeave, { passive: true });
 
-  let start = -1, last = 0, raf = 0, running = false;
+  const onContextLost = (e: Event) => { e.preventDefault(); stop(); onLost(); };
+  canvas.addEventListener('webglcontextlost', onContextLost);
 
-  function draw(now: number) {
-    if (start < 0) start = now;
-    const t = now - start;
-    const dt = Math.min(64, now - (last || now));
-    last = now;
-    const k = 1 - Math.exp(-dt / 90);
-    pointer.x += (pointer.tx - pointer.x) * k;
-    pointer.y += (pointer.ty - pointer.y) * k;
-    pointer.amt += ((pointer.on ? 1 : 0) - pointer.amt) * (1 - Math.exp(-dt / 260));
-
-    ctx!.setTransform(1, 0, 0, 1, 0, 0);
-    ctx!.clearRect(0, 0, canvas.width, canvas.height);
-    const z = scale * dpr;
-    const R = look.radius, R2 = R * R;
-    const sec = t / 1000;
-
-    for (let ci = 0; ci < coins.length; ci++) {
-      const coin = coins[ci];
-      const local = t - ci * ENTER.stagger;
-      if (local <= 0) continue;
-      const p = easeOut(clamp01(local / ENTER.duration));
-      // поворот вокруг центра монеты + подъём снизу; в покое — покачивание вдоль диагонали
-      const phi = ((coin.tilt * (1 - p)) * Math.PI) / 180;
-      const pc = Math.cos(rad + phi), ps = Math.sin(rad + phi);
-      const fl = look.float * Math.sin(sec * 0.9 + coin.phase) * smooth(clamp01((local - ENTER.duration * 0.6) / 1500));
-      const tx = fl * cos, ty = look.rise * (1 - p) - fl * sin;
-      // (u, v) → экран: x = a·u + c·v + e, y = b·u + d·v + f
-      const a = pc, b = -ps, c = ps, d = pc;
-      // поворот начала координат Art вокруг центра монеты
-      const e0 = ox - coin.x, f0 = oy - coin.y;
-      const cphi = Math.cos(phi), sphi = Math.sin(phi);
-      const e = coin.x + e0 * cphi + f0 * sphi + tx;
-      const f = coin.y - e0 * sphi + f0 * cphi + ty;
-      ctx!.setTransform(a * z, b * z, c * z, d * z, e * z, f * z);
-
-      // курсор в координатах монеты (матрица ортонормальная — обратная = транспонированная)
-      const px = pointer.x - e, py = pointer.y - f;
-      const pu = a * px + b * py, pv = c * px + d * py;
-      const hoverOn = hover && pointer.amt > 0.01;
-
-      for (const i of coin.dots) {
-        const q = easeOut(clamp01((local - D[i]) / (ENTER.duration - ENTER.dotDelay * 0.5)));
-        if (q <= 0) continue;
-        let u = U[i] + JX[i] * (1 - q), v = V[i] + JY[i] * (1 - q);
-        // волна размера бежит вдоль диагонали снизу вверх
-        let s = S[i] * (0.3 + 0.7 * q) * (1 + 0.14 * Math.sin(u * 0.012 - sec * 1.4));
-        let fill = fills[C[i]];
-        if (hoverOn) {
-          const du = u - pu, dv = v - pv, dd = du * du + dv * dv;
-          if (dd < R2) {
-            const dist = Math.sqrt(dd);
-            const h = smooth(1 - dist / R) * pointer.amt;
-            s *= 1 + 0.55 * h;
-            if (dist > 0.01) { u += (du / dist) * look.push * h; v += (dv / dist) * look.push * h; }
-            const [r0, g0, b0] = data.palette[C[i]];
-            const m = h * 0.9;
-            const tr = MINT[0] + (BLUE[0] - MINT[0]) * h, tg = MINT[1] + (BLUE[1] - MINT[1]) * h, tb = MINT[2] + (BLUE[2] - MINT[2]) * h;
-            fill = `rgb(${(r0 + (tr - r0) * m) | 0} ${(g0 + (tg - g0) * m) | 0} ${(b0 + (tb - b0) * m) | 0})`;
-          }
-        }
-        const sx = a * u + c * v + e, sy = b * u + d * v + f;
-        const alpha = look.mask(sx, sy) * clamp01(q * 1.8);
-        if (alpha < 0.004) continue;
-        ctx!.globalAlpha = alpha;
-        ctx!.fillStyle = fill;
-        const hs = s / 2;
-        ctx!.beginPath();
-        ctx!.roundRect(u - hs, v - hs, s, s, s * 0.2);
-        ctx!.fill();
-      }
-    }
-  }
+  // --- кадр
+  let start = -1, last = 0, raf = 0, running = false, pausedAt = 0;
+  const R = () => cfg.radius / scale;
 
   function frame(now: number) {
-    draw(now);
-    raf = requestAnimationFrame(frame);
-  }
-  const play = () => { if (!running) { running = true; last = 0; raf = requestAnimationFrame(frame); } };
-  const pause = () => { running = false; cancelAnimationFrame(raf); };
+    if (start < 0) start = now;
+    const t = now - start;
+    const dt = Math.min(0.05, last ? (now - last) / 1000 : 1 / 60);
+    last = now;
+    clock = t / 1000;
 
-  // вне экрана — пауза; время появления не «съедается» паузой
-  let pausedAt = 0;
-  const io = new IntersectionObserver(([entry]) => {
-    if (entry.isIntersecting) {
-      if (pausedAt && start >= 0) start += performance.now() - pausedAt;
-      pausedAt = 0;
-      play();
-    } else {
-      pausedAt = performance.now();
-      pause();
+    // курсор: присутствие и шлейф по скорости
+    ptr.amt += ((ptr.on ? 1 : 0) - ptr.amt) * (1 - Math.exp(-dt / (ptr.on ? 0.25 : 0.27)));
+    if (ptr.on) {
+      const speed = Math.hypot(ptr.x - ptr.px, ptr.y - ptr.py) / dt;
+      if (speed > 700 / scale) {
+        const k = trailHead * 4;
+        trail[k] = ptr.x; trail[k + 1] = ptr.y; trail[k + 2] = clock;
+        trail[k + 3] = Math.min(1, (speed * scale - 700) / 1600);
+        trailHead = (trailHead + 1) % TRAIL;
+      }
     }
-  });
+    ptr.px = ptr.x;
+    ptr.py = ptr.y;
+
+    for (let c = 0; c < coins.length; c++) {
+      const coin = coins[c];
+      coin.local = t - c * ASSEMBLE.stagger;
+      coin.p = easeOut(clamp01(coin.local / ASSEMBLE.duration));
+      const phi = coin.tilt * (1 - coin.p);
+      coin.c = Math.cos(phi);
+      coin.s = Math.sin(phi);
+      const fl = cfg.float * Math.sin(clock * 0.7 + coin.phase) * smooth(clamp01((coin.local - ASSEMBLE.duration) / 1200));
+      coin.tx = fl * dirX;
+      coin.ty = cfg.rise * (1 - coin.p) + fl * dirY;
+    }
+
+    const radius = R(), r2 = radius * radius;
+    const pushMin = 24 / scale, pushMax = 40 / scale;
+    const flowT = clock / 7;
+    const hOn = 1 - Math.exp(-dt / 0.12), hOff = Math.exp(-dt / 0.27);
+    const tintFar = 450 / scale;
+
+    for (let i = 0; i < n; i++) {
+      const coin = coins[CO[i]];
+      const q = easeOut(clamp01((coin.local - DL[i]) / (ASSEMBLE.duration - ASSEMBLE.dotDelay)));
+      // положение в покое с поворотом монеты вокруг её центра и шумом сборки
+      const rx = X0[i] - coin.x, ry = Y0[i] - coin.y;
+      const bx = coin.x + rx * coin.c + ry * coin.s + coin.tx + JX[i] * (1 - q);
+      const by = coin.y - rx * coin.s + ry * coin.c + coin.ty + JY[i] * (1 - q);
+
+      let tx = 0, ty = 0, ts = 1, heat = 0, tint = 0;
+      if (ptr.amt > 0.001) {
+        const dx = bx - ptr.x, dy = by - ptr.y, dd = dx * dx + dy * dy;
+        const d = Math.sqrt(dd);
+        tint = ptr.amt * (0.1 + 0.05 * Math.exp(-d / tintFar));
+        if (ptr.on && dd < r2 && d > 0.001) {
+          const f = 1 - d / radius, e = smooth(f);
+          const m = (pushMin + (pushMax - pushMin) * e) * smooth(clamp01(f / 0.3));
+          tx += (dx / d) * m;
+          ty += (dy / d) * m;
+          ts += 0.6 * e;
+          heat = e;
+        }
+      }
+      for (let j = 0; j < TRAIL; j++) {
+        const k = j * 4, age = clock - trail[k + 2];
+        if (age < 0 || age > TRAIL_LIFE) continue;
+        const dx = bx - trail[k], dy = by - trail[k + 1], d = Math.hypot(dx, dy), rt = radius * 0.5;
+        if (d >= rt || d < 0.001) continue;
+        const e = smooth(1 - d / rt) * trail[k + 3] * (1 - age / TRAIL_LIFE);
+        tx += (dx / d) * e * pushMin * 0.6;
+        ty += (dy / d) * e * pushMin * 0.6;
+        ts += 0.3 * e;
+        if (e > heat) heat = e;
+      }
+      for (let j = 0; j < WAVES; j++) {
+        const k = j * 3, age = clock - waves[k + 2];
+        if (waves[k + 2] < 0 || age > WAVE_LIFE) continue;
+        const dx = bx - waves[k], dy = by - waves[k + 1], d = Math.hypot(dx, dy);
+        const band = 1 - Math.abs(d - (WAVE_SPEED / scale) * age) / (WAVE_WIDTH / scale);
+        if (band <= 0 || d < 0.001) continue;
+        const e = smooth(band) * (1 - age / WAVE_LIFE);
+        tx += (dx / d) * e * pushMin * 0.5;
+        ty += (dy / d) * e * pushMin * 0.5;
+        ts += 0.3 * e;
+        if (e * 0.6 > heat) heat = e * 0.6;
+      }
+
+      // пружины смещения и размера
+      VX[i] += (SPRING.k * (tx - OX[i]) - SPRING.c * VX[i]) * dt;
+      VY[i] += (SPRING.k * (ty - OY[i]) - SPRING.c * VY[i]) * dt;
+      SV[i] += (SPRING.k * (ts - SC[i]) - SPRING.c * SV[i]) * dt;
+      OX[i] += VX[i] * dt;
+      OY[i] += VY[i] * dt;
+      SC[i] += SV[i] * dt;
+      HEAT[i] = heat > HEAT[i] ? HEAT[i] + (heat - HEAT[i]) * hOn : HEAT[i] * hOff;
+
+      const x = bx + OX[i], y = by + OY[i];
+      const wave = 1 + 0.25 * Math.sin(PR[i] * 0.011 - clock * 1.3);
+      const mix = HEAT[i] > tint ? HEAT[i] : tint;
+
+      // цвет: серый → живой градиент (тени — для тёмных тонов)
+      let cr = G[i], cg = G[i], cb = G[i];
+      if (mix > 0.002) {
+        let pr: number, pg: number, pb: number;
+        if (SH[i] < 2) {
+          const A = SHADOW[SH[i]];
+          pr = A[0];
+          pg = A[1];
+          pb = A[2];
+        } else {
+          let f = PR[i] / 700 + flowT;
+          f = (f - Math.floor(f)) * 4;
+          const a = f | 0, w = f - a, A = FLOW[a], B = FLOW[(a + 1) & 3];
+          pr = A[0] + (B[0] - A[0]) * w;
+          pg = A[1] + (B[1] - A[1]) * w;
+          pb = A[2] + (B[2] - A[2]) * w;
+        }
+        cr += (pr - cr) * mix;
+        cg += (pg - cg) * mix;
+        cb += (pb - cb) * mix;
+      }
+
+      const k = i * 8;
+      inst[k] = x;
+      inst[k + 1] = y;
+      inst[k + 2] = S[i] * q * wave * SC[i];
+      inst[k + 3] = rad + Math.atan2(coin.s, coin.c);
+      inst[k + 4] = cr;
+      inst[k + 5] = cg;
+      inst[k + 6] = cb;
+      inst[k + 7] = cfg.mask(x, y) * clamp01(q * 1.6);
+    }
+
+    gl!.clearColor(0, 0, 0, 0);
+    gl!.clear(gl!.COLOR_BUFFER_BIT);
+    gl!.bindBuffer(gl!.ARRAY_BUFFER, buf);
+    gl!.bufferSubData(gl!.ARRAY_BUFFER, 0, inst);
+    gl!.drawArraysInstanced(gl!.TRIANGLE_STRIP, 0, 4, n);
+  }
+
+  // Если устройство не тянет (первые кадры дольше 24 мс), возвращаем статичную картинку
+  let probed = 0, slow = 0;
+  function loop(now: number) {
+    const t0 = performance.now();
+    frame(now);
+    if (probed < 60) {
+      probed++;
+      if (performance.now() - t0 > 24 && ++slow >= 8) { stop(); onLost(); return; }
+    }
+    raf = requestAnimationFrame(loop);
+  }
+  const play = () => {
+    if (running) return;
+    running = true;
+    if (pausedAt && start >= 0) start += performance.now() - pausedAt;
+    pausedAt = 0;
+    last = 0;
+    raf = requestAnimationFrame(loop);
+  };
+  const pause = () => {
+    if (!running) return;
+    running = false;
+    pausedAt = performance.now();
+    cancelAnimationFrame(raf);
+  };
+  // вне экрана — пауза
+  const io = new IntersectionObserver(([entry]) => (entry.isIntersecting ? play() : pause()));
   io.observe(canvas);
 
-  return () => {
+  function stop() {
     pause();
     io.disconnect();
     ro.disconnect();
-    if (hover) {
-      hoverTarget!.removeEventListener('pointermove', onMove);
-      hoverTarget!.removeEventListener('pointerleave', onLeave);
-    }
-  };
+    target.removeEventListener('pointermove', onMove);
+    target.removeEventListener('pointerdown', onDown);
+    target.removeEventListener('pointerup', onUp);
+    target.removeEventListener('pointercancel', onLeave);
+    target.removeEventListener('pointerleave', onLeave);
+    canvas.removeEventListener('webglcontextlost', onContextLost);
+  }
+  return stop;
 }
