@@ -42,16 +42,22 @@ const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't
     justify-content: center;
     flex-shrink: 0;
     min-width: 64px;
-    height: var(--size-button-height);
+    /* высота — в переменной, чтобы hover-скругление шло ровно до половины высоты */
+    --btn-height: var(--size-button-height);
+    height: var(--btn-height);
     padding: var(--space-14) var(--gap-3xs);
     border-radius: 0;
     white-space: nowrap;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    /* hover — скругление в pill (кривая better-ui), press — scale 0.96 */
-    transition-property: border-radius, color, box-shadow, scale;
-    transition-duration: 300ms, 150ms, 150ms, 150ms;
-    transition-timing-function: cubic-bezier(0.2, 0, 0, 1), ease-out, ease-out, ease-out;
+    /*
+     * hover — скругление в pill. Анимируем до половины высоты, а не до radius-full (999px):
+     * иначе почти весь переход «пустой» и скругление прыгает в самом конце.
+     * press — scale 0.96 (better-ui).
+     */
+    transition-property: border-radius, color, background-color, box-shadow, scale;
+    transition-duration: 200ms, 150ms, 150ms, 150ms, 150ms;
+    transition-timing-function: cubic-bezier(0.2, 0, 0, 1), ease-out, ease-out, ease-out, ease-out;
   }
 
   .btn__text {
@@ -93,7 +99,7 @@ const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't
 
   /* Navbutton — пункт навигации */
   .btn--nav {
-    height: 32px;
+    --btn-height: 32px;
     padding: var(--gap-3xs) 8px;
     background: var(--color-surface-tertiary);
     color: var(--color-text-primary);
@@ -101,7 +107,7 @@ const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't
 
   @media (hover: hover) {
     .btn:hover {
-      border-radius: var(--radius-full);
+      border-radius: calc(var(--btn-height) / 2);
     }
     .btn--secondary:hover {
       color: var(--color-text-secondary);

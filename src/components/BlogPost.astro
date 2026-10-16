@@ -47,6 +47,7 @@ const { rubric, title, href } = Astro.props;
 
   .post__title {
     max-width: 600px;
+    transition: color 150ms ease-out;
   }
 
   /* Ссылка растянута на всю строку поста */
@@ -67,7 +68,11 @@ const { rubric, title, href } = Astro.props;
 
   @media (hover: hover) {
     .post:hover :global(.post__arrow) {
-      border-radius: var(--radius-full);
+      border-radius: calc(var(--size-button-height) / 2);
+    }
+
+    .post:hover .post__title {
+      color: var(--color-text-secondary);
     }
   }
 

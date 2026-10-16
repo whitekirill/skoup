@@ -101,8 +101,8 @@ const services = [
     gap: var(--gap-l);
     padding-block: var(--layout-section-padding);
     background: var(--color-surface-secondary);
-    /* 300 → 460 между брейкпоинтами */
-    --service-card-width: clamp(300px, 239.943px + 15.282vw, 460px);
+    /* 300 → 412 между брейкпоинтами */
+    --service-card-width: clamp(300px, 257.9599px + 10.6972vw, 412px);
   }
 
   .services__header {
@@ -118,17 +118,17 @@ const services = [
   .services__controls {
     display: flex;
     gap: var(--gap-2xs);
-    padding-block: var(--space-10);
+    padding-block: var(--space-4);
   }
 
   .services__list {
     display: flex;
     gap: var(--space-32);
-    padding-inline: var(--layout-page-padding);
+    padding-inline: var(--container-pad);
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--layout-page-padding);
+    scroll-padding-inline: var(--container-pad);
     scrollbar-width: none;
   }
 

@@ -27,14 +27,15 @@
 - Токены: `src/styles/tokens.css` (сгенерированы из Figma-переменных), стили текста: `src/styles/typography.css` (`.t-h1` … `.t-display` = текстовые стили Figma).
 - Шрифты self-hosted: Manrope 500, Geist Mono 300/500 (кириллица + латиница, woff2, preload).
 - Картинки: обложки кейсов в двух кадрированиях (Desktop / Mobile) → `<picture>` AVIF/WebP, lazy. Халфтон-иллюстрации — SVG.
-- UI-анимации кнопок и меню — по скиллу `better-ui` (`.claude/skills`): transitions, не keyframes; press `scale: 0.96` 150ms ease-out (не для disabled); hover только под `@media (hover: hover)`; движение — только под `prefers-reduced-motion: no-preference`.
+- UI-анимации кнопок и меню — по скиллу `better-ui` (`.claude/skills`): transitions, не keyframes; press `scale: 0.96` 150ms ease-out (не для disabled); hover только под `@media (hover: hover)`; hover-скругление кнопок — до половины высоты (`--btn-height / 2`), не до 999px; движение — только под `prefers-reduced-motion: no-preference`.
 - Вордмарк SKOUP в футере в макете — WebGPU-шейдер «Shape-based particles»; пока статичный кадр из Figma (`src/components/Wordmark.astro`), эффект отложен.
 - Анимации (позже): отдельные острова Astro, GSAP/Motion One или canvas/WebGL для халфтона, обязательно `prefers-reduced-motion`.
 
 ## Адаптив
 - Брейкпоинты макета: Mobile 393, Desktop 1440. Между ними — резина: adaptive-токены уже интерполируются `clamp()` в `tokens.css`.
 - Структурные перестроения (бургер вместо навигации, карусель услуг, стопка колонок в футере, этапы в горизонтальном скролле) — через `@media (max-width: 767px)`.
-- Поля страницы `--layout-page-padding`, вертикальные отступы секций `--layout-section-padding`.
+- Фоны секций — на всю ширину окна, контент — в колонке 1440: горизонтальные поля через `--container-pad` (= `--layout-page-padding` до 1440, дальше центрирует). Вертикальные отступы секций — `--layout-section-padding`.
+- Adaptive-токены пересчитываются из переменных Figma: обновить `scripts/figma-vars/*.json` и запустить `node scripts/adaptive-tokens.mjs`.
 
 ## Компоненты (имена = имена в Figma)
 Button (Primary / Secondary / Inverse / Navbutton × Default / Hover / Focus / Disabled; hover = скругление в pill), IconButton, Header, MobileMenu, StickyCTA, Footer, ServiceCard, CaseCard, FormatCard, FactCard, StepCard, BlogPost, IncludedItem, Logo.

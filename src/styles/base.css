@@ -67,16 +67,22 @@ button {
   border: 0;
 }
 
-/* Страница: ширина макета 1440, поля — layout/page-padding */
+/*
+ * Фоны секций — на всю ширину окна, контент — в колонке шириной макета (1440).
+ * --container-pad: поле страницы, а на экранах шире 1440 — ещё и половина остатка.
+ * Процент считается от ширины секции в месте использования.
+ */
+:root {
+  --container-pad: max(var(--layout-page-padding), calc((100% - var(--layout-page-width)) / 2 + var(--layout-page-padding)));
+}
+
 .page {
   position: relative;
-  max-width: var(--layout-page-width);
-  margin-inline: auto;
   overflow-x: clip;
 }
 
 .container {
-  padding-inline: var(--layout-page-padding);
+  padding-inline: var(--container-pad);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -73,10 +73,26 @@ const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], f
     padding-top: var(--space-160);
   }
 
+  /* Картинка увеличивается при наведении, контейнер остаётся прежнего размера */
+  .case__media {
+    display: block;
+    overflow: hidden;
+  }
+
   .case__media img {
     width: 100%;
     height: var(--size-case-media-height);
     object-fit: cover;
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .case__media img {
+      transition: scale 400ms cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .case:hover .case__media img {
+      scale: 1.04;
+    }
   }
 
   .case__text {

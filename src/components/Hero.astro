@@ -11,7 +11,7 @@ import { CTA } from '../data/site';
 <section class="hero container" aria-labelledby="hero-title">
   <picture class="hero__art" aria-hidden="true">
     <source media="(max-width: 767px)" srcset={artMobile} width="393" height="432" />
-    <img src={artDesktop} alt="" width="1010" height="836" decoding="async" fetchpriority="low" />
+    <img src={artDesktop} alt="" width="1010" height="756" decoding="async" fetchpriority="low" />
   </picture>
 
   <div class="hero__main">
@@ -42,12 +42,20 @@ import { CTA } from '../data/site';
     padding-bottom: var(--gap-xl);
   }
 
+  /* Иллюстрация привязана к правому краю колонки 1440 */
   .hero__art {
     position: absolute;
     top: 0;
-    right: 0;
-    width: calc(1010 / 1440 * 100%);
+    right: max(0px, (100% - var(--layout-page-width)) / 2);
+    width: min(calc(1010 / 1440 * 100%), 1010px);
     pointer-events: none;
+  }
+
+  /* Шире макета справа появляется срез иллюстрации — гасим его в фон */
+  @media (min-width: 1441px) {
+    .hero__art {
+      mask-image: linear-gradient(to left, transparent, #000 160px);
+    }
   }
 
   .hero__art img {
