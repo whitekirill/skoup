@@ -1,0 +1,79 @@
+---
+/**
+ * StickyCTA (Figma 411:13915): закреплённая «Обсудить проект».
+ * Появляется, когда первый экран ушёл из вида, и прячется у футера (там свой призыв).
+ */
+import Button from './Button.astro';
+import { CTA } from '../data/site';
+---
+
+<div class="sticky-cta" data-sticky-cta inert>
+  <Button variant="primary" href={CTA.discuss.href}>{CTA.discuss.label}</Button>
+</div>
+
+<script>
+  const cta = document.querySelector<HTMLElement>('[data-sticky-cta]');
+  const hero = document.querySelector('.hero');
+  const footer = document.querySelector('footer');
+
+  if (cta && hero && footer) {
+    let heroVisible = true;
+    let footerVisible = false;
+    const update = () => {
+      const show = !heroVisible && !footerVisible;
+      cta.classList.toggle('is-visible', show);
+      cta.inert = !show;
+    };
+    new IntersectionObserver(([entry]) => {
+      heroVisible = !!entry?.isIntersecting;
+      update();
+    }).observe(hero);
+    new IntersectionObserver(([entry]) => {
+      footerVisible = !!entry?.isIntersecting;
+      update();
+    }).observe(footer);
+  }
+</script>
+
+<style>
+  .sticky-cta {
+    position: fixed;
+    right: max(0px, (100vw - var(--layout-page-width)) / 2);
+    bottom: 0;
+    z-index: 20;
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--space-44);
+    pointer-events: none;
+    opacity: 0;
+    /* выход короче входа */
+    transition: opacity 150ms ease-out;
+  }
+
+  .sticky-cta :global(.btn) {
+    pointer-events: auto;
+  }
+
+  .sticky-cta.is-visible {
+    opacity: 1;
+    transition-duration: 300ms;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .sticky-cta {
+      translate: 0 12px;
+      transition-property: opacity, translate;
+    }
+
+    .sticky-cta.is-visible {
+      translate: 0 0;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .sticky-cta {
+      right: 0;
+      padding: var(--space-32) var(--space-12) var(--space-28);
+    }
+  }
+</style>
