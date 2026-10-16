@@ -1,0 +1,173 @@
+---
+/** «О нас» (Figma: desktop 376:8741, mobile 391:3399): фраза с аватарами и ссылками на кейсы, факты */
+import { Image } from 'astro:assets';
+import Button from './Button.astro';
+import FactCard from './FactCard.astro';
+import pavel from '../assets/team/pavel.png';
+import kirill from '../assets/team/kirill.png';
+import anna from '../assets/team/anna.png';
+import andrey from '../assets/team/andrey.png';
+import uzum from '../assets/logos/uzum.svg?url';
+import aliexpress from '../assets/logos/aliexpress.svg?url';
+import round from '../assets/logos/round.svg?url';
+import vk from '../assets/logos/vk.svg?url';
+import { CTA } from '../data/site';
+
+const team = [
+  { src: pavel, alt: 'Павел' },
+  { src: kirill, alt: 'Кирилл' },
+  { src: anna, alt: 'Анна' },
+  { src: andrey, alt: 'Андрей' },
+];
+
+const facts = [
+  { label: 'Год основания', value: '2009' },
+  { label: 'Пользователей у продуктов наших клиентов', value: '30 млн+' },
+  { label: 'Только финтех и банки', value: '16+ лет' },
+];
+---
+
+<section class="about container" id="about" aria-label="О нас">
+  <p class="statement t-h2">
+    <span>Мы</span>
+    <span class="statement__team">
+      {team.map((person) => <Image class="statement__avatar" src={person.src} alt={person.alt} width={64} height={64} densities={[1, 2, 3]} loading="lazy" />)}
+    </span>
+    <span>—</span>
+    <span>продуктовая</span>
+    <span>команда.</span>
+    <span class="muted">Проектируем</span>
+    <span class="muted">финтех</span>
+    <span class="muted">и</span>
+    <span class="muted">работаем</span>
+    <span class="muted">вдолгую</span>
+    <span class="muted">с клиентами</span>
+    <span class="statement__group">
+      <a class="brand brand--uzum" href="/cases/atm-locator"><img src={uzum} alt="" width="56" height="56" loading="lazy" />Uzum</a><span class="muted">,</span>
+    </span>
+    <span class="statement__group">
+      <a class="brand brand--aliexpress" href="/cases/installments"><img src={aliexpress} alt="" width="56" height="56" loading="lazy" />AliExpress</a><span class="muted">,</span>
+    </span>
+    <a class="brand brand--round" href="/cases/business-loans"><img src={round} alt="" width="56" height="56" loading="lazy" />Раунда</a>
+    <span class="muted">и</span>
+    <span class="brand brand--vk"><img src={vk} alt="" width="56" height="56" loading="lazy" />Вконтакте</span>
+    <span class="muted">— от исследования</span>
+    <span class="muted">до запуска</span>
+  </p>
+
+  <div class="facts">
+    {facts.map((fact) => <FactCard {...fact} />)}
+  </div>
+
+  <Button variant="secondary" href={CTA.about.href}>{CTA.about.label}</Button>
+</section>
+
+<style>
+  .about {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--gap-l);
+    padding-block: var(--layout-section-padding);
+  }
+
+  /* Как в макете: каждое слово — отдельный элемент с фиксированными зазорами */
+  .statement {
+    --avatar: 64px;
+    --avatar-ring: 3px;
+    --logo: 56px;
+    --logo-gap: var(--space-12);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-16) var(--gap-3xs);
+  }
+
+  .statement > * {
+    white-space: nowrap;
+  }
+
+  /* Текстовые слои Figma шире браузерных на ~2.25 × |letter-spacing| — как в WordsHeading */
+  .statement > :not(.statement__team) {
+    padding-inline-end: calc(-2.25 * var(--typography-h2-letter-spacing));
+  }
+
+  .muted {
+    color: var(--color-text-secondary);
+  }
+
+  .statement__team {
+    display: flex;
+  }
+
+  .statement__team :global(.statement__avatar) {
+    width: var(--avatar);
+    height: var(--avatar);
+    border: var(--avatar-ring) solid var(--color-surface-primary);
+    border-radius: var(--radius-full);
+    object-fit: cover;
+  }
+
+  .statement__team :global(.statement__avatar + .statement__avatar) {
+    margin-left: calc(var(--avatar) * -0.1875);
+  }
+
+  .statement__group {
+    display: flex;
+    align-items: center;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--logo-gap);
+    color: var(--color-text-secondary);
+    transition: color 150ms ease-out;
+  }
+
+  .brand img {
+    width: var(--logo);
+    height: var(--logo);
+  }
+
+  @media (hover: hover) {
+    .brand--uzum:hover {
+      color: var(--color-text-brand-uzum);
+    }
+    .brand--aliexpress:hover {
+      color: var(--color-text-brand-aliexpress);
+    }
+    .brand--round:hover {
+      color: var(--color-text-brand-round);
+    }
+    .brand--vk:hover {
+      color: var(--color-text-brand-vk);
+    }
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-32);
+    width: 100%;
+  }
+
+  @media (max-width: 767px) {
+    .about {
+      gap: var(--space-32);
+    }
+
+    .statement {
+      --avatar: 36.571px;
+      --avatar-ring: 1.714px;
+      --logo: 32px;
+      --logo-gap: 6.857px;
+      gap: 0 var(--space-8);
+    }
+
+    .facts {
+      grid-template-columns: 1fr;
+      gap: var(--space-8);
+    }
+  }
+</style>

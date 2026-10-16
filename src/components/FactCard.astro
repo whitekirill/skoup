@@ -1,0 +1,28 @@
+---
+/** FactCard (Figma 411:1596): подпись Caption/Mono + число Display/Mono */
+interface Props {
+  label: string;
+  value: string;
+}
+
+const { label, value } = Astro.props;
+---
+
+<div class="fact">
+  <p class="fact__label t-caption">{label}</p>
+  <p class="t-display">{value}</p>
+</div>
+
+<style>
+  .fact {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-fact-gap);
+    padding: var(--space-16);
+    border: 1px solid var(--color-element-border);
+  }
+
+  .fact__label {
+    color: var(--color-text-secondary);
+  }
+</style>

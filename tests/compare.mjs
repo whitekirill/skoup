@@ -1,5 +1,6 @@
 // Pixel-perfect сверка: скриншот собранной страницы (dist/) vs скриншот ноды Figma.
-// Запуск: npm run build && node tests/compare.mjs [desktop|mobile] [yFrom] [yTo]
+// Запуск: npm run build && node tests/compare.mjs [desktop|mobile] [yFrom] [yTo] [figmaYFrom]
+// figmaYFrom — начало того же участка в макете, если страница сдвинута относительно Figma
 import { chromium } from '@playwright/test';
 import { PNG } from 'pngjs';
 import pixelmatch from 'pixelmatch';
@@ -15,7 +16,7 @@ const VIEWPORTS = {
 };
 const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.png': 'image/png', '.webp': 'image/webp', '.avif': 'image/avif' };
 
-const [which = 'desktop', from = '0', to] = process.argv.slice(2);
+const [which = 'desktop', from = '0', to, figmaFrom] = process.argv.slice(2);
 const vp = VIEWPORTS[which];
 
 const server = http.createServer((req, res) => {
@@ -56,7 +57,7 @@ const crop = (img, y, height) => {
 };
 
 const a = crop(shot, y0, h);
-const b = crop(figma, y0, h);
+const b = crop(figma, figmaFrom === undefined ? y0 : +figmaFrom, h);
 const diff = new PNG({ width: vp.width, height: h });
 const n = pixelmatch(a.data, b.data, diff.data, vp.width, h, { threshold: 0.1, includeAA: false });
 
