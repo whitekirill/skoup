@@ -1,0 +1,79 @@
+---
+/** BlogPost (Figma 31:16159): рубрика + заголовок + кнопка-стрелка. Вся строка кликабельна. */
+import Button from './Button.astro';
+import ArrowRight from '../assets/icons/arrow-right-s.svg';
+import { typograph } from '../utils/typograph';
+
+interface Props {
+  rubric: string;
+  title: string;
+  href: string;
+}
+
+const { rubric, title, href } = Astro.props;
+---
+
+<article class="post">
+  <div class="post__text">
+    <p class="post__rubric t-caption">{rubric}</p>
+    <h3 class="post__title t-h3">
+      <a class="post__link" href={href}>{typograph(title)}</a>
+    </h3>
+  </div>
+  <Button variant="secondary" as="span" class="post__arrow" aria-hidden="true">
+    <ArrowRight slot="icon" />
+  </Button>
+</article>
+
+<style>
+  .post {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--gap-2xs);
+  }
+
+  .post__text {
+    display: flex;
+    flex: 1 0 0;
+    flex-direction: column;
+    gap: var(--gap-3xs);
+    min-width: 0;
+  }
+
+  .post__rubric {
+    color: var(--color-text-secondary);
+  }
+
+  .post__title {
+    max-width: 600px;
+  }
+
+  /* Ссылка растянута на всю строку поста */
+  .post__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .post__link:focus-visible {
+    outline: none;
+  }
+
+  .post:has(.post__link:focus-visible) {
+    outline: 2px solid var(--color-element-blue);
+    outline-offset: 4px;
+  }
+
+  @media (hover: hover) {
+    .post:hover :global(.post__arrow) {
+      border-radius: var(--radius-full);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .post:active :global(.post__arrow) {
+      scale: 0.96;
+    }
+  }
+</style>

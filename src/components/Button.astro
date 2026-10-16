@@ -14,10 +14,12 @@ interface Props extends HTMLAttributes<'a'> {
   /** Растянуть на всю ширину контейнера */
   block?: boolean;
   disabled?: boolean;
+  /** Декоративная кнопка внутри кликабельной карточки (span вместо a/button) */
+  as?: 'span';
 }
 
-const { variant = 'primary', href, block = false, disabled = false, class: className, ...rest } = Astro.props;
-const Tag = href && !disabled ? 'a' : 'button';
+const { variant = 'primary', href, block = false, disabled = false, as, class: className, ...rest } = Astro.props;
+const Tag = as ?? (href && !disabled ? 'a' : 'button');
 const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't-button-l', block && 'btn--block', className];
 ---
 
@@ -28,7 +30,7 @@ const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't
   disabled={Tag === 'button' && disabled ? true : undefined}
   {...rest}
 >
-  <span class="btn__text"><slot /></span>
+  {Astro.slots.has('default') && <span class="btn__text"><slot /></span>}
   {Astro.slots.has('icon') && <span class="btn__icon" aria-hidden="true"><slot name="icon" /></span>}
 </Tag>
 
