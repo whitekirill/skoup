@@ -29,7 +29,8 @@
 - Картинки: обложки кейсов в двух кадрированиях (Desktop / Mobile) → `<picture>` AVIF/WebP, lazy. Халфтон-иллюстрации — SVG.
 - UI-анимации кнопок и меню — по скиллу `better-ui` (`.claude/skills`): transitions, не keyframes; press `scale: 0.96` 150ms ease-out (не для disabled); hover только под `@media (hover: hover)`; hover-скругление кнопок — до половины высоты (`--btn-height / 2`), не до 999px; движение — только под `prefers-reduced-motion: no-preference`.
 - Вордмарк SKOUP в футере в макете — WebGPU-шейдер «Shape-based particles»; пока статичный кадр из Figma (`src/components/Wordmark.astro`), эффект отложен.
-- Анимации (позже): отдельные острова Astro, GSAP/Motion One или canvas/WebGL для халфтона, обязательно `prefers-reduced-motion`.
+- Иллюстрация первого экрана — живая на `<canvas>` (`src/scripts/hero-art.ts`): появление монет снизу вверх с поворотом, покачивание, волна размера, отклик на курсор (только мышь). Точки — `src/data/hero-dots-{desktop,mobile}.json`, пересобрать: `node scripts/hero-dots.mjs` после обновления SVG. При `prefers-reduced-motion` и без JS — статичный SVG; в покое canvas совпадает с SVG пиксель в пиксель.
+- Остальные анимации (позже): отдельные скрипты, canvas/WebGL, обязательно `prefers-reduced-motion`.
 
 ## Адаптив
 - Брейкпоинты макета: Mobile 393, Desktop 1440. Между ними — резина: adaptive-токены уже интерполируются `clamp()` в `tokens.css`.

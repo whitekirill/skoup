@@ -9,10 +9,25 @@ import { CTA } from '../data/site';
 ---
 
 <section class="hero container" aria-labelledby="hero-title">
-  <picture class="hero__art" aria-hidden="true">
-    <source media="(max-width: 767px)" srcset={artMobile} width="393" height="432" />
-    <img src={artDesktop} alt="" width="1010" height="756" decoding="async" fetchpriority="low" />
-  </picture>
+  <div class="hero__art" aria-hidden="true">
+    <!-- До первого кадра canvas прячем статичную картинку, чтобы иллюстрация «собралась» с нуля.
+         Без JS, при reduced motion или если скрипт не успел — остаётся статичная картинка. -->
+    <script is:inline>
+      (function () {
+        if (!matchMedia('(prefers-reduced-motion: no-preference)').matches || !('ResizeObserver' in window)) return;
+        var root = document.documentElement;
+        root.classList.add('hero-live');
+        setTimeout(function () {
+          if (!root.classList.contains('hero-live-ready')) root.classList.remove('hero-live');
+        }, 3000);
+      })();
+    </script>
+    <picture>
+      <source media="(max-width: 767px)" srcset={artMobile} width="393" height="432" />
+      <img src={artDesktop} alt="" width="1010" height="756" decoding="async" fetchpriority="low" />
+    </picture>
+    <canvas class="hero__canvas"></canvas>
+  </div>
 
   <div class="hero__main">
     <div class="hero__content">
@@ -58,9 +73,29 @@ import { CTA } from '../data/site';
     }
   }
 
+  .hero__art picture {
+    display: block;
+  }
+
   .hero__art img {
     width: 100%;
     height: auto;
+  }
+
+  .hero__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    visibility: hidden;
+  }
+
+  :global(.hero-live) .hero__art img {
+    opacity: 0;
+  }
+
+  :global(.hero-live-ready) .hero__canvas {
+    visibility: visible;
   }
 
   .hero__main {
@@ -151,3 +186,40 @@ import { CTA } from '../data/site';
     }
   }
 </style>
+
+<script>
+  import type { HeroDots } from '../scripts/hero-art';
+
+  const root = document.documentElement;
+  const art = document.querySelector<HTMLElement>('.hero__art');
+  const canvas = art?.querySelector<HTMLCanvasElement>('.hero__canvas');
+  const motion = matchMedia('(prefers-reduced-motion: no-preference)');
+  const mobile = matchMedia('(max-width: 767px)');
+  let unmount: (() => void) | undefined;
+  let token = 0;
+
+  async function mount() {
+    unmount?.();
+    unmount = undefined;
+    if (!art || !canvas || !root.classList.contains('hero-live')) return;
+    const kind = mobile.matches ? 'mobile' : 'desktop';
+    const id = ++token;
+    const [{ mountHeroArt }, data] = await Promise.all([
+      import('../scripts/hero-art'),
+      kind === 'mobile' ? import('../data/hero-dots-mobile.json') : import('../data/hero-dots-desktop.json'),
+    ]);
+    if (id !== token || !root.classList.contains('hero-live')) return;
+    unmount = mountHeroArt(canvas, data.default as HeroDots, kind, art.closest('.hero'));
+    root.classList.add('hero-live-ready');
+  }
+
+  if (motion.matches && root.classList.contains('hero-live')) {
+    mount().catch(() => root.classList.remove('hero-live'));
+    mobile.addEventListener('change', () => mount());
+    motion.addEventListener('change', () => {
+      if (motion.matches) return;
+      unmount?.();
+      root.classList.remove('hero-live', 'hero-live-ready');
+    });
+  }
+</script>
