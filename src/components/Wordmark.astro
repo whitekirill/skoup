@@ -1,0 +1,40 @@
+---
+/**
+ * Вордмарк SKOUP в футере — статичный кадр из Figma.
+ * В макете это интерактивный WebGPU-шейдер («Shape-based particles»); отложен — решим позже.
+ */
+import { getImage } from 'astro:assets';
+import dotsDesktop from '../assets/footer/wordmark-dots-desktop.png';
+import dotsMobile from '../assets/footer/wordmark-dots-mobile.png';
+
+const desktop2x = await getImage({ src: dotsDesktop, format: 'webp', width: 2704 });
+const desktop1x = await getImage({ src: dotsDesktop, format: 'webp', width: 1352 });
+const mobile = await getImage({ src: dotsMobile, format: 'webp', width: 369 });
+---
+
+<picture class="wordmark">
+  <source media="(max-width: 767px)" srcset={mobile.src} width="369" height="124" />
+  <img
+    src={desktop1x.src}
+    srcset={`${desktop1x.src} 1x, ${desktop2x.src} 2x`}
+    alt="Скоуп"
+    width="1352"
+    height="455"
+    loading="lazy"
+    decoding="async"
+  />
+</picture>
+
+<style>
+  .wordmark img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1352 / 455.224;
+  }
+
+  @media (max-width: 767px) {
+    .wordmark img {
+      aspect-ratio: 369 / 124;
+    }
+  }
+</style>

@@ -6,6 +6,8 @@ export const CTA = {
   discuss: { label: 'Обсудить проект', href: `mailto:${EMAIL}` },
   // TODO: заменить на реальную ссылку на презентацию, когда будет файл
   presentation: { label: 'Презентация', href: '#' },
+  // TODO: ссылка на форму брифа, пока — письмо
+  brief: { label: 'Начните с брифа', href: `mailto:${EMAIL}` },
   // TODO: куда ведёт «Подробнее» в блоке «О нас» — страницы пока нет
   about: { label: 'Подробнее', href: '#' },
 } as const;
@@ -26,4 +28,25 @@ export const POSTS = [
     title: 'Европейский акт о доступности и WCAG: каким требованиям должен соответствовать финтех',
     href: '#',
   },
+] as const;
+
+// TODO: реальные ссылки на соцсети и юридические страницы
+export const SOCIALS = [
+  { label: 'Telegram', href: '#' },
+  { label: 'ВКонтакте', href: '#' },
+  { label: 'Behance', href: '#' },
+  { label: 'Dribbble', href: '#' },
+] as const;
+
+export const LEGAL = [
+  { label: 'Политика в отношении персональных данных', href: '#' },
+  { label: 'Сведения об организации', href: '#' },
+] as const;
+
+/** Порядок ссылок в футере отличается от шапки — как в макете */
+export const FOOTER_NAV = [
+  { label: 'О нас', href: '#about' },
+  { label: 'Кейсы', href: '#cases' },
+  { label: 'Услуги', href: '#services' },
+  { label: 'Блог', href: '#blog' },
 ] as const;

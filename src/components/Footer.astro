@@ -1,0 +1,243 @@
+---
+/**
+ * Footer (Figma 411:13908): призыв «Начните с брифа», этапы, контакты, навигация, соцсети, вордмарк.
+ * Desktop — колонки, Mobile — этапы в горизонтальном скролле, колонки стопкой.
+ */
+import StepCard from './StepCard.astro';
+import Wordmark from './Wordmark.astro';
+import { CTA, EMAIL, FOOTER_NAV, LEGAL, SOCIALS } from '../data/site';
+
+const steps = [
+  { duration: '≈ 10 минут', lead: 'Заполните бриф или напишите нам.', rest: 'Уточним задачу, сроки и требования регулятора' },
+  { duration: '1 час', lead: 'Обсуждаем продукт', rest: 'и ограничения, предлагаем формат работы и оценку в часах', breakAfterLead: true },
+  { duration: '1–3 дня', lead: 'Подписываем документы до старта,', rest: 'чтобы вы спокойно открыли доступы команде' },
+  { duration: '1-я неделя', lead: 'Начинаем со спринта или ретейнера.', rest: 'Первые макеты — в конце первой недели' },
+];
+---
+
+<footer class="footer container">
+  <div class="footer__top">
+    <h2 class="footer__cta t-h2">
+      Ваш продукт начинается здесь.<br />
+      <a class="footer__brief" href={CTA.brief.href}>{CTA.brief.label}</a>
+    </h2>
+    <ol class="footer__steps" aria-label="Как начать работу">
+      {steps.map((step) => <StepCard {...step} />)}
+    </ol>
+  </div>
+
+  <div class="footer__content">
+    <div class="footer__columns">
+      <div class="footer__contact">
+        <a class="footer__mail t-h3" href={`mailto:${EMAIL}`}>{EMAIL}</a>
+      </div>
+      <div class="footer__links">
+        <nav class="footer__col" aria-labelledby="footer-nav-title">
+          <p class="footer__col-title t-caption" id="footer-nav-title">Навигация</p>
+          <ul class="footer__list t-body-m">
+            {FOOTER_NAV.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+          </ul>
+        </nav>
+        <div class="footer__col">
+          <p class="footer__col-title t-caption" id="footer-social-title">Соцсети</p>
+          <ul class="footer__list t-body-m" aria-labelledby="footer-social-title">
+            {SOCIALS.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__bottom-content">
+      <div class="footer__bottom t-body-s">
+        <ul class="footer__legal">
+          {LEGAL.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+        </ul>
+        <p>© 2026 Скоуп</p>
+      </div>
+      <Wordmark />
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    display: flex;
+    flex-direction: column;
+    gap: 172px;
+    padding-top: var(--space-80);
+    overflow: hidden;
+    background: var(--color-surface-primary-inversion);
+    color: var(--color-text-primary-inversion);
+  }
+
+  .footer a {
+    transition: color 150ms ease-out;
+  }
+
+  .footer__top {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-100);
+  }
+
+  .footer__brief {
+    color: var(--color-text-accent-2-hover);
+    text-decoration: underline;
+    text-decoration-thickness: 8.5%;
+  }
+
+  .footer__steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-64);
+  }
+
+  .footer__content {
+    display: flex;
+    flex-direction: column;
+    gap: 132px;
+  }
+
+  .footer__columns {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-48);
+  }
+
+  .footer__contact {
+    flex: 0 0 auto;
+    width: calc(745 / 1352 * 100%);
+  }
+
+  .footer__mail {
+    text-decoration: underline;
+    text-decoration-thickness: from-font;
+    text-underline-position: from-font;
+  }
+
+  .footer__links {
+    display: flex;
+    flex: 1 0 0;
+    gap: var(--space-48);
+  }
+
+  .footer__col {
+    display: flex;
+    flex: 1 0 0;
+    flex-direction: column;
+    gap: var(--space-20);
+    text-align: right;
+  }
+
+  .footer__col-title {
+    color: var(--color-text-secondary);
+  }
+
+  .footer__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+  }
+
+  .footer__bottom-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-100);
+  }
+
+  .footer__bottom {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-16);
+    color: var(--color-text-secondary-inversion);
+    white-space: nowrap;
+  }
+
+  .footer__legal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+  }
+
+  @media (hover: hover) {
+    .footer__list a:hover,
+    .footer__legal a:hover,
+    .footer__mail:hover {
+      color: var(--color-text-secondary-inversion);
+    }
+
+    .footer__brief:hover {
+      color: var(--color-text-accent-2);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .footer {
+      gap: var(--space-64);
+      padding-top: var(--space-48);
+    }
+
+    .footer__top {
+      gap: var(--space-40);
+    }
+
+    /* Этапы — горизонтальный скролл карточек 260px */
+    .footer__steps {
+      display: flex;
+      gap: var(--space-8);
+      margin-inline: calc(-1 * var(--layout-page-padding));
+      padding-inline: var(--layout-page-padding);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--layout-page-padding);
+      scrollbar-width: none;
+    }
+
+    .footer__steps::-webkit-scrollbar {
+      display: none;
+    }
+
+    .footer__steps :global(.step) {
+      flex: 0 0 260px;
+      scroll-snap-align: start;
+    }
+
+    .footer__content {
+      gap: var(--space-56);
+    }
+
+    .footer__columns {
+      flex-direction: column;
+      gap: var(--space-32);
+    }
+
+    .footer__contact {
+      width: auto;
+    }
+
+    .footer__mail {
+      text-decoration: none;
+    }
+
+    .footer__links {
+      width: 100%;
+      gap: var(--space-16);
+    }
+
+    .footer__col {
+      gap: var(--space-16);
+      text-align: left;
+    }
+
+    .footer__bottom-content {
+      gap: var(--space-40);
+    }
+
+    .footer__bottom {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-12);
+    }
+  }
+</style>
