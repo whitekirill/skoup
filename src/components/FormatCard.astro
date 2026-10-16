@@ -1,0 +1,79 @@
+---
+/** FormatCard (Figma 411:9699): Illustration, Title, Description, Terms, Payment */
+
+interface Props {
+  title: string;
+  description: string;
+  terms: string;
+  payment: string;
+  illustration: string;
+  /** Сдвиг точек внутри рамки иллюстрации, как в макете (доля ширины) */
+  illustrationShift?: number;
+}
+
+const { title, description, terms, payment, illustration, illustrationShift = 0 } = Astro.props;
+---
+
+<article class="format">
+  <div class="format__top">
+    <div class="format__illustration">
+      <img
+        src={illustration}
+        alt=""
+        width="185"
+        height="185"
+        loading="lazy"
+        decoding="async"
+        style={illustrationShift ? `translate: ${illustrationShift * 100}% 0` : undefined}
+      />
+    </div>
+    <h3 class="t-h3">{title}</h3>
+    <p class="format__description t-body-m">{description}</p>
+  </div>
+  <div class="format__bottom">
+    <p class="t-button-xl">{terms}</p>
+    <p class="format__payment t-caption">{payment}</p>
+  </div>
+</article>
+
+<style>
+  .format {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-format-gap);
+    padding: var(--size-format-padding);
+    background: var(--color-surface-primary);
+  }
+
+  .format__top {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-s);
+  }
+
+  /* Рамка 132 (100 на мобильном), точки выходят за неё на 20% с каждой стороны */
+  .format__illustration {
+    position: relative;
+    width: var(--size-format-illustration);
+    height: var(--size-format-illustration);
+  }
+
+  .format__illustration img {
+    position: absolute;
+    inset: -20%;
+    width: 140%;
+    max-width: none;
+    height: 140%;
+  }
+
+  .format__description,
+  .format__payment {
+    color: var(--color-text-secondary);
+  }
+
+  .format__bottom {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-4xs);
+  }
+</style>

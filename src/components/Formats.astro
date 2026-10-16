@@ -1,0 +1,111 @@
+---
+/** «Форматы работы» + «Включено во все форматы» (Figma: desktop 376:8624, mobile 391:3282) */
+import FormatCard from './FormatCard.astro';
+import sprint from '../assets/formats/sprint.svg?url';
+import retainer from '../assets/formats/retainer.svg?url';
+
+const included = [
+  'AI на каждом этапе',
+  'Регуляторика в макетах',
+  'Документация к проверкам',
+  'Спецификации для разработки',
+  'Дизайн-система',
+  'Арт-директор в команде',
+  'Один менеджер на связи',
+  'Общий чат с командой',
+  'Созвон раз в неделю',
+  'Отчёт по часам',
+  'Файлы и права — ваши',
+  'Договор и NDA',
+];
+---
+
+<section class="formats container" aria-labelledby="formats-title">
+  <h2 class="formats__title t-h2" id="formats-title">Форматы работы</h2>
+
+  <div class="formats__cards">
+    <FormatCard
+      title="Спринт"
+      description="Одна задача за неделю: новый сценарий, доработка экранов или аудит. На выходе — макеты и спецификации, которые можно сразу отдавать в разработку"
+      terms="5 дней · 40 часов"
+      payment="Оплата после каждого спринта"
+      illustration={sprint}
+      illustrationShift={-0.1082}
+    />
+    <FormatCard
+      title="Ретейнер"
+      description="Постоянная дизайн-команда внутри вашего продукта. Берём задачи из бэклога, участвуем в планировании и держим дизайн-систему в порядке"
+      terms="от 40 ч / месяц"
+      payment="Оплата раз в месяц, часы закреплены за вами"
+      illustration={retainer}
+    />
+  </div>
+
+  <div class="included">
+    <h3 class="included__title t-button-s" id="included-title">Включено во все форматы</h3>
+    <ul class="included__list" aria-labelledby="included-title">
+      {included.map((item) => <li class="included__item t-button-s">{item}</li>)}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .formats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-l);
+    padding-block: var(--layout-section-padding);
+    background: var(--color-surface-secondary);
+  }
+
+  .formats__title {
+    max-width: 896px;
+  }
+
+  .formats__cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap-2xs);
+  }
+
+  .included {
+    display: grid;
+    grid-template-columns: minmax(0, 440fr) minmax(0, 896fr);
+    gap: var(--gap-2xs);
+  }
+
+  .included__title {
+    padding-top: var(--space-24);
+    color: var(--color-text-secondary);
+  }
+
+  .included__list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-16);
+  }
+
+  .included__item {
+    padding-block: var(--gap-xs);
+  }
+
+  @media (max-width: 767px) {
+    .formats__cards {
+      grid-template-columns: 1fr;
+      gap: var(--space-8);
+    }
+
+    .included {
+      grid-template-columns: 1fr;
+      gap: var(--space-8);
+    }
+
+    .included__title {
+      padding-top: 0;
+    }
+
+    .included__list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
