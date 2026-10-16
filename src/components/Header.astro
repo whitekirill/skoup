@@ -74,6 +74,15 @@ import { NAV } from '../data/site';
       height: 32px;
       background: var(--color-surface-secondary);
       color: var(--color-element-primary);
+      -webkit-tap-highlight-color: transparent;
+      transition: scale 150ms ease-out;
     }
   }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .header__burger:active {
+      scale: 0.96;
+    }
+  }
+
 </style>

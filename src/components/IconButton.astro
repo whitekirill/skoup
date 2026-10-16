@@ -22,9 +22,10 @@ const { label, class: className, ...rest } = Astro.props;
     border-radius: var(--radius-full);
     background: var(--color-element-primary-inversion);
     color: var(--color-element-primary);
-    transition:
-      background-color 0.2s ease,
-      color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    transition-property: background-color, color, scale;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
   }
 
   .icon-btn :global(svg) {
@@ -36,6 +37,12 @@ const { label, class: className, ...rest } = Astro.props;
     .icon-btn:hover:not(:disabled) {
       background: var(--color-element-primary);
       color: var(--color-element-primary-inversion);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .icon-btn:not(:disabled):active {
+      scale: 0.96;
     }
   }
 

@@ -85,15 +85,54 @@ import { CTA, EMAIL, NAV } from '../data/site';
     border: 0;
     background: var(--color-surface-primary);
     color: var(--color-text-primary);
+    overscroll-behavior: contain;
+    /* выход: 150ms; display/overlay — чтобы диалог не пропадал до конца анимации */
+    opacity: 0;
+    transition:
+      opacity 150ms ease-out,
+      display 150ms allow-discrete,
+      overlay 150ms allow-discrete;
   }
 
   .menu[open] {
     display: flex;
     flex-direction: column;
+    opacity: 1;
+    transition-duration: 300ms;
+  }
+
+  @starting-style {
+    .menu[open] {
+      opacity: 0;
+    }
   }
 
   .menu::backdrop {
-    background: var(--color-surface-primary);
+    background: transparent;
+  }
+
+  /* Вход содержимого: opacity + 4px blur + 12px translateY, выход — короче и вверх */
+  @media (prefers-reduced-motion: no-preference) {
+    .menu__body {
+      translate: 0 -12px;
+      filter: blur(4px);
+      transition:
+        translate 150ms ease-out,
+        filter 150ms ease-out;
+    }
+
+    .menu[open] .menu__body {
+      translate: 0 0;
+      filter: blur(0);
+      transition-duration: 300ms;
+    }
+
+    @starting-style {
+      .menu[open] .menu__body {
+        translate: 0 12px;
+        filter: blur(4px);
+      }
+    }
   }
 
   .menu__header {
@@ -111,6 +150,24 @@ import { CTA, EMAIL, NAV } from '../data/site';
     height: 32px;
     background: var(--color-surface-secondary);
     color: var(--color-element-primary);
+    -webkit-tap-highlight-color: transparent;
+    transition: scale 150ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .menu__close:active {
+      scale: 0.96;
+    }
+  }
+
+  .menu__link {
+    transition: color 150ms ease-out;
+  }
+
+  @media (hover: hover) {
+    .menu__link--mail:hover {
+      color: var(--color-text-accent-2-hover);
+    }
   }
 
   .menu__body {

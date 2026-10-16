@@ -45,10 +45,11 @@ const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't
     border-radius: 0;
     white-space: nowrap;
     cursor: pointer;
-    transition:
-      border-radius 0.2s ease,
-      color 0.2s ease,
-      box-shadow 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    /* hover — скругление в pill (кривая better-ui), press — scale 0.96 */
+    transition-property: border-radius, color, box-shadow, scale;
+    transition-duration: 300ms, 150ms, 150ms, 150ms;
+    transition-timing-function: cubic-bezier(0.2, 0, 0, 1), ease-out, ease-out, ease-out;
   }
 
   .btn__text {
@@ -105,6 +106,12 @@ const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't
     }
     .btn--inverse:hover {
       box-shadow: inset 0 0 0 2.5px var(--color-element-primary);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .btn:not(:disabled, [aria-disabled='true']):active {
+      scale: 0.96;
     }
   }
 
