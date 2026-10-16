@@ -1,0 +1,47 @@
+---
+/** IconButton (Figma 411:13645) — круглая кнопка 48px. State: Default / Hover / Disabled. */
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = HTMLAttributes<'button'> & { label: string };
+
+const { label, class: className, ...rest } = Astro.props;
+---
+
+<button class:list={['icon-btn', className]} type="button" aria-label={label} {...rest}>
+  <slot />
+</button>
+
+<style>
+  .icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    background: var(--color-element-primary-inversion);
+    color: var(--color-element-primary);
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .icon-btn :global(svg) {
+    width: 24px;
+    height: 24px;
+  }
+
+  @media (hover: hover) {
+    .icon-btn:hover:not(:disabled) {
+      background: var(--color-element-primary);
+      color: var(--color-element-primary-inversion);
+    }
+  }
+
+  .icon-btn:disabled {
+    background: var(--color-element-border);
+    color: var(--color-element-secondary);
+    cursor: default;
+  }
+</style>

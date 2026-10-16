@@ -1,0 +1,53 @@
+---
+/** ServiceCard (Figma 411:11514): Illustration, Title, Description */
+import { typograph } from '../utils/typograph';
+
+interface Props {
+  title: string;
+  description: string;
+  illustration: string;
+}
+
+const { title, description, illustration } = Astro.props;
+---
+
+<article class="service">
+  <img class="service__illustration" src={illustration} alt="" width="286" height="200" loading="lazy" decoding="async" />
+  <div class="service__body">
+    <h3 class="service__title t-h3" set:html={title} />
+    <p class="service__description t-body-m">{typograph(description)}</p>
+  </div>
+</article>
+
+<style>
+  .service {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-shrink: 0;
+    width: var(--service-card-width);
+    height: var(--size-service-card-height);
+    padding: var(--size-service-padding);
+    overflow: hidden;
+    background: var(--color-static-white);
+    scroll-snap-align: start;
+  }
+
+  /* В макете иллюстрация 286×200 на обоих брейкпоинтах, на мобильном обрезается краем карточки */
+  .service__illustration {
+    flex-shrink: 0;
+    width: 286px;
+    max-width: none;
+    height: 200px;
+  }
+
+  .service__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-20);
+  }
+
+  .service__description {
+    color: var(--color-text-secondary);
+  }
+</style>
