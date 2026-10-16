@@ -1,0 +1,24 @@
+{
+  "name": "skoup",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test:visual": "node tests/compare.mjs desktop && node tests/compare.mjs mobile"
+  },
+  "dependencies": {
+    "astro": "7.3.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "pixelmatch": "7.1.0",
+    "pngjs": "7.0.0",
+    "svgo": "4.0.0"
+  }
+}

@@ -1,0 +1,56 @@
+---
+/** Стопка круглых цветных логотипов клиентов (Logo / Color / *). 56 desktop / 40 mobile. */
+import vk from '../assets/logos/vk.svg?url';
+import aliexpress from '../assets/logos/aliexpress.svg?url';
+import uzum from '../assets/logos/uzum.svg?url';
+import round from '../assets/logos/round.svg?url';
+
+const logos = [
+  { src: vk, alt: 'VK' },
+  { src: aliexpress, alt: 'AliExpress' },
+  { src: uzum, alt: 'Uzum' },
+  { src: round, alt: 'Раунд' },
+];
+---
+
+<ul class="logos">
+  {
+    logos.map((logo) => (
+      <li class="logos__item">
+        <img src={logo.src} alt={logo.alt} width="56" height="56" decoding="async" />
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .logos {
+    --logo-size: 56px;
+    --logo-ring: 2px;
+    display: flex;
+  }
+
+  .logos__item {
+    width: var(--logo-size);
+    height: var(--logo-size);
+    border-radius: var(--radius-full);
+    box-shadow: 0 0 0 var(--logo-ring) var(--color-surface-primary);
+    background: var(--color-surface-primary);
+  }
+
+  .logos__item + .logos__item {
+    margin-left: calc(var(--logo-ring) * -2);
+  }
+
+  .logos__item img {
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (max-width: 767px) {
+    .logos {
+      --logo-size: 40px;
+      --logo-ring: 1.43px;
+    }
+  }
+</style>

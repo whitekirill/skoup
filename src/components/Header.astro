@@ -1,0 +1,79 @@
+---
+/**
+ * Header (Figma 411:13712).
+ * Desktop — логотип + навигация (Navbutton). Mobile — логотип + бургер, открывает MobileMenu.
+ */
+import Button from './Button.astro';
+import Logo from './Logo.astro';
+import MobileMenu from './MobileMenu.astro';
+import MenuIcon from '../assets/icons/menu.svg';
+import { NAV } from '../data/site';
+---
+
+<header class="header">
+  <Logo />
+  <nav class="header__nav" aria-label="Основная навигация">
+    <ul class="header__list">
+      {
+        NAV.map((item) => (
+          <li>
+            <Button variant="nav" href={item.href}>
+              {item.label}
+            </Button>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+  <button
+    class="header__burger"
+    type="button"
+    aria-label="Открыть меню"
+    aria-haspopup="dialog"
+    aria-controls="mobile-menu"
+    aria-expanded="false"
+    data-menu-open
+  >
+    <MenuIcon aria-hidden="true" />
+  </button>
+</header>
+
+<MobileMenu />
+
+<style>
+  .header {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-12) var(--layout-page-padding);
+  }
+
+  .header__list {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+  }
+
+  .header__burger {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    .header__nav {
+      display: none;
+    }
+
+    .header__burger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 32px;
+      background: var(--color-surface-secondary);
+      color: var(--color-element-primary);
+    }
+  }
+</style>

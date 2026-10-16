@@ -1,0 +1,145 @@
+---
+/** Первый экран (Figma: desktop 376:7988, mobile 391:2635) */
+import Button from './Button.astro';
+import ClientLogos from './ClientLogos.astro';
+import DownloadIcon from '../assets/icons/download-2.svg';
+import artDesktop from '../assets/hero/hero-desktop.svg?url';
+import artMobile from '../assets/hero/hero-mobile.svg?url';
+import { CTA } from '../data/site';
+---
+
+<section class="hero container" aria-labelledby="hero-title">
+  <picture class="hero__art" aria-hidden="true">
+    <source media="(max-width: 767px)" srcset={artMobile} width="393" height="432" />
+    <img src={artDesktop} alt="" width="1010" height="836" decoding="async" fetchpriority="low" />
+  </picture>
+
+  <div class="hero__main">
+    <div class="hero__content">
+      <h1 class="hero__title t-h1" id="hero-title">
+        Проектируем финтех, который проходит проверку регулятора <span class="hero__muted"><span class="hero__nowrap">с AI</span> на каждом этапе</span>
+      </h1>
+      <div class="hero__actions">
+        <Button variant="primary" href={CTA.discuss.href}>{CTA.discuss.label}</Button>
+        <Button variant="secondary" href={CTA.presentation.href}>
+          {CTA.presentation.label}
+          <DownloadIcon slot="icon" />
+        </Button>
+      </div>
+    </div>
+
+    <div class="hero__clients">
+      <p class="hero__clients-text t-button-l">успешно работали<br />внутри команд</p>
+      <ClientLogos />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    padding-top: var(--layout-section-padding);
+    padding-bottom: var(--gap-xl);
+  }
+
+  .hero__art {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: calc(1010 / 1440 * 100%);
+    pointer-events: none;
+  }
+
+  .hero__art img {
+    width: 100%;
+    height: auto;
+  }
+
+  .hero__main {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-100);
+  }
+
+  .hero__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-44);
+    max-width: 896px;
+  }
+
+  /* Слова в макете разнесены фиксированным зазором gap-3xs, а не пробелом шрифта */
+  .hero__title {
+    --word-gap: var(--gap-3xs);
+    /* пробел Manrope = 0.2em; поправка на letter-spacing подобрана по координатам слов в Figma (393 и 1440) */
+    word-spacing: calc(var(--word-gap) - 0.2em - 2.25 * var(--typography-h1-letter-spacing));
+  }
+
+  .hero__muted {
+    color: var(--color-text-secondary-inversion);
+  }
+
+  /* «с AI» в макете — один текстовый слой: обычный пробел шрифта, без переноса */
+  .hero__nowrap {
+    white-space: nowrap;
+    word-spacing: normal;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--gap-3xs);
+  }
+
+  .hero__clients {
+    display: flex;
+    align-items: center;
+    gap: var(--space-24);
+  }
+
+  .hero__clients-text {
+    color: var(--color-text-secondary-inversion);
+  }
+
+  @media (max-width: 767px) {
+    .hero {
+      /* шапка 56 + иллюстрация 340 (масштабируется по ширине) + 16 */
+      padding-top: calc(72px + 340 / 393 * 100vw);
+      padding-bottom: var(--space-48);
+    }
+
+    .hero__art {
+      width: 100%;
+    }
+
+    .hero__main {
+      gap: var(--space-48);
+    }
+
+    .hero__content {
+      gap: var(--space-40);
+      max-width: none;
+    }
+
+    .hero__title {
+      --word-gap: var(--space-10);
+    }
+
+    .hero__actions {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--space-8);
+    }
+
+    .hero__actions :global(.btn) {
+      width: 100%;
+    }
+
+    .hero__clients {
+      gap: var(--space-16);
+    }
+  }
+</style>

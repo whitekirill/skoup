@@ -1,0 +1,154 @@
+---
+/**
+ * MobileMenu (Figma 411:14164) — оверлей на весь экран: шапка Menu=Open,
+ * ссылки по центру, почта акцентом, кнопки «Обсудить проект» и «Презентация».
+ */
+import Button from './Button.astro';
+import Logo from './Logo.astro';
+import CloseIcon from '../assets/icons/close.svg';
+import DownloadIcon from '../assets/icons/download-2.svg';
+import { CTA, EMAIL, NAV } from '../data/site';
+---
+
+<dialog class="menu" id="mobile-menu" aria-label="Меню">
+  <div class="menu__header">
+    <Logo />
+    <button class="menu__close" type="button" aria-label="Закрыть меню" data-menu-close>
+      <CloseIcon aria-hidden="true" />
+    </button>
+  </div>
+  <div class="menu__body">
+    <div class="menu__center">
+      <nav aria-label="Мобильная навигация">
+        <ul>
+          {
+            NAV.map((item) => (
+              <li>
+                <a class="menu__link t-h2" href={item.href} data-menu-close>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+      <a class="menu__link menu__link--mail t-h2" href={`mailto:${EMAIL}`}>{EMAIL}</a>
+    </div>
+    <div class="menu__actions">
+      <Button variant="primary" href={CTA.discuss.href} block>{CTA.discuss.label}</Button>
+      <Button variant="secondary" href={CTA.presentation.href} block>
+        {CTA.presentation.label}
+        <DownloadIcon slot="icon" />
+      </Button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  const menu = document.getElementById('mobile-menu') as HTMLDialogElement | null;
+  const opener = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+
+  if (menu && opener) {
+    const setOpen = (open: boolean) => {
+      opener.setAttribute('aria-expanded', String(open));
+      document.documentElement.classList.toggle('is-menu-open', open);
+    };
+
+    opener.addEventListener('click', () => {
+      menu.showModal();
+      setOpen(true);
+    });
+
+    menu.addEventListener('click', (event) => {
+      if ((event.target as HTMLElement).closest('[data-menu-close]')) menu.close();
+    });
+
+    menu.addEventListener('close', () => setOpen(false));
+
+    // Меню существует только на мобильном брейкпоинте
+    matchMedia('(min-width: 768px)').addEventListener('change', (event) => {
+      if (event.matches && menu.open) menu.close();
+    });
+  }
+</script>
+
+<style>
+  .menu {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--color-surface-primary);
+    color: var(--color-text-primary);
+  }
+
+  .menu[open] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .menu::backdrop {
+    background: var(--color-surface-primary);
+  }
+
+  .menu__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-12) var(--layout-page-padding);
+  }
+
+  .menu__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 32px;
+    background: var(--color-surface-secondary);
+    color: var(--color-element-primary);
+  }
+
+  .menu__body {
+    display: flex;
+    flex: 1 0 0;
+    flex-direction: column;
+    gap: var(--space-16);
+    min-height: 0;
+    padding: 0 var(--layout-page-padding) var(--space-28);
+  }
+
+  .menu__center {
+    display: flex;
+    flex: 1 0 0;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 72px;
+    min-height: 0;
+    padding-block: var(--space-44);
+  }
+
+  .menu__link {
+    display: block;
+    padding-block: var(--space-14);
+    text-align: center;
+  }
+
+  .menu__link--mail {
+    color: var(--color-text-accent-2);
+  }
+
+  .menu__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  :global(html.is-menu-open) {
+    overflow: hidden;
+  }
+</style>

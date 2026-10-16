@@ -1,0 +1,129 @@
+---
+/**
+ * Button (Figma 31:15794).
+ * Type: Primary / Secondary / Inverse / Navbutton × State: Default / Hover / Focus / Disabled.
+ * Hover — скругление в pill. Высота — size/button/height (56 desktop / 52 mobile), Navbutton — 32.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+type Variant = 'primary' | 'secondary' | 'inverse' | 'nav';
+
+interface Props extends HTMLAttributes<'a'> {
+  variant?: Variant;
+  href?: string;
+  /** Растянуть на всю ширину контейнера */
+  block?: boolean;
+  disabled?: boolean;
+}
+
+const { variant = 'primary', href, block = false, disabled = false, class: className, ...rest } = Astro.props;
+const Tag = href && !disabled ? 'a' : 'button';
+const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't-button-l', block && 'btn--block', className];
+---
+
+<Tag
+  class:list={classes}
+  href={Tag === 'a' ? href : undefined}
+  type={Tag === 'button' ? 'button' : undefined}
+  disabled={Tag === 'button' && disabled ? true : undefined}
+  {...rest}
+>
+  <span class="btn__text"><slot /></span>
+  {Astro.slots.has('icon') && <span class="btn__icon" aria-hidden="true"><slot name="icon" /></span>}
+</Tag>
+
+<style>
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-width: 64px;
+    height: var(--size-button-height);
+    padding: var(--space-14) var(--gap-3xs);
+    border-radius: 0;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      border-radius 0.2s ease,
+      color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .btn__text {
+    padding-inline: var(--space-8);
+  }
+
+  .btn__icon {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .btn__icon :global(svg) {
+    width: 24px;
+    height: 24px;
+  }
+
+  .btn--block {
+    display: flex;
+    width: 100%;
+  }
+
+  /* Primary */
+  .btn--primary {
+    background: var(--color-surface-primary-inversion);
+    color: var(--color-text-primary-inversion);
+  }
+
+  /* Secondary */
+  .btn--secondary {
+    background: var(--color-surface-secondary);
+    color: var(--color-text-primary);
+  }
+
+  /* Inverse — на тёмном фоне */
+  .btn--inverse {
+    background: var(--color-surface-primary);
+    color: var(--color-text-primary);
+  }
+
+  /* Navbutton — пункт навигации */
+  .btn--nav {
+    height: 32px;
+    padding: var(--gap-3xs) 8px;
+    background: var(--color-surface-tertiary);
+    color: var(--color-text-primary);
+  }
+
+  @media (hover: hover) {
+    .btn:hover {
+      border-radius: var(--radius-full);
+    }
+    .btn--secondary:hover {
+      color: var(--color-text-secondary);
+    }
+    .btn--inverse:hover {
+      box-shadow: inset 0 0 0 2.5px var(--color-element-primary);
+    }
+  }
+
+  .btn:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px var(--color-element-blue);
+  }
+
+  .btn:disabled,
+  .btn[aria-disabled='true'] {
+    opacity: 0.5;
+    color: var(--color-text-secondary);
+    border-radius: 0;
+    box-shadow: none;
+    pointer-events: none;
+  }
+
+  .btn--nav:disabled,
+  .btn--nav[aria-disabled='true'] {
+    opacity: 0.5;
+  }
+</style>
