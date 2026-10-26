@@ -1,12 +1,11 @@
 ---
 /**
  * MobileMenu (Figma 411:14164) — оверлей на весь экран: шапка Menu=Open,
- * ссылки по центру, почта акцентом, кнопки «Обсудить проект» и «Презентация».
+ * ссылки прижаты к низу и выровнены влево, почта акцентом, кнопки «Обсудить проект» и «Скачать презентацию».
  */
 import Button from './Button.astro';
 import Logo from './Logo.astro';
 import CloseIcon from '../assets/icons/close.svg';
-import DownloadIcon from '../assets/icons/download-2.svg';
 import { CTA, EMAIL, NAV } from '../data/site';
 ---
 
@@ -36,10 +35,7 @@ import { CTA, EMAIL, NAV } from '../data/site';
     </div>
     <div class="menu__actions">
       <Button variant="primary" href={CTA.discuss.href} block>{CTA.discuss.label}</Button>
-      <Button variant="secondary" href={CTA.presentation.href} block>
-        {CTA.presentation.label}
-        <DownloadIcon slot="icon" />
-      </Button>
+      <Button variant="secondary" href={CTA.presentation.href} block>Скачать презентацию</Button>
     </div>
   </div>
 </dialog>
@@ -148,8 +144,8 @@ import { CTA, EMAIL, NAV } from '../data/site';
     justify-content: center;
     width: 40px;
     height: 32px;
-    background: var(--color-surface-secondary);
-    color: var(--color-element-primary);
+    background: var(--color-surface-primary-inversion);
+    color: var(--color-element-primary-inversion);
     -webkit-tap-highlight-color: transparent;
     transition: scale 150ms ease-out;
   }
@@ -184,15 +180,14 @@ import { CTA, EMAIL, NAV } from '../data/site';
     flex: 1 0 0;
     flex-direction: column;
     justify-content: flex-end;
-    gap: 72px;
+    gap: var(--gap-xl);
     min-height: 0;
-    padding-block: var(--space-44);
+    padding-block: var(--space-32);
   }
 
   .menu__link {
     display: block;
     padding-block: var(--space-14);
-    text-align: center;
   }
 
   .menu__link--mail {
