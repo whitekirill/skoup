@@ -274,11 +274,11 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
         visibility 200ms;
     }
 
+    /* visibility не в списке: глобальное правило reduced motion растянуло бы и её,
+       и в первом кадре бриф был бы ещё невидим — фокус не встал бы на × */
     .brief[open] {
       opacity: 1;
-      transition:
-        opacity 200ms ease-out,
-        visibility 0s;
+      transition: opacity 200ms ease-out;
     }
   }
 

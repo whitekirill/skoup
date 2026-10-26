@@ -29,6 +29,8 @@ node tests/compare.mjs mobile 0 934
 
 Плавность скролла (долгие кадры при прокрутке, CPU ×4): `node tests/scroll-perf.mjs`.
 
+Свой ползунок прокрутки (появление/скрытие, перетаскивание, клик по дорожке, бриф, reduced motion): `node tests/scrollbar.mjs`.
+
 Сверка отдельного блока со скриншотом ноды Figma: `node tests/compare-node.mjs 1440 ".services" tests/screens/figma/node-376-8149.png`.
 
 ## Деплой

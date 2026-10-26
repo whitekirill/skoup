@@ -102,3 +102,77 @@ button {
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * Прокрутка: системная полоса скрыта (страница и бриф), вместо неё — свой ползунок
+ * src/scripts/scrollbar.ts. Колесо, тач и клавиатура работают как обычно.
+ */
+html,
+.brief {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+.brief::-webkit-scrollbar {
+  display: none;
+}
+
+/* Дорожка у правого края: шире самого ползунка, чтобы в неё было легко попасть мышью */
+.scrollbar {
+  position: fixed;
+  top: var(--space-4);
+  right: 0;
+  bottom: var(--space-4);
+  z-index: 60;
+  width: var(--space-16);
+  pointer-events: none;
+}
+
+.scrollbar[hidden] {
+  display: none;
+}
+
+.scrollbar__thumb {
+  position: absolute;
+  top: 0;
+  right: var(--space-4);
+  width: var(--space-4);
+  border-radius: var(--space-4);
+  background: var(--color-element-secondary);
+  opacity: 0;
+  will-change: translate;
+}
+
+.scrollbar.is-active .scrollbar__thumb {
+  opacity: 1;
+}
+
+/* Мышь: дорожка ловит наведение и клик, ползунок под курсором утолщается */
+@media (hover: hover) and (pointer: fine) {
+  .scrollbar {
+    pointer-events: auto;
+  }
+
+  .scrollbar:hover .scrollbar__thumb,
+  .scrollbar.is-dragging .scrollbar__thumb {
+    width: var(--space-8);
+    opacity: 1;
+  }
+}
+
+.scrollbar.is-dragging,
+.scrollbar.is-dragging .scrollbar__thumb {
+  cursor: grabbing;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scrollbar__thumb {
+    transition:
+      opacity 300ms ease-out,
+      width 150ms ease-out;
+  }
+
+  .scrollbar.is-active .scrollbar__thumb {
+    transition-duration: 150ms;
+  }
+}

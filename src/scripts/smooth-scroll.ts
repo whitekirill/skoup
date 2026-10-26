@@ -10,6 +10,9 @@ const root = document.documentElement;
 const easing = (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t));
 let lenis: Lenis | null = null;
 
+/** Текущий Lenis (null — плавный скролл выключен): через него страницу крутит свой ползунок */
+export const getLenis = () => lenis;
+
 function start() {
   if (lenis) return;
   lenis = new Lenis({ lerp: 0.1, autoRaf: true, allowNestedScroll: true, stopInertiaOnNavigate: true });
