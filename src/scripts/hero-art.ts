@@ -47,6 +47,7 @@ const CFG = {
 const ASSEMBLE = { stagger: 70, duration: 850, dotDelay: 120 };
 const SPRING = { k: 180, c: 2 * 0.55 * Math.sqrt(180) }; // ζ = 0.55 — лёгкий перелёт
 const TRAIL = 10, TRAIL_LIFE = 0.32;
+const SCROLL_IDLE = 150;
 const WAVES = 3, WAVE_LIFE = 1.1, WAVE_SPEED = 520, WAVE_WIDTH = 70;
 
 const VERT = `#version 300 es
@@ -369,9 +370,27 @@ export function mountHeroArt(canvas: HTMLCanvasElement, data: HeroDots, kind: Ki
     gl!.drawArraysInstanced(gl!.TRIANGLE_STRIP, 0, 4, n);
   }
 
+  // Пока страница прокручивается, иллюстрацию не перерисовываем: GPU отдаём скроллу, кадр
+  // держится последний. Через SCROLL_IDLE мс после остановки анимация продолжается с того же места.
+  // Сборку при загрузке не прерываем.
+  let scrollIdleAt = 0, frozenAt = 0;
+  const onScroll = () => { scrollIdleAt = performance.now() + SCROLL_IDLE; };
+  addEventListener('scroll', onScroll, { passive: true });
+
   // Если устройство не тянет (первые кадры дольше 24 мс), возвращаем статичную картинку
   let probed = 0, slow = 0;
   function loop(now: number) {
+    const assembled = start >= 0 && now - start > ASSEMBLE.stagger * coins.length + ASSEMBLE.duration;
+    if (assembled && now < scrollIdleAt) {
+      if (!frozenAt) frozenAt = now;
+      raf = requestAnimationFrame(loop);
+      return;
+    }
+    if (frozenAt) {
+      start += now - frozenAt;
+      last = 0;
+      frozenAt = 0;
+    }
     const t0 = performance.now();
     frame(now);
     if (probed < 60) {
@@ -392,6 +411,7 @@ export function mountHeroArt(canvas: HTMLCanvasElement, data: HeroDots, kind: Ki
     if (!running) return;
     running = false;
     pausedAt = performance.now();
+    if (frozenAt) { start += pausedAt - frozenAt; frozenAt = 0; }
     cancelAnimationFrame(raf);
   };
   // вне экрана — пауза
@@ -408,6 +428,7 @@ export function mountHeroArt(canvas: HTMLCanvasElement, data: HeroDots, kind: Ki
     target.removeEventListener('pointercancel', onLeave);
     target.removeEventListener('pointerleave', onLeave);
     canvas.removeEventListener('webglcontextlost', onContextLost);
+    removeEventListener('scroll', onScroll);
   }
   return stop;
 }
