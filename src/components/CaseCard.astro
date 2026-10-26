@@ -37,7 +37,7 @@ const [mobileAvif, mobileWebp, desktopAvif, desktopWebp] = await Promise.all([
 const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], format: 'webp' });
 ---
 
-<article class:list={['case', { 'case--offset': offset }]}>
+<article class:list={['case', { 'case--offset': offset }]} data-case={offset ? 'offset' : ''}>
   <picture class="case__media">
     <source media="(max-width: 767px)" type="image/avif" srcset={mobileAvif} sizes="100vw" />
     <source media="(max-width: 767px)" type="image/webp" srcset={mobileWebp} sizes="100vw" />
@@ -103,6 +103,17 @@ const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], f
 
     .case:hover .case__media img {
       scale: 1.04;
+    }
+
+    :global(.cases.is-parallax) .case:hover .case__media img {
+      scale: 1.12;
+    }
+  }
+
+  /* С параллаксом (скрипт в Cases.astro) обложка чуть крупнее — запас под сдвиг внутри рамки */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.cases.is-parallax) .case__media img {
+      scale: 1.08;
     }
   }
 
