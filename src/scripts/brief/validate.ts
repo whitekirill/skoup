@@ -17,10 +17,33 @@ export function parseContact(raw: string): { type: ContactType; value: string } 
   return null;
 }
 
-/** Телефон в международном формате: «+» и 10–15 цифр; пробелы, скобки и дефисы игнорируем */
-export function isPhone(raw: string): boolean {
-  return /^\+\d{10,15}$/.test(raw.replace(/[\s()-]/g, ''));
+// Телефон: маска +7 (999) 123-45-67
+
+export const PHONE_PREFIX = '+7 ';
+
+/** Цифры номера без кода страны (до 10). Ведущие 7/8 в 11-значном номере — код страны. */
+export function phoneDigits(raw: string): string {
+  const value = raw.trim();
+  let digits = value.replace(/\D/g, '');
+  if (value.startsWith('+7')) digits = digits.slice(1);
+  else if (digits.length === 11 && /^[78]/.test(digits)) digits = digits.slice(1);
+  return digits.slice(0, 10);
 }
+
+/** 10 цифр → «+7 (999) 123-45-67»; неполный номер — сколько набрано */
+export function formatPhone(digits: string): string {
+  const d = digits.slice(0, 10);
+  let out = PHONE_PREFIX;
+  if (d.length) out += `(${d.slice(0, 3)}`;
+  if (d.length >= 3) out += ')';
+  if (d.length > 3) out += ` ${d.slice(3, 6)}`;
+  if (d.length > 6) out += `-${d.slice(6, 8)}`;
+  if (d.length > 8) out += `-${d.slice(8, 10)}`;
+  return out;
+}
+
+/** Полный российский номер: +7 и 10 цифр */
+export const isPhone = (raw: string) => phoneDigits(raw).length === 10;
 
 export const isName = (raw: string) => raw.trim().length >= 2;
 

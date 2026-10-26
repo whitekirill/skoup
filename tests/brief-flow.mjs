@@ -72,6 +72,32 @@ for (const [v, okExpected] of [['anna@company.ru', true], ['@anna_skoup', true],
 }
 await page.fill('#brief-contact', 't.me/anna_skoup');
 
+// 5a. Маска телефона +7
+const phoneVal = () => page.inputValue('#brief-phone');
+await page.fill('#brief-phone', '');
+await page.focus('#brief-phone');
+check((await phoneVal()) === '+7 ', 'фокус в пустом телефоне — «+7 »');
+await page.keyboard.type('9991234567');
+check((await phoneVal()) === '+7 (999) 123-45-67', `набор 9991234567 → ${await phoneVal()}`);
+await page.keyboard.type('8');
+check((await phoneVal()) === '+7 (999) 123-45-67', 'лишние цифры не добавляются');
+await page.fill('#brief-phone', ''); await page.focus('#brief-phone');
+await page.keyboard.type('89161234567');
+check((await phoneVal()) === '+7 (916) 123-45-67', `набор с 8 → ${await phoneVal()}`);
+await page.fill('#brief-phone', ''); await page.focus('#brief-phone');
+await page.keyboard.insertText('+7 999 123 45 67');
+check((await phoneVal()) === '+7 (999) 123-45-67', `вставка «+7 999 123 45 67» → ${await phoneVal()}`);
+// Backspace сразу после «)» стирает цифру
+await page.evaluate(() => { const i = document.getElementById('brief-phone'); i.setSelectionRange(8, 8); });
+await page.keyboard.press('Backspace');
+check((await phoneVal()) === '+7 (991) 234-56-7', `Backspace по «)» → ${await phoneVal()}`);
+// правка в середине: курсор остаётся у цифры
+await page.keyboard.type('9');
+check((await phoneVal()) === '+7 (999) 123-45-67' && (await page.evaluate(() => document.getElementById('brief-phone').selectionStart)) === 7, 'вставка цифры в середину — курсор сразу после неё');
+await page.fill('#brief-phone', ''); await page.focus('#brief-phone'); await page.locator('#brief-company').focus();
+check((await phoneVal()) === '', 'пустой «+7 » при уходе с поля убирается (виден плейсхолдер)');
+check((await errText('phone')) === 'Укажите телефон', 'только «+7 » — «Укажите телефон»');
+
 // 5. Короткий телефон
 await page.fill('#brief-phone', '+7 999');
 check((await errText('phone')) === 'Проверьте номер', 'короткий телефон → «Проверьте номер»');
@@ -114,7 +140,7 @@ await page.click('[data-brief-submit]');
 await page.waitForSelector('[data-brief-view="success"]:not([hidden])', { timeout: 5000 });
 check(true, 'экран успеха показан');
 const has = (k, v) => lastBody.includes(`name="${k}"\r\n\r\n${v}`);
-check(has('name', 'Анна') && has('company', 'Банк') && has('contact', 'https://t.me/anna_skoup') && has('contact_type', 'url') && has('budget', 'более 6 млн ₽'), 'в заявке поля, contact с https:// и contact_type=url');
+check(has('phone', '+79991234567') && has('name', 'Анна') && has('company', 'Банк') && has('contact', 'https://t.me/anna_skoup') && has('contact_type', 'url') && has('budget', 'более 6 млн ₽'), 'в заявке поля, телефон +79991234567, contact с https:// и contact_type=url');
 check((lastBody.match(/name="services"/g) || []).length === 2, 'в заявке две услуги');
 check(lastBody.includes('filename="brief-skoup.pdf"') && !lastBody.includes('big.pdf'), 'в заявку ушёл только файл без ошибки');
 check(lastBody.includes('multipart/form-data') || /^--/.test(lastBody), 'multipart/form-data');
