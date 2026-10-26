@@ -12,32 +12,29 @@ const { title, description, illustration } = Astro.props;
 ---
 
 <article class="service">
-  <img class="service__illustration" src={illustration} alt="" width="286" height="200" loading="lazy" decoding="async" />
+  <img class="service__illustration" src={illustration} alt="" width="189" height="132" loading="lazy" decoding="async" />
   <div class="service__body">
-    <h3 class="service__title t-h3" set:html={title} />
-    <p class="service__description t-body-m">{typograph(description)}</p>
+    <h3 class="service__title t-h5" set:html={title} />
+    <p class="service__description t-body-s">{typograph(description)}</p>
   </div>
 </article>
 
 <style>
+  /* Высота по содержимому; ширина — колонка сетки (258 на 1440, вся ширина на мобилке) */
   .service {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    flex-shrink: 0;
-    width: var(--service-card-width);
-    height: var(--size-service-card-height);
+    gap: var(--size-service-gap);
     padding: var(--size-service-padding);
-    overflow: hidden;
     background: var(--color-static-white);
-    scroll-snap-align: start;
   }
 
-  /* 286×200 → 260×182 на мобильном; SVG прибит к левому верхнему углу (xMinYMin) */
+  /* 189×132; в узкой колонке уменьшается пропорционально */
   .service__illustration {
-    flex-shrink: 0;
     width: var(--size-service-illustration-width);
-    height: var(--size-service-illustration-height);
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 189 / 132;
   }
 
   .service__body {

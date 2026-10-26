@@ -1,152 +1,112 @@
 ---
 /**
- * «Что мы делаем» (Figma: desktop 376:8149, mobile 391:2807).
- * Desktop — ряд карточек со скроллом стрелками, Mobile — горизонтальная карусель 300px.
+ * «Что мы делаем» (Figma: desktop 469:5247, mobile 482:3284).
+ * Desktop — пять карточек в ряд со ступенчатым сдвигом по вертикали, Mobile — столбик.
  */
-import IconButton from './IconButton.astro';
 import ServiceCard from './ServiceCard.astro';
-import ArrowLeft from '../assets/icons/arrow-left-s.svg';
-import ArrowRight from '../assets/icons/arrow-right-s.svg';
 import strategy from '../assets/services/strategy.svg?url';
 import interfaces from '../assets/services/interfaces.svg?url';
 import regulatory from '../assets/services/regulatory.svg?url';
 import analytics from '../assets/services/analytics.svg?url';
 import audit from '../assets/services/audit.svg?url';
 
+// offset — сдвиг карточки вниз на десктопе, px от верхней (как в макете 1440)
 const services = [
   {
     title: 'Стратегия и&nbsp;исследования',
     description: 'Изучаем бизнес и клиентов, составляем план развития продукта с учётом требований закона',
     illustration: strategy,
+    offset: 46,
   },
   {
-    title: 'Интерфейсы<br />и дизайн‑системы',
+    title: 'Интерфейсы<br />и дизайн-системы',
     description: 'Экраны, сценарии и дизайн‑системы, которые разработка берёт без переделок',
     illustration: interfaces,
+    offset: 162,
   },
   {
     title: 'Регуляторика',
     description: 'Встраиваем требования регуляторов в интерфейс и готовим документацию к проверкам',
     illustration: regulatory,
+    offset: 0,
   },
   {
     title: 'Аналитика и рост',
     description: 'Изучаем данные и проводим A/B-тесты, чтобы росла конверсия',
     illustration: analytics,
+    offset: 236,
   },
   {
     title: 'Аудит и исправления',
     description: 'Проверяем удобство и соответствие закону, помогаем всё исправить',
     illustration: audit,
+    offset: 63,
   },
 ];
 ---
 
-<section class="services" id="services" aria-labelledby="services-title" data-carousel>
-  <div class="services__header container">
+<section class="services" id="services" aria-labelledby="services-title">
+  <div class="services__inner container">
     <h2 class="services__title t-h2" id="services-title">Что мы делаем</h2>
-    <div class="services__controls">
-      <IconButton label="Предыдущие услуги" data-carousel-prev disabled>
-        <ArrowLeft aria-hidden="true" />
-      </IconButton>
-      <IconButton label="Следующие услуги" data-carousel-next>
-        <ArrowRight aria-hidden="true" />
-      </IconButton>
-    </div>
+    <ul class="services__list">
+      {
+        services.map(({ offset, ...service }) => (
+          <li style={`--offset: ${offset}px`}>
+            <ServiceCard {...service} />
+          </li>
+        ))
+      }
+    </ul>
   </div>
-
-  <ul class="services__list" data-carousel-track>
-    {
-      services.map((service) => (
-        <li>
-          <ServiceCard {...service} />
-        </li>
-      ))
-    }
-  </ul>
 </section>
-
-<script>
-  document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((root) => {
-    const track = root.querySelector<HTMLElement>('[data-carousel-track]');
-    const prev = root.querySelector<HTMLButtonElement>('[data-carousel-prev]');
-    const next = root.querySelector<HTMLButtonElement>('[data-carousel-next]');
-    if (!track || !prev || !next) return;
-
-    const step = () => {
-      const item = track.firstElementChild as HTMLElement | null;
-      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-      return item ? item.offsetWidth + gap : track.clientWidth;
-    };
-
-    const update = () => {
-      const max = track.scrollWidth - track.clientWidth - 1;
-      prev.disabled = track.scrollLeft <= 1;
-      next.disabled = track.scrollLeft >= max;
-    };
-
-    const smooth = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-    prev.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: smooth }));
-    next.addEventListener('click', () => track.scrollBy({ left: step(), behavior: smooth }));
-    track.addEventListener('scroll', update, { passive: true });
-    addEventListener('resize', update);
-    update();
-  });
-</script>
 
 <style>
   .services {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-l);
     padding-block: var(--layout-section-padding);
     background: var(--color-surface-secondary);
-    /* 300 → 412 между брейкпоинтами */
-    --service-card-width: clamp(300px, 257.9599px + 10.6972vw, 412px);
   }
 
-  .services__header {
+  .services__inner {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: var(--space-44);
   }
 
   .services__title {
     max-width: 896px;
   }
 
-  .services__controls {
-    display: flex;
-    gap: var(--gap-2xs);
-    padding-block: var(--space-4);
-  }
-
+  /* 5 колонок по 258 на 1440 (зазор 15.5 — как в макете), карточки сдвинуты вниз на --offset */
   .services__list {
-    display: flex;
-    gap: var(--space-32);
-    padding-inline: var(--container-pad);
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--container-pad);
-    scrollbar-width: none;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: start;
+    column-gap: 15.5px;
   }
 
-  .services__list::-webkit-scrollbar {
-    display: none;
+  .services__list > li {
+    margin-top: var(--offset);
+  }
+
+  /* Между мобилкой и узким десктопом пять колонок слишком тесные — три в ряд, без ступенек */
+  @media (max-width: 1099px) {
+    .services__list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-8);
+    }
+
+    .services__list > li {
+      margin-top: 0;
+    }
   }
 
   @media (max-width: 767px) {
-    .services {
+    .services__inner {
       gap: var(--space-24);
     }
 
-    .services__controls {
-      display: none;
-    }
-
     .services__list {
-      gap: var(--space-8);
+      grid-template-columns: 1fr;
     }
   }
 </style>

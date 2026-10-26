@@ -32,7 +32,7 @@ import { CTA } from '../data/site';
   <div class="hero__main">
     <div class="hero__content">
       <h1 class="hero__title t-h1" id="hero-title">
-        Проектируем финтех, который проходит проверку регулятора <span class="hero__muted"><span class="hero__nowrap">с AI</span> на каждом этапе</span>
+        Проектируем финтех, который проходит проверку регулятора
       </h1>
       <div class="hero__actions">
         <Button variant="primary" href={CTA.discuss.href}>{CTA.discuss.label}</Button>
@@ -53,6 +53,8 @@ import { CTA } from '../data/site';
 <style>
   .hero {
     position: relative;
+    /* иллюстрация (756) выше блока (676) — обрезаем по его краю, как в макете */
+    overflow: clip;
     padding-top: var(--layout-section-padding);
     padding-bottom: var(--gap-xl);
   }
@@ -120,15 +122,7 @@ import { CTA } from '../data/site';
     word-spacing: calc(var(--word-gap) - 0.2em - 2.25 * var(--typography-h1-letter-spacing));
   }
 
-  .hero__muted {
-    color: var(--color-text-secondary-inversion);
-  }
 
-  /* «с AI» в макете — один текстовый слой: обычный пробел шрифта, без переноса */
-  .hero__nowrap {
-    white-space: nowrap;
-    word-spacing: normal;
-  }
 
   .hero__actions {
     display: flex;

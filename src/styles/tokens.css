@@ -155,10 +155,10 @@
   --size-format-gap: clamp(24px, -4.5272px + 7.2588vw, 100px); /* 24 → 100 */
   --size-format-padding: clamp(24px, 16.4928px + 1.9102vw, 44px); /* 24 → 44 */
   --size-case-media-height: clamp(402px, 282.6361px + 30.3725vw, 720px); /* 402 → 720 */
-  --size-service-illustration-width: clamp(260px, 250.2407px + 2.4833vw, 286px); /* 260 → 286 */
-  --size-service-illustration-height: clamp(182px, 175.2436px + 1.7192vw, 200px); /* 182 → 200 */
-  --size-service-padding: clamp(20px, 18.4986px + 0.382vw, 24px); /* 20 → 24 */
-  --size-service-card-height: clamp(404px, 382.9799px + 5.3486vw, 460px); /* 404 → 460 */
+  --size-service-illustration-width: 189px;
+  --size-service-illustration-height: 132px;
+  --size-service-padding: 16px;
+  --size-service-gap: clamp(16px, 9.9943px + 1.5282vw, 32px); /* 16 → 32 */
   --surface-step-card: transparent;
 
   /* ── Adaptive: типографика ── */

@@ -1,10 +1,9 @@
 ---
 /**
- * Footer (Figma 411:13908): призыв «Начните с брифа», этапы, контакты, навигация, соцсети, вордмарк.
+ * Footer (Figma 411:13908): призыв «Начните с брифа», этапы, контакты, навигация, «Публикуемся».
  * Desktop — колонки, Mobile — этапы в горизонтальном скролле, колонки стопкой.
  */
 import StepCard from './StepCard.astro';
-import Wordmark from './Wordmark.astro';
 import { CTA, EMAIL, FOOTER_NAV, LEGAL, SOCIALS } from '../data/site';
 
 const steps = [
@@ -39,7 +38,7 @@ const steps = [
           </ul>
         </nav>
         <div class="footer__col">
-          <p class="footer__col-title t-caption" id="footer-social-title">Соцсети</p>
+          <p class="footer__col-title t-caption" id="footer-social-title">Публикуемся</p>
           <ul class="footer__list t-body-m" aria-labelledby="footer-social-title">
             {SOCIALS.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
           </ul>
@@ -54,7 +53,6 @@ const steps = [
         </ul>
         <p>© 2026 Скоуп</p>
       </div>
-      <Wordmark />
     </div>
   </div>
 </footer>
@@ -96,6 +94,7 @@ const steps = [
     display: flex;
     flex-direction: column;
     gap: 132px;
+    padding-bottom: var(--space-24);
   }
 
   .footer__columns {

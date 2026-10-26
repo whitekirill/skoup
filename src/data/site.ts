@@ -32,10 +32,9 @@ export const POSTS = [
 
 // TODO: реальные ссылки на соцсети и юридические страницы
 export const SOCIALS = [
+  { label: 'VC', href: '#' },
   { label: 'Telegram', href: '#' },
-  { label: 'ВКонтакте', href: '#' },
-  { label: 'Behance', href: '#' },
-  { label: 'Dribbble', href: '#' },
+  { label: 'Designers', href: '#' },
 ] as const;
 
 export const LEGAL = [
