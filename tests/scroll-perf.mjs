@@ -26,7 +26,7 @@ await p.evaluate(() => {
   requestAnimationFrame(tick);
   new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__loaf.push({ y: Math.round(scrollY), dur: Math.round(e.duration), render: Math.round(e.renderStart ? e.startTime + e.duration - e.renderStart : 0), style: Math.round(e.styleAndLayoutStart ? e.startTime + e.duration - e.styleAndLayoutStart : 0), scripts: e.scripts.map((sc) => `${sc.invoker} ${Math.round(sc.duration)}ms ${sc.sourceURL.split('/').pop()}`) }); }).observe({ type: 'long-animation-frame', buffered: false });
 });
-await p.mouse.move(700, 450);
+await p.mouse.move(200, 450); // слева от иллюстрации: замер именно скролла (наведение во время скролла — tests/hero-scroll.mjs)
 for (let i = 0; i < 90; i++) { await p.mouse.wheel(0, 120); await p.waitForTimeout(60); }
 await p.waitForTimeout(1500);
 const r = await p.evaluate(() => ({ frames: window.__frames, loaf: window.__loaf }));

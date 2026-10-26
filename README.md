@@ -27,7 +27,7 @@ node tests/compare.mjs mobile 0 934
 
 Бриф: `node tests/brief-visual.mjs` — скриншоты формы и экрана успеха на 1440/393 против Figma; `node tests/brief-flow.mjs` — сценарии из ТЗ; `node tests/brief-perf.mjs` — плавность открытия/закрытия (CPU ×4, видимая полоса прокрутки) (валидация, файлы, отправка, Esc/«Назад», `/#brief`, клавиатура). Адрес отправки — env `PUBLIC_BRIEF_ENDPOINT`, без него мок.
 
-Плавность скролла (долгие кадры при прокрутке, CPU ×4): `node tests/scroll-perf.mjs`.
+Плавность скролла (долгие кадры при прокрутке, CPU ×4): `node tests/scroll-perf.mjs`. Иллюстрация первого экрана под курсором во время скролла: `node tests/hero-scroll.mjs`.
 
 Свой ползунок прокрутки (появление/скрытие, перетаскивание, клик по дорожке, бриф, reduced motion): `node tests/scrollbar.mjs`.
 

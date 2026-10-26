@@ -189,6 +189,9 @@ export function mountHeroArt(canvas: HTMLCanvasElement, data: HeroDots, kind: Ki
 
   // --- ввод: координаты в единицах SVG
   const ptr = { x: 0, y: 0, px: 0, py: 0, on: false, amt: 0, lastT: 0 };
+  // мышь: последние координаты в окне (null — вне окна). Попадание в иллюстрацию считается
+  // в каждом кадре — колесо двигает страницу под неподвижным курсором без pointermove
+  let mouse: { x: number; y: number } | null = null;
   const trail = new Float32Array(TRAIL * 4); // x, y, время, сила
   let trailHead = 0;
   const waves = new Float32Array(WAVES * 3); // x, y, время (−1 — свободна)
@@ -210,20 +213,26 @@ export function mountHeroArt(canvas: HTMLCanvasElement, data: HeroDots, kind: Ki
     waves[waveHead * 3 + 2] = clock;
     waveHead = (waveHead + 1) % WAVES;
   };
-  const onMove = (e: PointerEvent) => {
-    const p = toLocal(e);
-    if (!p) { ptr.on = false; return; }
-    if (!ptr.on) enter(p[0], p[1]);
+  const point = (p: number[] | null) => {
+    if (!p) ptr.on = false;
+    else if (!ptr.on) enter(p[0], p[1]);
     else { ptr.x = p[0]; ptr.y = p[1]; }
   };
-  const onDown = (e: PointerEvent) => { if (e.pointerType !== 'mouse') onMove(e); };
+  const onMouse = (e: PointerEvent) => {
+    if (e.pointerType === 'mouse') mouse = { x: e.clientX, y: e.clientY };
+  };
+  const onMouseOut = (e: PointerEvent) => {
+    if (e.pointerType === 'mouse' && !e.relatedTarget) mouse = null; // ушла за пределы окна
+  };
+  // касание: только пока палец на иллюстрации
+  const onMove = (e: PointerEvent) => { if (e.pointerType !== 'mouse') point(toLocal(e)); };
   const onUp = (e: PointerEvent) => { if (e.pointerType !== 'mouse') ptr.on = false; };
-  const onLeave = () => { ptr.on = false; };
+  addEventListener('pointermove', onMouse, { passive: true });
+  document.addEventListener('pointerout', onMouseOut, { passive: true });
   target.addEventListener('pointermove', onMove, { passive: true });
-  target.addEventListener('pointerdown', onDown, { passive: true });
+  target.addEventListener('pointerdown', onMove, { passive: true });
   target.addEventListener('pointerup', onUp, { passive: true });
-  target.addEventListener('pointercancel', onLeave, { passive: true });
-  target.addEventListener('pointerleave', onLeave, { passive: true });
+  target.addEventListener('pointercancel', onUp, { passive: true });
 
   const onContextLost = (e: Event) => { e.preventDefault(); stop(); onLost(); };
   canvas.addEventListener('webglcontextlost', onContextLost);
@@ -231,6 +240,24 @@ export function mountHeroArt(canvas: HTMLCanvasElement, data: HeroDots, kind: Ki
   // --- кадр
   let start = -1, last = 0, raf = 0, running = false, pausedAt = 0;
   const R = () => cfg.radius / scale;
+  let mouseWas = false;
+  const followMouse = () => {
+    if (mouse) point(toLocal({ clientX: mouse.x, clientY: mouse.y } as PointerEvent));
+    else if (mouseWas) ptr.on = false;
+    mouseWas = !!mouse;
+  };
+  // курсор рядом с точками (в радиусе разлёта) — а не над пустой частью холста или заголовком
+  const nearDots = () => {
+    if (!ptr.on) return false;
+    const r = R() * 1.2, r2 = r * r;
+    for (let i = 0; i < n; i++) {
+      const dx = X0[i] - ptr.x, dy = Y0[i] - ptr.y;
+      if (dx * dx + dy * dy < r2) return true;
+    }
+    return false;
+  };
+  // энергия пружин в прошлом кадре — пока точки не успокоились, иллюстрация «занята»
+  let energy = 0;
 
   function frame(now: number) {
     if (start < 0) start = now;
@@ -271,6 +298,7 @@ export function mountHeroArt(canvas: HTMLCanvasElement, data: HeroDots, kind: Ki
     const hOn = 1 - Math.exp(-dt / 0.12), hOff = Math.exp(-dt / 0.27);
     const tintFar = 450 / scale;
 
+    energy = 0;
     for (let i = 0; i < n; i++) {
       const coin = coins[CO[i]];
       const q = easeOut(clamp01((coin.local - DL[i]) / (ASSEMBLE.duration - ASSEMBLE.dotDelay)));
@@ -317,6 +345,7 @@ export function mountHeroArt(canvas: HTMLCanvasElement, data: HeroDots, kind: Ki
         if (e * 0.6 > heat) heat = e * 0.6;
       }
 
+      energy += Math.abs(VX[i]) + Math.abs(VY[i]) + Math.abs(SV[i]) * 40;
       // пружины смещения и размера
       VX[i] += (SPRING.k * (tx - OX[i]) - SPRING.c * VX[i]) * dt;
       VY[i] += (SPRING.k * (ty - OY[i]) - SPRING.c * VY[i]) * dt;
@@ -370,9 +399,10 @@ export function mountHeroArt(canvas: HTMLCanvasElement, data: HeroDots, kind: Ki
     gl!.drawArraysInstanced(gl!.TRIANGLE_STRIP, 0, 4, n);
   }
 
-  // Пока страница прокручивается, иллюстрацию не перерисовываем: GPU отдаём скроллу, кадр
-  // держится последний. Через SCROLL_IDLE мс после остановки анимация продолжается с того же места.
-  // Сборку при загрузке не прерываем.
+  // Пока страница прокручивается, спокойную иллюстрацию не перерисовываем: GPU отдаём скроллу,
+  // кадр держится последний. Через SCROLL_IDLE мс после остановки анимация продолжается с того же
+  // места. Если курсор над иллюстрацией или точки ещё не вернулись на место — рисуем как обычно,
+  // иначе разлёт застывает на полпути. Сборку при загрузке не прерываем.
   let scrollIdleAt = 0, frozenAt = 0;
   const onScroll = () => { scrollIdleAt = performance.now() + SCROLL_IDLE; };
   addEventListener('scroll', onScroll, { passive: true });
@@ -381,8 +411,10 @@ export function mountHeroArt(canvas: HTMLCanvasElement, data: HeroDots, kind: Ki
   let probed = 0, slow = 0;
   function loop(now: number) {
     const assembled = start >= 0 && now - start > ASSEMBLE.stagger * coins.length + ASSEMBLE.duration;
+    followMouse();
+    const hold = now < scrollIdleAt && !(energy > n * 0.05 || nearDots());
     // под открытым брифом иллюстрацию не видно — не рисуем
-    if (assembled && (now < scrollIdleAt || document.documentElement.classList.contains('is-brief-open'))) {
+    if (assembled && (hold || document.documentElement.classList.contains('is-brief-open'))) {
       if (!frozenAt) frozenAt = now;
       raf = requestAnimationFrame(loop);
       return;
@@ -423,11 +455,12 @@ export function mountHeroArt(canvas: HTMLCanvasElement, data: HeroDots, kind: Ki
     pause();
     io.disconnect();
     ro.disconnect();
+    removeEventListener('pointermove', onMouse);
+    document.removeEventListener('pointerout', onMouseOut);
     target.removeEventListener('pointermove', onMove);
-    target.removeEventListener('pointerdown', onDown);
+    target.removeEventListener('pointerdown', onMove);
     target.removeEventListener('pointerup', onUp);
-    target.removeEventListener('pointercancel', onLeave);
-    target.removeEventListener('pointerleave', onLeave);
+    target.removeEventListener('pointercancel', onUp);
     canvas.removeEventListener('webglcontextlost', onContextLost);
     removeEventListener('scroll', onScroll);
   }
