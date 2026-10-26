@@ -13,7 +13,8 @@
     "test:visual": "node tests/compare.mjs desktop && node tests/compare.mjs mobile"
   },
   "dependencies": {
-    "astro": "7.3.8"
+    "astro": "7.3.8",
+    "lenis": "1.3.27"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",

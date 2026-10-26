@@ -85,6 +85,13 @@ button {
   padding-inline: var(--container-pad);
 }
 
+/* Без JS якоря всё равно прокручиваются плавно; с Lenis (html.lenis) скролл ведёт он сам */
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.lenis) {
+    scroll-behavior: smooth;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
