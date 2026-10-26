@@ -1,41 +1,27 @@
 // Данные страницы «О нас» (Figma: desktop 524:28926, mobile 536:3431)
 
-/** Плашка качества: центр (cx, cy) в px макета от левого верхнего угла зоны и угол в знаке CSS */
-export interface QualitySpot {
-  cx: number;
-  cy: number;
-  rotate: number;
+export interface Shot {
+  /** файл в src/assets/about/shots/ */
+  file: string;
+  /** размер в макете, px (лента 542:33345, высоты 400 / 372 / 289 / 197) */
+  width: number;
+  height: number;
+  alt: string;
 }
 
-export interface Quality {
-  label: string;
-  /** зона 1440×274 */
-  desktop: QualitySpot;
-  /** зона 393×504 */
-  mobile: QualitySpot;
-}
-
-/** Зоны кучи плашек в пространстве макета */
-export const PILE = {
-  desktop: { width: 1440, height: 274 },
-  mobile: { width: 393, height: 504 },
-} as const;
-
-// Порядок — как в таблице desktop: снизу вверх, слева направо. Финальные позиции — ровно из макета
-export const QUALITIES: Quality[] = [
-  { label: 'Экспертиза', desktop: { cx: 91, cy: 236, rotate: 0 }, mobile: { cx: 64, cy: 335, rotate: 0 } },
-  { label: 'Въедливые', desktop: { cx: 372, cy: 236, rotate: 0 }, mobile: { cx: 333, cy: 466, rotate: -3 } },
-  { label: 'Партнёрство', desktop: { cx: 621, cy: 236, rotate: 0 }, mobile: { cx: 73, cy: 143, rotate: -18 } },
-  { label: 'Результат', desktop: { cx: 872, cy: 236, rotate: 0 }, mobile: { cx: 99, cy: 403, rotate: 0 } },
-  { label: 'Ответственность', desktop: { cx: 1203, cy: 236, rotate: 0 }, mobile: { cx: 115, cy: 267, rotate: 0 } },
-  { label: 'Вдумчивые', desktop: { cx: 198, cy: 152, rotate: 0 }, mobile: { cx: 334, cy: 186, rotate: -3 } },
-  { label: 'Вкус', desktop: { cx: 560, cy: 152, rotate: 0 }, mobile: { cx: 32, cy: 471, rotate: 0 } },
-  { label: 'Аккуратные', desktop: { cx: 898, cy: 152, rotate: 0 }, mobile: { cx: 328, cy: 254, rotate: -3 } },
-  { label: 'Быстрые', desktop: { cx: 1156, cy: 152, rotate: 0 }, mobile: { cx: 269, cy: 49, rotate: -5 } },
-  { label: 'Открытые', desktop: { cx: 1376, cy: 155, rotate: 8 }, mobile: { cx: 333, cy: 399, rotate: -3 } },
-  { label: 'Данные', desktop: { cx: 63, cy: 78, rotate: -18 }, mobile: { cx: 178, cy: 471, rotate: 0 } },
-  { label: 'Регуляторика', desktop: { cx: 433, cy: 83, rotate: -12 }, mobile: { cx: 93, cy: 59, rotate: -12 } },
-  { label: 'Финтех', desktop: { cx: 665, cy: 78, rotate: 12 }, mobile: { cx: 176, cy: 199, rotate: 0 } },
-  { label: 'Аналитика', desktop: { cx: 919, cy: 68, rotate: 4.6 }, mobile: { cx: 272, cy: 332, rotate: -8 } },
-  { label: 'Предсказуемые', desktop: { cx: 1267, cy: 53, rotate: -6.4 }, mobile: { cx: 302, cy: 117, rotate: -3 } },
+// Шоты из кейсов в ленте «Почему мы» — в порядке макета. Картинки — рендер кадров Figma в 2x
+export const SHOTS: Shot[] = [
+  { file: 'shot-01.png', width: 299.13, height: 400, alt: 'Uzum: карта и микрозайм в мобильном приложении' },
+  { file: 'shot-02.png', width: 312.97, height: 288.7, alt: 'Uzum: банкомат с предложением рассрочки' },
+  { file: 'shot-03.png', width: 340.73, height: 372, alt: 'Рассрочка: график платежей в приложении' },
+  { file: 'shot-04.png', width: 365.69, height: 197.49, alt: 'Кредитная линия: нет долга и предложение беспроцентного займа' },
+  { file: 'shot-05.png', width: 264.44, height: 288.7, alt: 'Рассрочка: выбор суммы платежа и график' },
+  { file: 'shot-06.png', width: 273.64, height: 400, alt: 'Round: заявка на кредит для бизнеса в мобильном приложении' },
+  { file: 'shot-07.png', width: 365.69, height: 400, alt: 'Uzum: карта банкоматов и выбор суммы' },
+  { file: 'shot-08.png', width: 365.69, height: 197.49, alt: 'Uzum: карта Visa с беспроцентным периодом' },
+  { file: 'shot-09.png', width: 457.74, height: 400, alt: 'Round: кабинет бизнеса с предодобренным кредитом' },
+  { file: 'shot-10.png', width: 533.89, height: 288.7, alt: 'Round: выбор суммы и срока кредита' },
+  { file: 'shot-11.png', width: 365.69, height: 197.49, alt: 'Рассрочка: карточки товаров' },
+  { file: 'shot-12.png', width: 365.69, height: 400, alt: 'Выбор карты для оплаты в приложении' },
+  { file: 'shot-13.png', width: 313.81, height: 288.7, alt: 'Kilde: дашборд инвестора' },
 ];

@@ -67,7 +67,10 @@ const clients = [
 
   /* Заголовок отдаёт место колонке фактов, но не уже самого длинного слова */
   /* в макете слова — блоки с зазором gap-3xs (см. WhyUs) */
+  /* Заголовок закреплён, пока рядом прокручиваются карточки фактов, и уходит вместе с концом блока */
   .intro__title {
+    position: sticky;
+    top: var(--layout-section-padding);
     word-spacing: calc(var(--gap-3xs) - 0.2em - 2.25 * var(--typography-h1-letter-spacing));
     flex: 1 1 0;
     min-width: min-content;
@@ -137,6 +140,7 @@ const clients = [
     }
 
     .intro__title {
+      position: static;
       flex: none;
       min-width: 0;
     }

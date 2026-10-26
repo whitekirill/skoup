@@ -1,17 +1,34 @@
 ---
 /**
  * «Почему мы» (Figma: desktop 524:29099, mobile 536:3480).
- * Абзац H2 обычным текстом с халфтон-иконками в строке (лупа, молния) — переносится на любой ширине.
- * Абзац заливается по словам вместе со скроллом. Внизу — 15 качеств моноширинными словами на местах плашек
- * из макета (зона 535:30985 / 536:3691): позиции заданы в CSS, скрипт src/scripts/quality-pile.ts роняет их
- * из-за верхнего края окна, даёт потаскать и рассыпает слово в халфтон при наведении.
+ * Абзац H2 обычным текстом с халфтон-иконками в строке (лупа, молния) — переносится на любой ширине,
+ * заливается по словам вместе со скроллом. Под ним — лента шотов из кейсов (542:33345): едет влево вместе
+ * со скроллом, шоты с разной высотой — с лёгким параллаксом, при резком скролле лента растягивается
+ * и пружиной собирается (src/scripts/shots-drift.ts).
  */
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import loupe from '../../assets/about/loupe.svg?url';
 import bolt from '../../assets/about/bolt.svg?url';
-import { PILE, QUALITIES } from '../../data/about';
+import { SHOTS } from '../../data/about';
 
-const spot = (prefix: string, s: { cx: number; cy: number; rotate: number }) =>
-  `--${prefix}x: ${s.cx}px; --${prefix}y: ${s.cy}px; --${prefix}r: ${s.rotate}deg;`;
+const files = import.meta.glob<{ default: ImageMetadata }>('../../assets/about/shots/*.png', { eager: true });
+const shots = await Promise.all(
+  SHOTS.map(async (shot) => {
+    const src = files[`../../assets/about/shots/${shot.file}`].default;
+    // 1x и 2x от размера в макете; мобильная лента меньше — браузер возьмёт 1x
+    const widths = [Math.round(shot.width), Math.round(shot.width * 2)];
+    const build = (format: 'avif' | 'webp') =>
+      Promise.all(widths.map((width) => getImage({ src, width, format }))).then((images) =>
+        images.map((image, i) => `${image.src} ${widths[i]}w`).join(', '),
+      );
+    const [avif, webp] = await Promise.all([build('avif'), build('webp')]);
+    const fallback = await getImage({ src, width: widths[0], format: 'webp' });
+    // на мобильном лента — 0.7 от макета (см. --u ниже)
+    const sizes = `(max-width: 767px) ${Math.round(shot.width * 0.7)}px, ${Math.round(shot.width)}px`;
+    return { ...shot, avif, webp, sizes, fallback: fallback.src };
+  }),
+);
 ---
 
 <section class="why" aria-labelledby="why-title">
@@ -24,43 +41,38 @@ const spot = (prefix: string, s: { cx: number; cy: number; rotate: number }) =>
     </p>
   </div>
 
-  <div class="pile" data-pile>
-    <div class="pile__box">
-      <ul
-        class="pile__stage"
-        aria-label="Наши качества"
-        style={`--pile-dw: ${PILE.desktop.width}px; --pile-dh: ${PILE.desktop.height}px; --pile-mw: ${PILE.mobile.width}px; --pile-mh: ${PILE.mobile.height}px;`}
-      >
-        {QUALITIES.map((q) => <li class="pile__item" style={spot('d', q.desktop) + spot('m', q.mobile)}><span class="pile__text">{q.label}</span></li>)}
-      </ul>
-    </div>
+  <div class="shots" data-shots>
+    <ul class="shots__track" aria-label="Шоты из кейсов">
+      {
+        shots.map((shot) => (
+          <li class="shots__item" style={`--w: ${shot.width}; --h: ${shot.height};`}>
+            <picture>
+              <source type="image/avif" srcset={shot.avif} sizes={shot.sizes} />
+              <source type="image/webp" srcset={shot.webp} sizes={shot.sizes} />
+              <img src={shot.fallback} alt={shot.alt} width={Math.round(shot.width)} height={Math.round(shot.height)} loading="lazy" decoding="async" />
+            </picture>
+          </li>
+        ))
+      }
+    </ul>
   </div>
 </section>
 
-<!-- До первой отрисовки: слова качеств прячем, скрипт роняет их, когда зона появится. Место под зону уже занято -->
-<script is:inline>
-  document.documentElement.classList.add('pile-wait');
-  // если скрипт анимации так и не запустился — показываем слова на местах
-  setTimeout(() => window.__pileArmed || document.documentElement.classList.remove('pile-wait'), 4000);
-</script>
-
 <script>
-  import { mountQualityPile } from '../../scripts/quality-pile';
   import { mountScrollFill } from '../../scripts/scroll-fill';
-  mountQualityPile();
+  import { mountShotsDrift } from '../../scripts/shots-drift';
   const text = document.querySelector<HTMLElement>('.why__text');
   if (text) mountScrollFill(text);
+  const shots = document.querySelector<HTMLElement>('[data-shots]');
+  if (shots) mountShotsDrift(shots);
 </script>
 
 <style>
   .why {
-    padding-top: var(--layout-section-padding);
+    padding-block: var(--layout-section-padding);
   }
 
-  /* падающие слова пролетают за абзацем, а не поверх него */
   .why__head {
-    position: relative;
-    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -156,103 +168,50 @@ const spot = (prefix: string, s: { cx: number; cy: number; rotate: number }) =>
   }
 
   /*
-   * Куча качеств рисуется в пространстве макета (1440×274) и масштабируется целиком под ширину экрана:
-   * --s = ширина / 1440 (tan(atan2()) делит длины без единиц). Уже 792 (scale < 0.55) — мобильная зона 393×504.
-   * По бокам обрезаем, сверху — нет: слова падают из-за верхнего края зоны.
+   * Лента шотов: от левого поля страницы до правого края окна и дальше (обрезается).
+   * Размеры шотов — из макета (px) × --u: 1 px на 1440, к 393 — 0.7 px (мобильной ленты в макете пока нет).
+   * Между шотами — 2/3 от space-32 (32 × 2/3 px), как в макете: лента там уменьшена до 2/3.
    */
-  .pile {
-    container-type: inline-size;
-    margin-top: calc(var(--layout-section-padding) * 1.5);
+  .shots {
+    --u: clamp(0.7px, 0.5874px + 0.02865vw, 1px);
+    margin-top: calc(var(--layout-section-padding) + var(--space-44));
+    padding-left: var(--container-pad);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .shots::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* лентой управляет скрипт — своей прокрутки нет */
+  .shots:global(.is-drifting) {
     overflow-x: clip;
   }
 
-  .pile__box {
-    --w: var(--pile-dw, 1440px);
-    --h: var(--pile-dh, 274px);
-    --s: 1;
-    position: relative;
-    height: calc(var(--h) * var(--s));
+  .shots__track {
+    display: flex;
+    align-items: flex-start;
+    gap: calc(32 * 2 / 3 * var(--u));
+    width: max-content;
+    padding-right: var(--container-pad);
   }
 
-  @supports (width: calc(tan(atan2(1px, 1px)) * 1px)) {
-    .pile__box {
-      --s: tan(atan2(100cqw, var(--w)));
-    }
+  .shots__item {
+    flex: none;
+    width: calc(var(--w) * var(--u));
+    height: calc(var(--h) * var(--u));
   }
 
-  .pile__stage {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: var(--w);
-    height: var(--h);
-    transform: scale(var(--s));
-    transform-origin: 0 0;
-  }
-
-  /*
-   * Качество — моноширинное слово (Geist Mono, верхний регистр, как другие моно-стили сайта) в месте плашки
-   * из макета: кегль H3 макета на брейкпоинте зоны, межбуквенный — Button/XL. При наведении слово
-   * рассыпается в халфтон (canvas поверх, src/scripts/quality-pile.ts).
-   */
-  .pile__item {
-    --x: var(--dx);
-    --y: var(--dy);
-    --r: var(--dr);
-    position: absolute;
-    top: var(--y);
-    left: var(--x);
-    color: var(--color-text-secondary);
-    font-family: var(--typography-family-mono);
-    font-size: 32px;
-    line-height: 44px;
-    letter-spacing: 0.65px;
-    text-transform: uppercase;
-    white-space: nowrap;
-    transform: translate(-50%, -50%) rotate(var(--r));
-    user-select: none;
-  }
-
-  .pile__text {
-    display: block;
-  }
-
-  /* халфтон-слой поверх слова; сам текст на время эффекта гаснет */
-  .pile__item :global(.pile__dots) {
-    position: absolute;
-    inset: 0;
+  .shots__item img {
     width: 100%;
     height: 100%;
-    pointer-events: none;
-  }
-
-  :global(html.pile-wait) .pile__item {
-    opacity: 0;
-  }
-
-  @media (max-width: 791px) {
-    .pile__box {
-      --w: var(--pile-mw, 393px);
-      --h: var(--pile-mh, 504px);
-    }
-
-    .pile__item {
-      --x: var(--mx);
-      --y: var(--my);
-      --r: var(--mr);
-      font-size: 24px;
-      line-height: 30px;
-      letter-spacing: 0.5px;
-    }
+    object-fit: cover;
   }
 
   @media (max-width: 767px) {
     .why__head {
       gap: var(--space-32);
-    }
-
-    .pile {
-      margin-top: var(--gap-xl);
     }
   }
 </style>
