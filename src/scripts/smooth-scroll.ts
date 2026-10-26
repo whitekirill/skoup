@@ -20,9 +20,10 @@ function stop() {
   lenis = null;
 }
 
-// Открытое мобильное меню (html.is-menu-open) — страницу под ним не крутим
+// Открытое мобильное меню или бриф — страницу под ними не крутим
+const overlayOpen = () => root.classList.contains('is-menu-open') || root.classList.contains('is-brief-open');
 new MutationObserver(() => {
-  if (root.classList.contains('is-menu-open')) lenis?.stop();
+  if (overlayOpen()) lenis?.stop();
   else lenis?.start();
 }).observe(root, { attributes: true, attributeFilter: ['class'] });
 
@@ -41,9 +42,9 @@ document.addEventListener('click', (event) => {
     const y = target.getBoundingClientRect().top + scrollY - parseFloat(getComputedStyle(target).scrollMarginTop || '0');
     lenis?.scrollTo(y, { duration: 1.2, easing });
   };
-  // Меню закрывается своим обработчиком раньше, а html.is-menu-open снимается по событию close
-  const menu = link!.closest('dialog');
-  if (menu && root.classList.contains('is-menu-open')) menu.addEventListener('close', () => requestAnimationFrame(go), { once: true });
+  // Меню/бриф закрываются своим обработчиком раньше, а класс на html снимается по событию close
+  const overlay = link!.closest('dialog');
+  if (overlay && overlayOpen()) overlay.addEventListener('close', () => requestAnimationFrame(go), { once: true });
   else go();
 });
 

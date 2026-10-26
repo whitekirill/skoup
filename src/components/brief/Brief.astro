@@ -1,0 +1,531 @@
+---
+/**
+ * Бриф — полноэкранный оверлей поверх главной (Figma: desktop 451:5845, mobile 497:3898,
+ * успех 490:3907 / 514:5507). Открывается по CTA с data-brief-open и по /#brief.
+ * Desktop — две колонки (заголовок секции слева, поля справа), Mobile — одна.
+ */
+import Button from '../Button.astro';
+import Footer from '../Footer.astro';
+import Field from './Field.astro';
+import Chip from './Chip.astro';
+import FileUpload from './FileUpload.astro';
+import CloseIcon from '../../assets/icons/close.svg';
+import SendIcon from '../../assets/icons/send-plane.svg';
+import MailIcon from '../../assets/icons/mail.svg';
+import DownloadIcon from '../../assets/icons/download-2.svg';
+import letter from '../../assets/brief/letter.svg?url';
+import { EMAIL, LEGAL } from '../../data/site';
+import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/brief';
+---
+
+<dialog class="brief" id="brief" aria-labelledby="brief-title" data-brief>
+  <div class="brief__main">
+    <div class="brief__bar">
+      <Button variant="secondary" class="brief__close" aria-label="Закрыть бриф" data-brief-close>
+        <CloseIcon slot="icon" />
+      </Button>
+    </div>
+
+    <!-- Форма -->
+    <div class="brief__view" data-brief-view="form">
+      <h2 class="brief__title t-h2 brief__reveal" id="brief-title" style="--i: 0" tabindex="-1">
+        Расскажите о&nbsp;проекте<br />
+        <span class="brief__muted">
+          или напишите нам в{' '}
+          <a class="brief__contact brief__contact--tg" href={TELEGRAM_URL} target="_blank" rel="noopener">
+            <SendIcon aria-hidden="true" /><span>telegram</span>
+          </a>{' '}
+          <br class="brief__br-desktop" />или на{' '}
+          <a class="brief__contact brief__contact--mail" href={`mailto:${EMAIL}`}>
+            <MailIcon aria-hidden="true" /><span>{EMAIL}</span>
+          </a>
+        </span>
+      </h2>
+
+      <form class="brief__form" novalidate data-brief-form>
+        <section class="brief__section brief__reveal" style="--i: 1" aria-labelledby="brief-about">
+          <h3 class="brief__heading t-h3" id="brief-about">О вас</h3>
+          <div class="brief__content brief__fields">
+            <Field name="name" label="Имя" autocomplete="name" required />
+            <Field name="company" label="Компания" autocomplete="organization" required />
+            <Field name="contact" label="Email или другой контакт" autocomplete="email" required />
+            <Field name="phone" label="Телефон" type="tel" autocomplete="tel" inputmode="tel" required />
+          </div>
+        </section>
+
+        <section class="brief__section brief__reveal" style="--i: 2" aria-labelledby="brief-project">
+          <h3 class="brief__heading t-h3" id="brief-project">О проекте</h3>
+          <div class="brief__content brief__fields">
+            <fieldset class="brief__group" data-group="services" aria-describedby="brief-services-error">
+              <legend class="brief__legend t-body-m">Какие услуги вас интересуют?</legend>
+              <div class="brief__chips">
+                {SERVICES.map((service) => <Chip type="checkbox" name="services" value={service} />)}
+              </div>
+              <p class="brief__group-error t-body-s" id="brief-services-error" hidden></p>
+            </fieldset>
+            <div class="brief__task">
+              <Field name="task" label="Опишите задачу" multiline />
+              <FileUpload />
+            </div>
+          </div>
+        </section>
+
+        <section class="brief__section brief__reveal" style="--i: 3" aria-labelledby="brief-budget">
+          <h3 class="brief__heading t-h3" id="brief-budget">Бюджет</h3>
+          <div class="brief__content">
+            <fieldset class="brief__group" data-group="budget" aria-describedby="brief-budget-error">
+              <legend class="visually-hidden">Бюджет</legend>
+              <div class="brief__chips">
+                {BUDGETS.map((budget) => <Chip type="radio" name="budget" value={budget} />)}
+              </div>
+              <p class="brief__group-error t-body-s" id="brief-budget-error" hidden></p>
+            </fieldset>
+          </div>
+        </section>
+
+        <div class="brief__section brief__reveal" style="--i: 4">
+          <div class="brief__content brief__submit">
+            <div class="brief__send">
+              <Button variant="primary" type="submit" class="brief__button" data-brief-submit>Отправить заявку</Button>
+              <p class="brief__send-error t-body-s" role="alert" data-brief-send-error></p>
+            </div>
+            <p class="brief__consent t-body-m">
+              Нажимая на кнопку, вы даёте согласие на <a href={LEGAL[0].href}>обработку персональных данных</a><br />
+              и соглашаетесь с <a href={LEGAL[0].href}>политикой конфиденциальности</a>.
+            </p>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Экран успеха -->
+    <div class="brief__view brief__success" data-brief-view="success" hidden>
+      <div class="brief__success-message">
+        <img class="brief__letter" src={letter} alt="" width="132" height="132" />
+        <div class="brief__success-text">
+          <h2 class="t-h2" tabindex="-1" data-brief-success-title>
+            Спасибо!<br />Заявка отправлена,<br />скоро свяжемся с&nbsp;вами
+          </h2>
+          <p class="brief__success-note t-body-m">
+            Изучим бриф, при необходимости уточним детали<br class="brief__br-desktop" /> и предложим время для звонка.
+          </p>
+        </div>
+      </div>
+      <div class="brief__success-actions">
+        <Button variant="primary" href={PRESENTATION_URL} download>
+          Скачать презентацию
+          <DownloadIcon slot="icon" />
+        </Button>
+        <Button variant="secondary" data-brief-close>На главную</Button>
+      </div>
+    </div>
+  </div>
+
+  <Footer compact />
+</dialog>
+
+<script>
+  import '../../scripts/brief/index';
+</script>
+
+<style is:global>
+  /* Пока бриф открыт: страница под ним не прокручивается, чуть уменьшается; шапка и sticky CTA гаснут */
+  html.is-brief-open {
+    overflow: hidden;
+  }
+
+  html.is-brief-open .header,
+  html.is-brief-open .sticky-cta {
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .page > main,
+    .page > footer {
+      transition: scale 700ms cubic-bezier(0.76, 0, 0.24, 1);
+    }
+
+    html.is-brief-open .page > main,
+    html.is-brief-open .page > footer {
+      scale: 0.96;
+    }
+  }
+</style>
+
+<style>
+  /* Панель на весь экран: выезжает снизу; содержимое прокручивается внутри */
+  .brief {
+    --brief-ease: cubic-bezier(0.76, 0, 0.24, 1);
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--color-surface-primary);
+    color: var(--color-text-primary);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .brief[open] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* панель фиксированной высоты — содержимое не сжимаем, оно прокручивается */
+  .brief > :global(*) {
+    flex-shrink: 0;
+  }
+
+  .brief::backdrop {
+    background: color-mix(in srgb, var(--color-surface-primary-inversion) 40%, transparent);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .brief {
+      translate: 0 100%;
+      transition:
+        translate 700ms var(--brief-ease),
+        display 700ms allow-discrete,
+        overlay 700ms allow-discrete;
+    }
+
+    .brief[open] {
+      translate: 0 0;
+    }
+
+    @starting-style {
+      .brief[open] {
+        translate: 0 100%;
+      }
+    }
+
+    .brief::backdrop {
+      opacity: 0;
+      transition:
+        opacity 700ms var(--brief-ease),
+        display 700ms allow-discrete,
+        overlay 700ms allow-discrete;
+    }
+
+    .brief[open]::backdrop {
+      opacity: 1;
+    }
+
+    @starting-style {
+      .brief[open]::backdrop {
+        opacity: 0;
+      }
+    }
+
+    /* Контент — лесенкой: заголовок → секции → кнопка, шаг 60 мс, после того как панель почти доехала */
+    .brief__reveal {
+      opacity: 0;
+      translate: 0 24px;
+    }
+
+    .brief[open] .brief__reveal {
+      opacity: 1;
+      translate: 0 0;
+      transition:
+        opacity 500ms cubic-bezier(0.2, 0, 0, 1),
+        translate 500ms cubic-bezier(0.2, 0, 0, 1);
+      transition-delay: calc(350ms + var(--i, 0) * 60ms);
+    }
+
+    @starting-style {
+      .brief[open] .brief__reveal {
+        opacity: 0;
+        translate: 0 24px;
+      }
+    }
+  }
+
+  /* reduced motion — простой fade 200 мс */
+  @media (prefers-reduced-motion: reduce) {
+    .brief,
+    .brief::backdrop {
+      opacity: 0;
+      transition:
+        opacity 200ms ease-out,
+        display 200ms allow-discrete,
+        overlay 200ms allow-discrete;
+    }
+
+    .brief[open],
+    .brief[open]::backdrop {
+      opacity: 1;
+    }
+
+    @starting-style {
+      .brief[open],
+      .brief[open]::backdrop {
+        opacity: 0;
+      }
+    }
+  }
+
+  .brief__main {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-l);
+    padding: var(--layout-page-padding) var(--container-pad) var(--layout-section-padding);
+  }
+
+  /* × — справа вверху, в строке заголовка (desktop) */
+  .brief__bar {
+    position: absolute;
+    top: var(--layout-page-padding);
+    right: var(--container-pad);
+    z-index: 1;
+  }
+
+  .brief__view {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-l);
+  }
+
+  .brief__view[hidden] {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .brief__view {
+      transition: opacity 300ms ease-out;
+    }
+
+    .brief__view.is-leaving {
+      opacity: 0;
+    }
+
+    @starting-style {
+      .brief__view {
+        opacity: 0;
+      }
+    }
+  }
+
+  /* Заголовок: слова через фиксированный зазор gap-4xs, как в макете */
+  .brief__title {
+    max-width: calc(782 / 1352 * 100%);
+    word-spacing: calc(var(--gap-4xs) - 0.2em - 2.25 * var(--typography-h2-letter-spacing));
+    outline: none;
+  }
+
+  .brief__muted {
+    color: var(--color-text-secondary);
+  }
+
+  .brief__contact {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-12);
+    color: var(--color-text-secondary);
+    word-spacing: normal;
+    vertical-align: top;
+    transition: color 200ms ease-out;
+  }
+
+  .brief__contact span {
+    text-decoration: underline;
+    text-decoration-thickness: 8.5%;
+    text-underline-offset: from-font;
+  }
+
+  .brief__contact :global(svg) {
+    flex-shrink: 0;
+    width: calc(var(--typography-h2-size) - 4px);
+    height: calc(var(--typography-h2-size) - 4px);
+  }
+
+  @media (hover: hover) {
+    .brief__contact--tg:hover {
+      color: var(--color-text-accent-2);
+    }
+
+    .brief__contact--mail:hover {
+      color: var(--color-text-accent-1);
+    }
+  }
+
+  .brief__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-l);
+  }
+
+  /* Секция: заголовок 440 слева, поля 782 справа */
+  .brief__section {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--gap-xs);
+  }
+
+  .brief__heading {
+    width: calc(440 / 1352 * 100%);
+  }
+
+  .brief__content {
+    width: calc(782 / 1352 * 100%);
+    margin-left: auto;
+  }
+
+  .brief__fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--layout-page-padding);
+  }
+
+  .brief__group {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .brief__legend {
+    margin-bottom: var(--gap-s);
+    padding: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .brief__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-12);
+  }
+
+  .brief__group-error {
+    margin-top: var(--gap-4xs);
+    color: var(--color-text-error);
+  }
+
+  .brief__task {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-32);
+  }
+
+  .brief__submit {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-s);
+  }
+
+  .brief__send {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--gap-4xs);
+  }
+
+  .brief__send-error {
+    color: var(--color-text-error);
+  }
+
+  .brief__send-error:empty {
+    display: none;
+  }
+
+  .brief__consent {
+    color: var(--color-text-secondary);
+  }
+
+  .brief__consent a {
+    color: var(--color-text-accent-2);
+    transition: color 150ms ease-out;
+  }
+
+  @media (hover: hover) {
+    .brief__consent a:hover {
+      color: var(--color-text-accent-2-hover);
+    }
+  }
+
+  /* Экран успеха */
+  .brief__success {
+    gap: var(--space-64);
+    max-width: calc(782 / 1352 * 100%);
+  }
+
+  .brief__success-message {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-s);
+  }
+
+  .brief__letter {
+    width: var(--size-format-illustration);
+    height: var(--size-format-illustration);
+  }
+
+  .brief__success-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-24);
+  }
+
+  .brief__success-text h2 {
+    outline: none;
+  }
+
+  .brief__success-note {
+    color: var(--color-text-secondary);
+  }
+
+  .brief__success-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-12);
+  }
+
+  @media (max-width: 767px) {
+    .brief__br-desktop {
+      display: none;
+    }
+
+    /* × — отдельной строкой сверху и закреплён при прокрутке */
+    .brief__bar {
+      position: sticky;
+      top: var(--layout-page-padding);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .brief__main {
+      padding-top: var(--layout-page-padding);
+    }
+
+    .brief__title,
+    .brief__success {
+      max-width: none;
+    }
+
+    .brief__section {
+      flex-direction: column;
+      gap: var(--gap-xs);
+    }
+
+    .brief__heading,
+    .brief__content {
+      width: 100%;
+    }
+
+    .brief__send :global(.btn),
+    .brief__success-actions :global(.btn) {
+      width: 100%;
+    }
+
+    .brief__success-actions {
+      flex-direction: column;
+    }
+  }
+</style>

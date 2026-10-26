@@ -25,6 +25,8 @@ node tests/compare.mjs mobile 0 934
 
 Живая иллюстрация первого экрана: `node tests/hero-anim.mjs desktop|mobile [папка]` — кадры сборки, наведение, шлейф, касание и замер кадров. Сверка с Figma (`compare.mjs`) идёт с reduced motion, по статичной картинке.
 
+Бриф: `node tests/brief-visual.mjs` — скриншоты формы и экрана успеха на 1440/393 против Figma; `node tests/brief-flow.mjs` — сценарии из ТЗ (валидация, файлы, отправка, Esc/«Назад», `/#brief`, клавиатура). Адрес отправки — env `PUBLIC_BRIEF_ENDPOINT`, без него мок.
+
 Плавность скролла (долгие кадры при прокрутке, CPU ×4): `node tests/scroll-perf.mjs`.
 
 Сверка отдельного блока со скриншотом ноды Figma: `node tests/compare-node.mjs 1440 ".services" tests/screens/figma/node-376-8149.png`.

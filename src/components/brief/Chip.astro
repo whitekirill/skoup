@@ -1,0 +1,73 @@
+---
+/**
+ * Chip — выбор в брифе (в Figma пока фреймы «Chips» без состояний).
+ * Default — surface/secondary; Hover — element/border-2; Selected — element/primary, текст инверсный;
+ * Focus — видимый контур для клавиатуры. Внутри — настоящий checkbox или radio.
+ */
+interface Props {
+  type: 'checkbox' | 'radio';
+  name: string;
+  value: string;
+}
+
+const { type, name, value } = Astro.props;
+---
+
+<label class="chip">
+  <input class="chip__input" type={type} name={name} value={value} />
+  <span class="chip__label t-button-l">{value}</span>
+</label>
+
+<style>
+  .chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--gap-3xs) var(--gap-2xs);
+    background: var(--color-surface-secondary);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color 150ms ease-out,
+      color 150ms ease-out,
+      scale 150ms ease-out;
+  }
+
+  /* сам input прячем визуально, но оставляем в фокусе и доступности */
+  .chip__input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .chip__label {
+    white-space: nowrap;
+  }
+
+  @media (hover: hover) {
+    .chip:hover {
+      background: var(--color-element-border-2);
+    }
+  }
+
+  .chip:has(.chip__input:checked) {
+    background: var(--color-element-primary);
+    color: var(--color-text-primary-inversion);
+  }
+
+  .chip:has(.chip__input:focus-visible) {
+    outline: 2px solid var(--color-element-blue);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .chip:active {
+      scale: 0.96;
+    }
+  }
+</style>

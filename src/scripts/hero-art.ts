@@ -381,7 +381,8 @@ export function mountHeroArt(canvas: HTMLCanvasElement, data: HeroDots, kind: Ki
   let probed = 0, slow = 0;
   function loop(now: number) {
     const assembled = start >= 0 && now - start > ASSEMBLE.stagger * coins.length + ASSEMBLE.duration;
-    if (assembled && now < scrollIdleAt) {
+    // под открытым брифом иллюстрацию не видно — не рисуем
+    if (assembled && (now < scrollIdleAt || document.documentElement.classList.contains('is-brief-open'))) {
       if (!frozenAt) frozenAt = now;
       raf = requestAnimationFrame(loop);
       return;

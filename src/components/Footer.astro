@@ -6,6 +6,14 @@
 import StepCard from './StepCard.astro';
 import { CTA, EMAIL, FOOTER_NAV, LEGAL, SOCIALS } from '../data/site';
 
+interface Props {
+  /** Внутри брифа: без призыва и этапов (в Figma верхний блок скрыт), отступ сверху 56 */
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+const uid = compact ? 'brief-footer' : 'footer';
+
 const steps = [
   { duration: '≈ 10 минут', lead: 'Заполните бриф или напишите нам.', rest: 'Уточним задачу, сроки и требования регулятора' },
   { duration: '1 час', lead: 'Обсуждаем продукт', rest: 'и ограничения, предлагаем формат работы и оценку в часах', breakAfterLead: true },
@@ -14,16 +22,18 @@ const steps = [
 ];
 ---
 
-<footer class="footer container">
+<footer class:list={['footer container', compact && 'footer--compact']}>
+  {!compact && (
   <div class="footer__top">
     <h2 class="footer__cta t-h2">
       Ваш продукт начинается здесь.<br />
-      <a class="footer__brief" href={CTA.brief.href}>{CTA.brief.label}</a>
+      <a class="footer__brief" href={CTA.brief.href} data-brief-open>{CTA.brief.label}</a>
     </h2>
     <ol class="footer__steps" aria-label="Как начать работу">
       {steps.map((step) => <StepCard {...step} />)}
     </ol>
   </div>
+  )}
 
   <div class="footer__content">
     <div class="footer__columns">
@@ -31,15 +41,15 @@ const steps = [
         <a class="footer__mail t-h3" href={`mailto:${EMAIL}`}>{EMAIL}</a>
       </div>
       <div class="footer__links">
-        <nav class="footer__col" aria-labelledby="footer-nav-title">
-          <p class="footer__col-title t-caption" id="footer-nav-title">Навигация</p>
+        <nav class="footer__col" aria-labelledby={`${uid}-nav-title`}>
+          <p class="footer__col-title t-caption" id={`${uid}-nav-title`}>Навигация</p>
           <ul class="footer__list t-body-m">
             {FOOTER_NAV.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
           </ul>
         </nav>
         <div class="footer__col">
-          <p class="footer__col-title t-caption" id="footer-social-title">Публикуемся</p>
-          <ul class="footer__list t-body-m" aria-labelledby="footer-social-title">
+          <p class="footer__col-title t-caption" id={`${uid}-social-title`}>Публикуемся</p>
+          <ul class="footer__list t-body-m" aria-labelledby={`${uid}-social-title`}>
             {SOCIALS.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
           </ul>
         </div>
@@ -66,6 +76,10 @@ const steps = [
     overflow: hidden;
     background: var(--color-surface-primary-inversion);
     color: var(--color-text-primary-inversion);
+  }
+
+  .footer--compact {
+    padding-top: var(--space-56);
   }
 
   .footer a {
@@ -170,6 +184,10 @@ const steps = [
     .footer {
       gap: var(--space-64);
       padding-top: var(--space-48);
+    }
+
+    .footer--compact {
+      padding-top: var(--space-56);
     }
 
     .footer__top {

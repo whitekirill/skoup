@@ -16,9 +16,11 @@ interface Props extends HTMLAttributes<'a'> {
   disabled?: boolean;
   /** Декоративная кнопка внутри кликабельной карточки (span вместо a/button) */
   as?: 'span';
+  /** Для кнопки отправки формы */
+  type?: 'button' | 'submit';
 }
 
-const { variant = 'primary', href, block = false, disabled = false, as, class: className, ...rest } = Astro.props;
+const { variant = 'primary', href, block = false, disabled = false, as, type = 'button', class: className, ...rest } = Astro.props;
 const Tag = as ?? (href && !disabled ? 'a' : 'button');
 const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't-button-l', block && 'btn--block', className];
 ---
@@ -26,7 +28,7 @@ const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't
 <Tag
   class:list={classes}
   href={Tag === 'a' ? href : undefined}
-  type={Tag === 'button' ? 'button' : undefined}
+  type={Tag === 'button' ? type : undefined}
   disabled={Tag === 'button' && disabled ? true : undefined}
   {...rest}
 >

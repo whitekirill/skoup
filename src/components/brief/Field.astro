@@ -1,0 +1,102 @@
+---
+/**
+ * Input (Figma 497:3747): только нижняя линия. Default / Hover / Focus / Filled / Error / Disabled.
+ * Подпись — визуально скрытый <label> с тем же текстом, что плейсхолдер. multiline — textarea,
+ * растёт по высоте вместе с текстом.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props {
+  name: string;
+  label: string;
+  multiline?: boolean;
+  required?: boolean;
+  type?: 'text' | 'tel';
+  autocomplete?: HTMLAttributes<'input'>['autocomplete'];
+  inputmode?: HTMLAttributes<'input'>['inputmode'];
+}
+
+const { name, label, multiline = false, required = false, type = 'text', autocomplete, inputmode } = Astro.props;
+const id = `brief-${name}`;
+const errorId = `${id}-error`;
+---
+
+<div class="field" data-field={name}>
+  <label class="visually-hidden" for={id}>{label}</label>
+  {
+    multiline ? (
+      <textarea class="field__control t-body-l" id={id} name={name} placeholder={label} rows="1" data-autosize />
+    ) : (
+      <input
+        class="field__control t-body-l"
+        id={id}
+        name={name}
+        type={type}
+        placeholder={label}
+        autocomplete={autocomplete}
+        inputmode={inputmode}
+        aria-required={required ? 'true' : undefined}
+      />
+    )
+  }
+  <p class="field__error t-body-s" id={errorId} hidden></p>
+</div>
+
+<style>
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-4xs);
+  }
+
+  .field__control {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: var(--gap-2xs) 0;
+    border: 0;
+    border-bottom: 1.5px solid var(--color-element-border);
+    border-radius: 0;
+    background: none;
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: var(--typography-body-l-size);
+    line-height: var(--typography-body-l-line-height);
+    caret-color: var(--color-element-primary);
+    outline: none;
+    transition: border-color 150ms ease-out;
+  }
+
+  textarea.field__control {
+    resize: none;
+    overflow: hidden;
+    field-sizing: content;
+  }
+
+  .field__control::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 1;
+  }
+
+  @media (hover: hover) {
+    .field__control:hover {
+      border-bottom-color: var(--color-element-border-2);
+    }
+  }
+
+  .field__control:focus {
+    border-bottom-color: var(--color-element-primary);
+  }
+
+  .field__control[aria-invalid='true'] {
+    border-bottom-color: var(--color-element-border-2-error);
+  }
+
+  .field__control:disabled {
+    opacity: 0.4;
+  }
+
+  .field__error {
+    color: var(--color-text-error);
+  }
+</style>

@@ -1,0 +1,160 @@
+---
+/**
+ * File upload (Figma 497:3851) и File item (497:3764).
+ * Default/Hover — ссылка «Прикрепить документ до 50 МБ»; Attached/Multiple — список файлов,
+ * ссылка «Прикрепить ещё»; Error — строка файла с причиной. Список рисует скрипт брифа по шаблону.
+ */
+import AddIcon from '../../assets/icons/add.svg';
+import FileIcon from '../../assets/icons/file-text.svg';
+import WarnIcon from '../../assets/icons/error-warning.svg';
+import CloseIcon from '../../assets/icons/close.svg';
+import { FILES } from '../../data/brief';
+
+const accept = FILES.extensions.map((ext) => `.${ext}`).join(',');
+---
+
+<div class="upload" data-upload>
+  <ul class="upload__files" data-upload-list aria-label="Прикреплённые файлы" hidden></ul>
+  <input class="visually-hidden" type="file" id="brief-files" multiple accept={accept} tabindex="-1" aria-hidden="true" data-upload-input />
+  <button class="upload__add" type="button" data-upload-add>
+    <AddIcon aria-hidden="true" />
+    <span class="upload__label t-body-m">
+      <span class="upload__action" data-upload-action>Прикрепить документ</span>
+      <span class="upload__limit">до 50 МБ</span>
+    </span>
+  </button>
+
+  <template data-upload-item>
+    <li class="file">
+      <span class="file__icon file__icon--ok" aria-hidden="true"><FileIcon /></span>
+      <span class="file__icon file__icon--error" aria-hidden="true"><WarnIcon /></span>
+      <span class="file__text t-body-m">
+        <span class="file__name" data-file-name></span>
+        <span class="file__meta" data-file-meta></span>
+      </span>
+      <button class="file__remove" type="button" data-file-remove>
+        <CloseIcon aria-hidden="true" />
+      </button>
+    </li>
+  </template>
+</div>
+
+<style>
+  .upload {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--gap-3xs);
+  }
+
+  .upload__files:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-4xs);
+    width: 100%;
+  }
+
+  .upload__add:not([hidden]) {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-4xs);
+    color: var(--color-text-primary);
+    text-align: left;
+  }
+
+  .upload__add :global(svg) {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+  }
+
+  .upload__label {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-6);
+  }
+
+  .upload__limit {
+    color: var(--color-text-secondary-inversion);
+  }
+
+  @media (hover: hover) {
+    .upload__add:hover .upload__action {
+      text-decoration: underline;
+      text-underline-offset: from-font;
+    }
+  }
+
+  /* перетаскивание файла над областью — как hover */
+  .upload.is-dragover .upload__action {
+    text-decoration: underline;
+  }
+
+  /* File item */
+  :global(.file) {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-3xs);
+    padding: var(--gap-3xs) var(--gap-2xs);
+    background: var(--color-surface-secondary);
+  }
+
+  :global(.file.is-error) {
+    background: var(--color-background-red);
+  }
+
+  :global(.file__icon) {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  :global(.file__icon svg),
+  :global(.file__remove svg) {
+    width: 24px;
+    height: 24px;
+  }
+
+  :global(.file__icon--error),
+  :global(.file.is-error .file__icon--ok) {
+    display: none;
+  }
+
+  :global(.file.is-error .file__icon--error) {
+    display: flex;
+    color: var(--color-text-error);
+  }
+
+  :global(.file__text) {
+    display: flex;
+    flex: 1 0 0;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px var(--gap-4xs);
+    min-width: 0;
+  }
+
+  :global(.file__name) {
+    overflow-wrap: anywhere;
+  }
+
+  :global(.file__meta) {
+    color: var(--color-text-secondary);
+  }
+
+  :global(.file.is-error .file__meta) {
+    color: var(--color-text-error);
+  }
+
+  :global(.file__remove) {
+    display: flex;
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+    transition: color 150ms ease-out;
+  }
+
+  @media (hover: hover) {
+    :global(.file__remove:hover) {
+      color: var(--color-text-primary);
+    }
+  }
+</style>
