@@ -25,8 +25,12 @@ if (brief && form) {
     // страница под брифом уменьшается к центру видимой области
     for (const el of pageParts()) el.style.transformOrigin = `50% ${scrollY + innerHeight / 2 - el.offsetTop}px`;
     brief!.scrollTop = 0;
-    brief!.showModal();
+    // не showModal(): модальность делает инертной всю длинную страницу и пересчитывает её стили
+    // в первом кадре анимации. aria-modal, ловушка фокуса и Esc — свои (ниже)
+    brief!.show();
     root.classList.add('is-brief-open');
+    // фокус — в следующем кадре, когда стили уже посчитаны: иначе первый кадр анимации тормозит
+    requestAnimationFrame(() => brief!.querySelector<HTMLElement>('.brief__close')?.focus({ preventScroll: true }));
   }
 
   function close() {
@@ -46,12 +50,35 @@ if (brief && form) {
   brief.addEventListener('close', () => {
     root.classList.remove('is-brief-open');
     pushedHash = false;
-    opener?.focus({ preventScroll: true });
+    // фокус на кнопку, которой открыли, браузер возвращает сам; вручную — только если её нет в фокусе,
+    // и в следующем кадре, чтобы не пересчитывать страницу синхронно в момент закрытия
+    requestAnimationFrame(() => {
+      if (opener && document.activeElement !== opener) opener.focus({ preventScroll: true });
+    });
   });
 
-  brief.addEventListener('cancel', (event) => {
-    event.preventDefault();
-    requestClose();
+  // Esc закрывает; Tab не выпускает фокус из брифа
+  const focusable = () =>
+    [...brief.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([tabindex="-1"]), textarea, [tabindex="0"]')].filter(
+      (el) => el.getClientRects().length > 0 && !el.closest('[hidden]'),
+    );
+  brief.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      requestClose();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    const list = focusable();
+    if (!list.length) return;
+    const first = list[0], last = list[list.length - 1];
+    if (event.shiftKey && (document.activeElement === first || !brief.contains(document.activeElement))) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   });
 
   addEventListener('popstate', () => {

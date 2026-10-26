@@ -48,7 +48,10 @@ await page.waitForTimeout(900);
 check(await isOpen(), 'CTA в hero открывает бриф');
 check((await page.evaluate(() => location.hash)) === '#brief', 'в URL #brief');
 check(await page.evaluate(() => document.getElementById('brief').contains(document.activeElement)), 'фокус внутри брифа');
-check(await page.evaluate(() => ['hidden', 'clip'].includes(getComputedStyle(document.documentElement).overflowY)), 'скролл страницы заблокирован');
+const y0 = await page.evaluate(() => scrollY);
+await page.mouse.move(700, 450); await page.mouse.wheel(0, 2000); await page.waitForTimeout(400);
+check((await page.evaluate(() => scrollY)) === y0 && (await page.evaluate(() => document.getElementById('brief').scrollTop)) > 0, 'колесо прокручивает бриф, а не страницу под ним');
+await page.evaluate(() => document.getElementById('brief').scrollTo(0, 0));
 
 // 2. Пустая отправка — 6 обязательных пунктов
 await submit();
@@ -155,6 +158,11 @@ await page.waitForTimeout(900);
 check((await page.inputValue('#brief-name')) === '' && (await page.evaluate(() => document.querySelector('[data-brief-view="form"]').hidden === false && document.querySelectorAll('.file').length === 0)), 'повторное открытие — чистая форма');
 
 // 11. Esc и «Назад»
+// Tab не выпускает фокус из брифа
+for (let i = 0; i < 40; i++) await page.keyboard.press('Tab');
+check(await page.evaluate(() => document.getElementById('brief').contains(document.activeElement)), 'Tab по кругу не выходит из брифа');
+await page.keyboard.press('Shift+Tab');
+check(await page.evaluate(() => document.getElementById('brief').contains(document.activeElement)), 'Shift+Tab тоже');
 await page.keyboard.press('Escape'); await page.waitForTimeout(900);
 check(!(await isOpen()) && (await page.evaluate(() => location.hash)) === '', 'Esc закрывает бриф');
 await page.click('.hero [data-brief-open]'); await page.waitForTimeout(900);

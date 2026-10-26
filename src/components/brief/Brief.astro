@@ -18,7 +18,8 @@ import { EMAIL, LEGAL } from '../../data/site';
 import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/brief';
 ---
 
-<dialog class="brief" id="brief" aria-labelledby="brief-title" data-brief>
+<div class="brief-shade" aria-hidden="true"></div>
+<dialog class="brief" id="brief" aria-labelledby="brief-title" aria-modal="true" data-brief>
   <div class="brief__main">
     <div class="brief__bar">
       <Button variant="secondary" class="brief__close" aria-label="Закрыть бриф" data-brief-close>
@@ -129,9 +130,15 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
 </script>
 
 <style is:global>
-  /* Пока бриф открыт: страница под ним не прокручивается, чуть уменьшается; шапка и sticky CTA гаснут */
-  html.is-brief-open {
-    overflow: hidden;
+  /*
+   * Пока бриф открыт, страница под ним чуть уменьшается; шапка и sticky CTA гаснут.
+   * overflow у страницы не трогаем: модальный dialog на весь экран и так забирает колесо, тач
+   * и фокус (overscroll-behavior: contain), а смена overflow убирала полосу прокрутки —
+   * страница прыгала вбок и перекладывалась целиком, отсюда рывки при открытии и закрытии.
+   * Lenis на паузе, но без своего overflow: clip.
+   */
+  html.lenis.is-brief-open.lenis-stopped {
+    overflow: visible;
   }
 
   html.is-brief-open .header,
@@ -158,6 +165,7 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
     --brief-ease: cubic-bezier(0.76, 0, 0.24, 1);
     position: fixed;
     inset: 0;
+    z-index: 50;
     width: 100%;
     max-width: none;
     height: 100%;
@@ -172,9 +180,20 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
     overscroll-behavior: contain;
   }
 
-  .brief[open] {
+  /*
+   * Закрытый бриф не убираем через display: none, а держим разложенным и невидимым
+   * (visibility: hidden, сдвинут вниз). Иначе при открытии браузер с нуля раскладывает
+   * всю форму и футер прямо в первом кадре анимации — это и давало рывок.
+   */
+  .brief,
+  .brief:not([open]) {
     display: flex;
     flex-direction: column;
+    visibility: hidden;
+  }
+
+  .brief[open] {
+    visibility: visible;
   }
 
   /* панель фиксированной высоты — содержимое не сжимаем, оно прокручивается */
@@ -182,51 +201,52 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
     flex-shrink: 0;
   }
 
-  .brief::backdrop {
+  /* затемнение страницы под брифом (вместо ::backdrop — бриф открывается не модально, см. скрипт) */
+  .brief-shade {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
     background: color-mix(in srgb, var(--color-surface-primary-inversion) 40%, transparent);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  :global(html.is-brief-open) .brief-shade {
+    opacity: 1;
+    visibility: visible;
   }
 
   @media (prefers-reduced-motion: no-preference) {
     .brief {
       translate: 0 100%;
+      will-change: translate;
       transition:
         translate 700ms var(--brief-ease),
-        display 700ms allow-discrete,
-        overlay 700ms allow-discrete;
+        visibility 700ms;
     }
 
+    /* при открытии видимость включается сразу (иначе фокус не встанет на ×), при закрытии — в конце */
     .brief[open] {
       translate: 0 0;
+      transition:
+        translate 700ms var(--brief-ease),
+        visibility 0s;
     }
 
-    @starting-style {
-      .brief[open] {
-        translate: 0 100%;
-      }
-    }
-
-    .brief::backdrop {
-      opacity: 0;
+    .brief-shade {
       transition:
         opacity 700ms var(--brief-ease),
-        display 700ms allow-discrete,
-        overlay 700ms allow-discrete;
+        visibility 700ms;
     }
 
-    .brief[open]::backdrop {
-      opacity: 1;
-    }
-
-    @starting-style {
-      .brief[open]::backdrop {
-        opacity: 0;
-      }
-    }
-
-    /* Контент — лесенкой: заголовок → секции → кнопка, шаг 60 мс, после того как панель почти доехала */
+    /* Контент — лесенкой: заголовок → секции → кнопка, шаг 60 мс, пока панель доезжает */
     .brief__reveal {
       opacity: 0;
       translate: 0 24px;
+      transition:
+        opacity 300ms ease-out,
+        translate 300ms ease-out;
     }
 
     .brief[open] .brief__reveal {
@@ -237,36 +257,28 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
         translate 500ms cubic-bezier(0.2, 0, 0, 1);
       transition-delay: calc(350ms + var(--i, 0) * 60ms);
     }
-
-    @starting-style {
-      .brief[open] .brief__reveal {
-        opacity: 0;
-        translate: 0 24px;
-      }
-    }
   }
 
   /* reduced motion — простой fade 200 мс */
   @media (prefers-reduced-motion: reduce) {
-    .brief,
-    .brief::backdrop {
+    .brief {
       opacity: 0;
       transition:
         opacity 200ms ease-out,
-        display 200ms allow-discrete,
-        overlay 200ms allow-discrete;
+        visibility 200ms;
     }
 
-    .brief[open],
-    .brief[open]::backdrop {
+    .brief-shade {
+      transition:
+        opacity 200ms ease-out,
+        visibility 200ms;
+    }
+
+    .brief[open] {
       opacity: 1;
-    }
-
-    @starting-style {
-      .brief[open],
-      .brief[open]::backdrop {
-        opacity: 0;
-      }
+      transition:
+        opacity 200ms ease-out,
+        visibility 0s;
     }
   }
 
