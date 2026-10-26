@@ -1,6 +1,6 @@
 // Общие данные сайта: контакты, навигация, ссылки CTA
 
-export const EMAIL = 'in@skoup.agency';
+export const EMAIL = 'in@skoup.ru';
 
 export const CTA = {
   discuss: { label: 'Обсудить проект', href: `mailto:${EMAIL}` },
