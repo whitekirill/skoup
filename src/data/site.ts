@@ -8,12 +8,11 @@ export const CTA = {
   presentation: { label: 'Презентация', href: '#' },
   // TODO: ссылка на форму брифа, пока — письмо
   brief: { label: 'Начните с брифа', href: `mailto:${EMAIL}` },
-  // TODO: куда ведёт «Подробнее» в блоке «О нас» — страницы пока нет
-  about: { label: 'Подробнее', href: '#' },
+  about: { label: 'Подробнее', href: '/about' },
 } as const;
 
 export const NAV = [
-  { label: 'О нас', href: '#about' },
+  { label: 'О нас', href: '/about' },
   { label: 'Услуги', href: '#services' },
   { label: 'Блог', href: '#blog' },
   { label: 'Кейсы', href: '#cases' },
@@ -44,8 +43,12 @@ export const LEGAL = [
 
 /** Порядок ссылок в футере отличается от шапки — как в макете */
 export const FOOTER_NAV = [
-  { label: 'О нас', href: '#about' },
+  { label: 'О нас', href: '/about' },
   { label: 'Кейсы', href: '#cases' },
   { label: 'Услуги', href: '#services' },
   { label: 'Блог', href: '#blog' },
 ] as const;
+
+/** Якорь секции главной (#cases) с другой страницы ведёт на главную (/#cases) */
+export const pageHref = (href: string, pathname: string) =>
+  href.startsWith('#') && href.length > 1 && pathname.replace(/\/$/, '') !== '' ? `/${href}` : href;

@@ -184,26 +184,31 @@ if (brief && form) {
     phone.addEventListener('blur', () => {
       if (!phoneDigits(phone.value)) phone.value = '';
     });
-    // вставка из буфера: целый номер заменяет поле, кусок цифр — встаёт на место курсора
+    // Вставка из буфера: целый номер заменяет поле, кусок цифр — встаёт на место курсора.
+    // Саму вставку не запрещаем (браузер вставит текст как есть) — разбираем её в input ниже
+    let paste: { text: string; head: string; tail: string } | null = null;
     phone.addEventListener('paste', (event) => {
-      const text = event.clipboardData?.getData('text') ?? '';
-      const pasted = text.replace(/\D/g, '');
-      if (!pasted) return event.preventDefault();
-      event.preventDefault();
       const caret = phone.selectionStart ?? phone.value.length;
       const end = phone.selectionEnd ?? caret;
-      const head = phone.value.slice(0, caret).replace(/\D/g, '').slice(1);
-      const tail = phone.value.slice(end).replace(/\D/g, '');
-      const digits = pasted.length >= 10 ? phoneDigits(text.trim().startsWith('+') || pasted.length === 11 ? text : `+7${text}`) : (head + pasted + tail).slice(0, 10);
-      phone.value = formatPhone(digits);
-      const at = pasted.length >= 10 ? phone.value.length : caretAfter(phone.value, Math.min(head.length + pasted.length, digits.length));
-      phone.setSelectionRange(at, at);
-      prevDigits = digits;
-      phone.dispatchEvent(new Event('input', { bubbles: true }));
+      paste = {
+        text: event.clipboardData?.getData('text') ?? '',
+        head: phone.value.slice(0, caret).replace(/\D/g, '').slice(1),
+        tail: phone.value.slice(end).replace(/\D/g, ''),
+      };
     });
     phone.addEventListener('input', (event) => {
-      if (!(event instanceof InputEvent)) return; // своё событие после paste — для перепроверки ошибки
       const inputType = (event as InputEvent).inputType ?? '';
+      if (paste) {
+        const { text, head, tail } = paste;
+        paste = null;
+        const pasted = text.replace(/\D/g, '');
+        const digits = pasted.length >= 10 ? phoneDigits(text.trim().startsWith('+') || pasted.length === 11 ? text : `+7${text}`) : (head + pasted + tail).slice(0, 10);
+        phone.value = formatPhone(digits);
+        const at = pasted.length >= 10 ? phone.value.length : caretAfter(phone.value, Math.min(head.length + pasted.length, digits.length));
+        phone.setSelectionRange(at, at);
+        prevDigits = digits;
+        return;
+      }
       const raw = phone.value;
       const caret = phone.selectionStart ?? raw.length;
       let digits = phoneDigits(raw);

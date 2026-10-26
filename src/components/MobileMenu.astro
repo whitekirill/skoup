@@ -6,7 +6,7 @@
 import Button from './Button.astro';
 import Logo from './Logo.astro';
 import CloseIcon from '../assets/icons/close.svg';
-import { CTA, EMAIL, NAV } from '../data/site';
+import { CTA, EMAIL, NAV, pageHref } from '../data/site';
 ---
 
 <dialog class="menu" id="mobile-menu" aria-label="Меню">
@@ -23,7 +23,7 @@ import { CTA, EMAIL, NAV } from '../data/site';
           {
             NAV.map((item) => (
               <li>
-                <a class="menu__link t-h2" href={item.href} data-menu-close>
+                <a class="menu__link t-h2" href={pageHref(item.href, Astro.url.pathname)} data-menu-close>
                   {item.label}
                 </a>
               </li>

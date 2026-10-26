@@ -1,0 +1,218 @@
+---
+/**
+ * «Почему мы» (Figma: desktop 524:29099, mobile 536:3480).
+ * Абзац H2 обычным текстом с халфтон-иконками в строке (лупа, молния) — переносится на любой ширине.
+ * Внизу — куча из 15 плашек качеств (зона 535:30985 / 536:3691): финальные позиции из макета заданы в CSS,
+ * скрипт src/scripts/quality-pile.ts только роняет их сверху и даёт потаскать.
+ */
+import loupe from '../../assets/about/loupe.svg?url';
+import bolt from '../../assets/about/bolt.svg?url';
+import { PILE, QUALITIES } from '../../data/about';
+
+const spot = (prefix: string, s: { cx: number; cy: number; rotate: number }) =>
+  `--${prefix}x: ${s.cx}px; --${prefix}y: ${s.cy}px; --${prefix}r: ${s.rotate}deg;`;
+---
+
+<section class="why" aria-labelledby="why-title">
+  <div class="why__head container">
+    <h2 class="why__label t-h4" id="why-title">Почему мы?</h2>
+    <p class="why__text t-h2">
+      Делаем финтех удобным. Требования закладываем с&nbsp;первого макета. Работаем внутри вашей команды. Решения
+      принимаем{' '}<span class="why__keep"><span class="why__icon why__icon--loupe" aria-hidden="true"><img src={loupe} alt="" width="113" height="79" /></span>{' '}<span class="accent-4">на</span></span><span class="accent-4">{' '}данных <span class="why__tight">и&nbsp;исследованиях,</span></span>{' '}
+      и делаем это <span class="why__tight">со&nbsp;вкусом.</span> Не тянем <span class="why__tight">с&nbsp;решениями,</span> даём{' '}<span class="accent-3"><span class="why__keep">результат{' '}<span class="why__icon why__icon--bolt" aria-hidden="true"><img src={bolt} alt="" width="84" height="84" /></span></span>{' '}быстро.</span>
+    </p>
+  </div>
+
+  <div class="pile" data-pile>
+    <div class="pile__box">
+      <ul
+        class="pile__stage"
+        aria-label="Наши качества"
+        style={`--pile-dw: ${PILE.desktop.width}px; --pile-dh: ${PILE.desktop.height}px; --pile-mw: ${PILE.mobile.width}px; --pile-mh: ${PILE.mobile.height}px;`}
+      >
+        {QUALITIES.map((q) => <li class="pile__item" style={spot('d', q.desktop) + spot('m', q.mobile)}>{q.label}</li>)}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- До первой отрисовки кучи: плашки прячем, скрипт роняет их, когда зона появится. Место под зону уже занято -->
+<script is:inline>
+  document.documentElement.classList.add('pile-wait');
+  // если скрипт анимации так и не запустился — показываем плашки на местах
+  setTimeout(() => window.__pileArmed || document.documentElement.classList.remove('pile-wait'), 4000);
+</script>
+
+<script>
+  import { mountQualityPile } from '../../scripts/quality-pile';
+  mountQualityPile();
+</script>
+
+<style>
+  .why {
+    padding-top: var(--layout-section-padding);
+  }
+
+  /* падающие плашки пролетают за текстом, а не закрывают его фоном */
+  .why__head {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--gap-l);
+  }
+
+  .why__label {
+    color: var(--color-text-secondary);
+  }
+
+  /*
+   * В макете строки идут с шагом «высота строки + 8» (ряды с зазором 8). Лишние 4 px сверху и снизу
+   * абзаца компенсируем отрицательными полями — верх и низ текста совпадают с макетом.
+   */
+  .why__text {
+    --icon: var(--typography-h2-line-height);
+    max-width: 896px;
+    margin-block: calc(-1 * var(--space-4));
+    line-height: calc(var(--typography-h2-line-height) + var(--space-8));
+    /* В макете слова — блоки с зазором gap-3xs; пробел Manrope — 0.2em, текстовые слои Figma шире
+       браузерных на 2.25 × |letter-spacing| (как в WordsHeading) */
+    word-spacing: calc(var(--gap-3xs) - 0.2em - 2.25 * var(--typography-h2-letter-spacing));
+  }
+
+  .accent-4 {
+    color: var(--color-text-accent-4);
+  }
+
+  .accent-3 {
+    color: var(--color-text-accent-3);
+  }
+
+  /* фразы, которые в макете — один текстовый слой: обычный пробел внутри */
+  .why__tight {
+    word-spacing: normal;
+  }
+
+  /* иконка не отрывается от соседнего слова */
+  .why__keep {
+    white-space: nowrap;
+  }
+
+  /*
+   * Иконка — квадрат высотой в строку, по центру строки. Точки (слой Dots из Figma) выходят за квадрат,
+   * как в макете: смещения и размеры — доли стороны квадрата (56 на desktop, 38 на mobile).
+   */
+  .why__icon {
+    position: relative;
+    display: inline-block;
+    width: var(--icon);
+    height: var(--icon);
+    margin-top: var(--space-4);
+    vertical-align: top;
+  }
+
+  .why__icon img {
+    position: absolute;
+    max-width: none;
+    pointer-events: none;
+  }
+
+  .why__icon--loupe img {
+    top: calc(var(--icon) * -0.17);
+    left: calc(var(--icon) * -0.1636);
+    width: calc(var(--icon) * 2.025);
+    height: calc(var(--icon) * 1.4143);
+  }
+
+  .why__icon--bolt img {
+    top: calc(var(--icon) * -0.25);
+    left: calc(var(--icon) * 0.0455);
+    width: calc(var(--icon) * 1.5);
+    height: calc(var(--icon) * 1.5);
+  }
+
+  /*
+   * Куча плашек рисуется в пространстве макета (1440×274) и масштабируется целиком под ширину экрана:
+   * --s = ширина / 1440 (tan(atan2()) делит длины без единиц). Уже 792 (scale < 0.55) — мобильная зона 393×504.
+   * По бокам обрезаем, сверху — нет: плашки падают из-за верхнего края зоны.
+   */
+  .pile {
+    container-type: inline-size;
+    margin-top: calc(var(--layout-section-padding) * 1.5);
+    overflow-x: clip;
+  }
+
+  .pile__box {
+    --w: var(--pile-dw, 1440px);
+    --h: var(--pile-dh, 274px);
+    --s: 1;
+    position: relative;
+    height: calc(var(--h) * var(--s));
+  }
+
+  @supports (width: calc(tan(atan2(1px, 1px)) * 1px)) {
+    .pile__box {
+      --s: tan(atan2(100cqw, var(--w)));
+    }
+  }
+
+  .pile__stage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--w);
+    height: var(--h);
+    transform: scale(var(--s));
+    transform-origin: 0 0;
+  }
+
+  /* Плашка: стиль из Figma (Quality), типографика H3 макета — значения токена на брейкпоинте зоны */
+  .pile__item {
+    --x: var(--dx);
+    --y: var(--dy);
+    --r: var(--dr);
+    position: absolute;
+    top: var(--y);
+    left: var(--x);
+    padding: var(--space-16);
+    background: var(--color-surface-tertiary);
+    color: var(--color-text-secondary);
+    font-size: 32px;
+    line-height: 44px;
+    letter-spacing: -0.6px;
+    white-space: nowrap;
+    transform: translate(-50%, -50%) rotate(var(--r));
+    user-select: none;
+  }
+
+  :global(html.pile-wait) .pile__item {
+    opacity: 0;
+  }
+
+  @media (max-width: 791px) {
+    .pile__box {
+      --w: var(--pile-mw, 393px);
+      --h: var(--pile-mh, 504px);
+    }
+
+    .pile__item {
+      --x: var(--mx);
+      --y: var(--my);
+      --r: var(--mr);
+      font-size: 24px;
+      line-height: 30px;
+      letter-spacing: -0.3px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .why__head {
+      gap: var(--space-32);
+    }
+
+    .pile {
+      margin-top: var(--gap-xl);
+    }
+  }
+</style>

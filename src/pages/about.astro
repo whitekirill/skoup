@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import AboutIntro from '../components/about/AboutIntro.astro';
+import WhyUs from '../components/about/WhyUs.astro';
+import Formats from '../components/Formats.astro';
+import Footer from '../components/Footer.astro';
+import Brief from '../components/brief/Brief.astro';
+---
+
+<Base
+  title="О нас — Скоуп"
+  description="Скоуп проектирует цифровые продукты для финтеха и банков: работаем с 2009 года, решения принимаем на данных и исследованиях, требования регулятора закладываем с первого макета."
+>
+  <Header />
+  <main>
+    <AboutIntro />
+    <WhyUs />
+    <Formats />
+  </main>
+  <Footer />
+  <Brief />
+</Base>

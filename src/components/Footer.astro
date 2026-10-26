@@ -4,7 +4,7 @@
  * Desktop — колонки, Mobile — этапы в горизонтальном скролле, колонки стопкой.
  */
 import StepCard from './StepCard.astro';
-import { CTA, EMAIL, FOOTER_NAV, LEGAL, SOCIALS } from '../data/site';
+import { CTA, EMAIL, FOOTER_NAV, LEGAL, SOCIALS, pageHref } from '../data/site';
 
 interface Props {
   /** Внутри брифа: без призыва и этапов (в Figma верхний блок скрыт), отступ сверху 56 */
@@ -44,7 +44,7 @@ const steps = [
         <nav class="footer__col" aria-labelledby={`${uid}-nav-title`}>
           <p class="footer__col-title t-caption" id={`${uid}-nav-title`}>Навигация</p>
           <ul class="footer__list t-body-m">
-            {FOOTER_NAV.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+            {FOOTER_NAV.map((item) => <li><a href={pageHref(item.href, Astro.url.pathname)}>{item.label}</a></li>)}
           </ul>
         </nav>
         <div class="footer__col">

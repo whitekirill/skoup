@@ -1,0 +1,152 @@
+---
+/**
+ * Первый экран «О нас» (Figma: desktop 524:28927, mobile 536:3432):
+ * заголовок H1 и колонка из 4 карточек фактов. Desktop — две колонки, Mobile — заголовок, под ним карточки.
+ */
+import { Image } from 'astro:assets';
+import PaletteIcon from '../../assets/icons/palette.svg';
+import SafeIcon from '../../assets/icons/safe-2.svg';
+import pavel from '../../assets/about/face-pavel.png';
+import kirill from '../../assets/about/face-kirill.png';
+import anna from '../../assets/about/face-anna.png';
+import andrey from '../../assets/about/face-andrey.png';
+import vk from '../../assets/logos/vk.svg?url';
+import aliexpress from '../../assets/logos/aliexpress.svg?url';
+import uzum from '../../assets/logos/uzum.svg?url';
+import round from '../../assets/logos/round.svg?url';
+
+const team = [
+  { src: pavel, alt: 'Павел' },
+  { src: kirill, alt: 'Кирилл' },
+  { src: anna, alt: 'Анна' },
+  { src: andrey, alt: 'Андрей' },
+];
+
+const clients = [
+  { src: vk, alt: 'Вконтакте' },
+  { src: aliexpress, alt: 'AliExpress' },
+  { src: uzum, alt: 'Uzum' },
+  { src: round, alt: 'Раунд' },
+];
+---
+
+<section class="intro container" aria-labelledby="intro-title">
+  <h1 class="intro__title t-h1" id="intro-title">Мы проектируем цифровые продукты</h1>
+
+  <ul class="intro__facts">
+    <li class="fact">
+      <PaletteIcon class="fact__icon" aria-hidden="true" />
+      <p class="fact__text t-h5">Работаем <span class="muted">с 2009 года</span></p>
+    </li>
+    <li class="fact">
+      <span class="fact__row fact__row--team">
+        {team.map((person) => <Image class="fact__face" src={person.src} alt={person.alt} width={44} height={44} densities={[1, 2, 3]} loading="lazy" />)}
+      </span>
+      <p class="fact__text t-h5">Команда <span class="muted">из 4 специалистов в сфере цифровых продуктов, UX дизайна и регуляторики</span></p>
+    </li>
+    <li class="fact">
+      <SafeIcon class="fact__icon" aria-hidden="true" />
+      <p class="fact__text t-h5">Опыт <span class="muted">16+ лет в финтехе<br class="fact__br-mobile" /> и банковских продуктах</span></p>
+    </li>
+    <li class="fact">
+      <span class="fact__row fact__row--clients">
+        {clients.map((client) => <img class="fact__logo" src={client.src} alt={client.alt} width="44" height="44" loading="lazy" decoding="async" />)}
+      </span>
+      <p class="fact__text t-h5">Аудитория<br /><span class="muted">продуктов, которые<br />мы проектировали 30млн+</span></p>
+    </li>
+  </ul>
+</section>
+
+<style>
+  .intro {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-100);
+    padding-block: var(--layout-section-padding);
+  }
+
+  /* Заголовок отдаёт место колонке фактов, но не уже самого длинного слова */
+  /* в макете слова — блоки с зазором gap-3xs (см. WhyUs) */
+  .intro__title {
+    word-spacing: calc(var(--gap-3xs) - 0.2em - 2.25 * var(--typography-h1-letter-spacing));
+    flex: 1 1 0;
+    min-width: min-content;
+    max-width: 896px;
+  }
+
+  .intro__facts {
+    display: flex;
+    flex: 0 1 356px;
+    flex-direction: column;
+    gap: var(--space-16);
+    min-width: 0;
+  }
+
+  .fact {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--size-fact-gap);
+    padding: var(--space-16);
+    border: 1px solid var(--color-element-border);
+  }
+
+  .fact__icon {
+    width: 44px;
+    height: 44px;
+    color: var(--color-element-secondary);
+  }
+
+  .fact__row {
+    display: flex;
+    align-items: center;
+  }
+
+  .fact__row :global(.fact__face),
+  .fact__logo {
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--color-surface-primary);
+    border-radius: var(--radius-full);
+  }
+
+  .fact__row :global(.fact__face) {
+    object-fit: cover;
+  }
+
+  .fact__row :global(.fact__face + .fact__face) {
+    margin-left: calc(-1 * var(--space-12));
+  }
+
+  .fact__logo + .fact__logo {
+    margin-left: calc(-1 * var(--space-4));
+  }
+
+  .muted {
+    color: var(--color-text-secondary);
+  }
+
+  .fact__br-mobile {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    .intro {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .intro__title {
+      flex: none;
+      min-width: 0;
+    }
+
+    .intro__facts {
+      flex: none;
+    }
+
+    .fact__br-mobile {
+      display: inline;
+    }
+  }
+</style>
