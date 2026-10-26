@@ -1,19 +1,22 @@
-// Куча плашек в «Почему мы»: один раз, когда зона на 35% в окне, плашки падают сверху на свои места
-// (GSAP + ScrollTrigger) — снизу вверх по рядам, с отскоком при приземлении. После падения на desktop
-// с мышью плашку можно потаскать (Draggable): отпустили — пружиной возвращается к своему месту и углу.
-// Финальные позиции задаёт CSS (без JS плашки и так на местах), здесь — только transform и opacity.
-// prefers-reduced-motion: без падения — плашки на местах, fade 200 мс, без перетаскивания.
+// Качества в «Почему мы»: один раз, когда зона на 35% в окне, слова падают из-за верхнего края окна
+// на свои места (GSAP + ScrollTrigger) — снизу вверх по рядам, с отскоком при приземлении; время падения —
+// от высоты, как при свободном падении. После падения на desktop с мышью: наведение — слово рассыпается
+// в халфтон, слово можно потаскать (Draggable) — отпустили, пружиной возвращается к месту и углу.
+// Финальные позиции задаёт CSS (без JS слова и так на местах), здесь — только transform и opacity.
+// prefers-reduced-motion: без падения — слова на местах, fade 200 мс, без перетаскивания и халфтона.
 // GSAP грузится, только когда зона близко.
 import { QUALITIES } from '../data/about';
+import { halftone } from './halftone-word';
 
 type Gsap = typeof import('gsap').gsap;
 
-const FALL = { drop: [320, 620], tilt: [10, 25], duration: [0.8, 1.05], step: [0.045, 0.06], bounce: [6, 10] };
+// above — насколько выше верхнего края окна стартует слово (px экрана); gravity — px/с², падение ~1 с с 700 px
+const FALL = { above: [40, 220], gravity: 1400, duration: [0.7, 1.3], tilt: [10, 25], step: [0.045, 0.06], bounce: [6, 10] };
 const LANDING = 0.35;
-const ROW_TOLERANCE = 30; // плашки с близким cy — один ряд
+const ROW_TOLERANCE = 30; // слова с близким cy — один ряд
 const DRAG_LEAN = 8; // град, наклон по направлению движения при перетаскивании
 
-// Случайно, но стабильно: сид от индекса плашки
+// Случайно, но стабильно: сид от индекса слова
 function random(seed: number) {
   let t = seed * 0x9e3779b9;
   return () => {
@@ -35,6 +38,9 @@ export function mountQualityPile() {
   const mouse = matchMedia('(hover: hover) and (pointer: fine)');
   const spot = (i: number) => (mobile.matches ? QUALITIES[i].mobile : QUALITIES[i].desktop);
   const show = () => root.classList.remove('pile-wait');
+  const stage = pile.querySelector<HTMLElement>('.pile__stage')!;
+  // масштаб зоны: она нарисована в пространстве макета и уменьшена/увеличена целиком
+  const scale = () => stage.getBoundingClientRect().width / stage.offsetWidth || 1;
   (window as Window & { __pileArmed?: boolean }).__pileArmed = true;
 
   const near = new IntersectionObserver(
@@ -51,7 +57,7 @@ export function mountQualityPile() {
     try {
       const [{ gsap }, { ScrollTrigger }] = await Promise.all([import('gsap'), import('gsap/ScrollTrigger')]);
       gsap.registerPlugin(ScrollTrigger);
-      // transform плашки теперь ведёт GSAP: центр в точке (cx, cy) и угол из макета, пока невидима
+      // transform слова теперь ведёт GSAP: центр в точке (cx, cy) и угол из макета, пока невидима
       gsap.set(items, { xPercent: -50, yPercent: -50, x: 0, y: 0, rotation: (i: number) => spot(i).rotate, opacity: 0 });
       show();
       ScrollTrigger.create({
@@ -63,7 +69,7 @@ export function mountQualityPile() {
       // смена раскладки (desktop ↔ mobile) — углы из другой таблицы
       mobile.addEventListener('change', () => items.forEach((el, i) => gsap.set(el, { rotation: spot(i).rotate })));
     } catch {
-      show(); // без GSAP плашки просто стоят на местах
+      show(); // без GSAP слова просто стоят на местах
     }
   }
 
@@ -87,21 +93,24 @@ export function mountQualityPile() {
   }
 
   function fall(gsap: Gsap) {
-    const tl = gsap.timeline({ onComplete: () => void draggable(gsap) });
+    const tl = gsap.timeline({ onComplete: () => void interactive(gsap) });
+    const k = scale();
     let at = 0;
     for (const i of order()) {
       const el = items[i];
       const rnd = random(i + 1);
       const final = spot(i).rotate;
-      const drop = between(rnd, FALL.drop);
+      // старт — над верхним краем окна: путь от него до места виден целиком
+      const distance = el.getBoundingClientRect().bottom + between(rnd, FALL.above);
       const side = rnd() < 0.5 ? -1 : 1;
       const tilt = side * between(rnd, FALL.tilt);
       const over = -side * between(rnd, [1, 2]); // доворот с перелётом через финальный угол
-      const duration = between(rnd, FALL.duration);
+      const duration = gsap.utils.clamp(FALL.duration[0], FALL.duration[1], Math.sqrt((2 * distance) / FALL.gravity));
       const bounce = between(rnd, FALL.bounce);
 
-      gsap.set(el, { y: -drop, rotation: final + tilt, willChange: 'transform' });
-      tl.to(el, { opacity: 1, duration: 0.12, ease: 'none' }, at)
+      // y — в пикселях макета (зона масштабирована), поэтому делим на масштаб
+      gsap.set(el, { y: -distance / k, rotation: final + tilt, willChange: 'transform' });
+      tl.set(el, { opacity: 1 }, at)
         // падение до касания — с ускорением
         .to(el, { y: 0, duration, ease: 'power2.in' }, at)
         .to(el, { rotation: final + over, duration, ease: 'power1.out' }, at)
@@ -114,9 +123,23 @@ export function mountQualityPile() {
     }
   }
 
+  // После падения, с мышью: халфтон при наведении и перетаскивание
+  async function interactive(gsap: Gsap) {
+    if (!mouse.matches || reduced.matches) return;
+    const effects = items.map((el) => {
+      const effect = halftone(el, el.querySelector<HTMLElement>('.pile__text')!, scale);
+      el.addEventListener('pointerenter', (event) => event.pointerType === 'mouse' && effect.enter());
+      el.addEventListener('pointerleave', () => effect.leave());
+      return effect;
+    });
+    const relayout = () => effects.forEach((effect) => effect.reset());
+    mobile.addEventListener('change', relayout);
+    addEventListener('resize', relayout);
+    await draggable(gsap);
+  }
+
   // Перетаскивание — только с мышью и после падения
   async function draggable(gsap: Gsap) {
-    if (!mouse.matches || reduced.matches) return;
     const { Draggable } = await import('gsap/Draggable');
     gsap.registerPlugin(Draggable);
     let top = items.length;

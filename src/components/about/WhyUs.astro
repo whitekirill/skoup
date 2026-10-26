@@ -2,8 +2,9 @@
 /**
  * «Почему мы» (Figma: desktop 524:29099, mobile 536:3480).
  * Абзац H2 обычным текстом с халфтон-иконками в строке (лупа, молния) — переносится на любой ширине.
- * Внизу — куча из 15 плашек качеств (зона 535:30985 / 536:3691): финальные позиции из макета заданы в CSS,
- * скрипт src/scripts/quality-pile.ts только роняет их сверху и даёт потаскать.
+ * Абзац заливается по словам вместе со скроллом. Внизу — 15 качеств моноширинными словами на местах плашек
+ * из макета (зона 535:30985 / 536:3691): позиции заданы в CSS, скрипт src/scripts/quality-pile.ts роняет их
+ * из-за верхнего края окна, даёт потаскать и рассыпает слово в халфтон при наведении.
  */
 import loupe from '../../assets/about/loupe.svg?url';
 import bolt from '../../assets/about/bolt.svg?url';
@@ -30,22 +31,25 @@ const spot = (prefix: string, s: { cx: number; cy: number; rotate: number }) =>
         aria-label="Наши качества"
         style={`--pile-dw: ${PILE.desktop.width}px; --pile-dh: ${PILE.desktop.height}px; --pile-mw: ${PILE.mobile.width}px; --pile-mh: ${PILE.mobile.height}px;`}
       >
-        {QUALITIES.map((q) => <li class="pile__item" style={spot('d', q.desktop) + spot('m', q.mobile)}>{q.label}</li>)}
+        {QUALITIES.map((q) => <li class="pile__item" style={spot('d', q.desktop) + spot('m', q.mobile)}><span class="pile__text">{q.label}</span></li>)}
       </ul>
     </div>
   </div>
 </section>
 
-<!-- До первой отрисовки кучи: плашки прячем, скрипт роняет их, когда зона появится. Место под зону уже занято -->
+<!-- До первой отрисовки: слова качеств прячем, скрипт роняет их, когда зона появится. Место под зону уже занято -->
 <script is:inline>
   document.documentElement.classList.add('pile-wait');
-  // если скрипт анимации так и не запустился — показываем плашки на местах
+  // если скрипт анимации так и не запустился — показываем слова на местах
   setTimeout(() => window.__pileArmed || document.documentElement.classList.remove('pile-wait'), 4000);
 </script>
 
 <script>
   import { mountQualityPile } from '../../scripts/quality-pile';
+  import { mountScrollFill } from '../../scripts/scroll-fill';
   mountQualityPile();
+  const text = document.querySelector<HTMLElement>('.why__text');
+  if (text) mountScrollFill(text);
 </script>
 
 <style>
@@ -53,7 +57,7 @@ const spot = (prefix: string, s: { cx: number; cy: number; rotate: number }) =>
     padding-top: var(--layout-section-padding);
   }
 
-  /* падающие плашки пролетают за текстом, а не закрывают его фоном */
+  /* падающие слова пролетают за абзацем, а не поверх него */
   .why__head {
     position: relative;
     z-index: 1;
@@ -82,11 +86,30 @@ const spot = (prefix: string, s: { cx: number; cy: number; rotate: number }) =>
   }
 
   .accent-4 {
+    --fill-color: var(--color-text-accent-4);
     color: var(--color-text-accent-4);
   }
 
   .accent-3 {
+    --fill-color: var(--color-text-accent-3);
     color: var(--color-text-accent-3);
+  }
+
+  /*
+   * Заливка по скроллу (src/scripts/scroll-fill.ts): слово из серого text/secondary переходит в свой цвет —
+   * --fill-color родителя. Иконки проявляются из серого вместе со словами.
+   */
+  .why__text {
+    --fill-color: var(--color-text-primary);
+  }
+
+  .why__text:global(.is-filling) :global(.fill-word) {
+    color: color-mix(in oklab, var(--fill-color) calc(var(--fill, 0) * 100%), var(--color-text-secondary));
+  }
+
+  .why__text:global(.is-filling) :global(.why__icon.fill-word) {
+    opacity: calc(0.4 + 0.6 * var(--fill, 0));
+    filter: grayscale(calc(1 - var(--fill, 0)));
   }
 
   /* фразы, которые в макете — один текстовый слой: обычный пробел внутри */
@@ -133,9 +156,9 @@ const spot = (prefix: string, s: { cx: number; cy: number; rotate: number }) =>
   }
 
   /*
-   * Куча плашек рисуется в пространстве макета (1440×274) и масштабируется целиком под ширину экрана:
+   * Куча качеств рисуется в пространстве макета (1440×274) и масштабируется целиком под ширину экрана:
    * --s = ширина / 1440 (tan(atan2()) делит длины без единиц). Уже 792 (scale < 0.55) — мобильная зона 393×504.
-   * По бокам обрезаем, сверху — нет: плашки падают из-за верхнего края зоны.
+   * По бокам обрезаем, сверху — нет: слова падают из-за верхнего края зоны.
    */
   .pile {
     container-type: inline-size;
@@ -167,7 +190,11 @@ const spot = (prefix: string, s: { cx: number; cy: number; rotate: number }) =>
     transform-origin: 0 0;
   }
 
-  /* Плашка: стиль из Figma (Quality), типографика H3 макета — значения токена на брейкпоинте зоны */
+  /*
+   * Качество — моноширинное слово (Geist Mono, верхний регистр, как другие моно-стили сайта) в месте плашки
+   * из макета: кегль H3 макета на брейкпоинте зоны, межбуквенный — Button/XL. При наведении слово
+   * рассыпается в халфтон (canvas поверх, src/scripts/quality-pile.ts).
+   */
   .pile__item {
     --x: var(--dx);
     --y: var(--dy);
@@ -175,15 +202,28 @@ const spot = (prefix: string, s: { cx: number; cy: number; rotate: number }) =>
     position: absolute;
     top: var(--y);
     left: var(--x);
-    padding: var(--space-16);
-    background: var(--color-surface-tertiary);
     color: var(--color-text-secondary);
+    font-family: var(--typography-family-mono);
     font-size: 32px;
     line-height: 44px;
-    letter-spacing: -0.6px;
+    letter-spacing: 0.65px;
+    text-transform: uppercase;
     white-space: nowrap;
     transform: translate(-50%, -50%) rotate(var(--r));
     user-select: none;
+  }
+
+  .pile__text {
+    display: block;
+  }
+
+  /* халфтон-слой поверх слова; сам текст на время эффекта гаснет */
+  .pile__item :global(.pile__dots) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
   }
 
   :global(html.pile-wait) .pile__item {
@@ -202,7 +242,7 @@ const spot = (prefix: string, s: { cx: number; cy: number; rotate: number }) =>
       --r: var(--mr);
       font-size: 24px;
       line-height: 30px;
-      letter-spacing: -0.3px;
+      letter-spacing: 0.5px;
     }
   }
 

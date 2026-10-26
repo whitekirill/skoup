@@ -1,5 +1,5 @@
 // Страница «О нас» (/about): скриншоты на 1440, 1024, 768, 393 и 360, сверка 1440 и 393 с Figma,
-// ширины плашек против макета, пересечения плашек после падения (SAT по реальным углам, допуск 2 px).
+// пересечения слов-качеств после падения (SAT по реальным углам, допуск 2 px).
 // Запуск: npm run build && node tests/about.mjs [outDir]
 import { chromium } from '@playwright/test';
 import { PNG } from 'pngjs';
@@ -20,12 +20,6 @@ const server = http.createServer((req, res) => {
   fs.createReadStream(file).pipe(res);
 }).listen(0);
 const url = `http://localhost:${server.address().port}/about/`;
-
-// ширины плашек в макете (для проверки типографики)
-const FIGMA_WIDTH = {
-  desktop: { Экспертиза: 210, Партнёрство: 231, Ответственность: 296, Результат: 185, Въедливые: 200, Открытые: 183, Вдумчивые: 202, Аккуратные: 212, Быстрые: 165, Вкус: 101, Регуляторика: 240, Данные: 151, Финтех: 142, Аналитика: 192, Предсказуемые: 273 },
-  mobile: { Данные: 122, Вкус: 85, Въедливые: 159, Результат: 148, Открытые: 147, Экспертиза: 167, Аналитика: 154, Ответственность: 232, Аккуратные: 168, Финтех: 116, Вдумчивые: 161, Партнёрство: 183, Предсказуемые: 215, Регуляторика: 190, Быстрые: 133 },
-};
 
 let fails = 0;
 const ok = (cond, name) => { console.log(`${cond ? '✓' : '✗'} ${name}`); if (!cond) fails++; };
@@ -78,14 +72,9 @@ for (const width of [1440, 1024, 768, 393, 360]) {
     const d = overlap(rects[i].pts, rects[j].pts);
     if (d > worst) { worst = d; pair = `${rects[i].label} × ${rects[j].label}`; }
   }
-  ok(worst <= 2, `${width}: пересечений плашек нет (максимум ${worst.toFixed(2)} px${pair ? ` — ${pair}` : ''})`);
+  ok(worst <= 2, `${width}: пересечений качеств нет (максимум ${worst.toFixed(2)} px${pair ? ` — ${pair}` : ''})`);
   const visible = await page.evaluate(() => [...document.querySelectorAll('.pile__item')].every((el) => getComputedStyle(el).opacity === '1'));
-  ok(visible, `${width}: все плашки видны после падения`);
-  if (width === 1440 || width === 393 || width === 360) {
-    const table = FIGMA_WIDTH[width >= 792 ? 'desktop' : 'mobile'];
-    const off = rects.map((r) => [r.label, r.layoutWidth - table[r.label]]).filter(([, d]) => Math.abs(d) > 4);
-    ok(off.length === 0, `${width}: ширины плашек как в макете ±4 px${off.length ? ` (${off.map(([l, d]) => `${l} ${d > 0 ? '+' : ''}${d}`).join(', ')})` : ''}`);
-  }
+  ok(visible, `${width}: все качества видны после падения`);
   ok(errors.length === 0, `${width}: ошибок в консоли нет${errors.length ? ` (${errors.join('; ')})` : ''}`);
   await page.evaluate(() => scrollTo(0, 0));
   await page.waitForTimeout(1500); // ползунок прокрутки гаснет
