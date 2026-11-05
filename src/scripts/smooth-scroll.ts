@@ -23,15 +23,15 @@ function stop() {
   lenis = null;
 }
 
-// Открытое мобильное меню или бриф — страницу под ними не крутим
-const overlayOpen = () => root.classList.contains('is-menu-open') || root.classList.contains('is-brief-open');
+// Открытый бриф — страницу под ним не крутим
+const overlayOpen = () => root.classList.contains('is-brief-open');
 new MutationObserver(() => {
   if (overlayOpen()) lenis?.stop();
   else lenis?.start();
 }).observe(root, { attributes: true, attributeFilter: ['class'] });
 
 // Якорные ссылки: свой обработчик, чтобы цель считалась от реального положения страницы
-// и переход из мобильного меню начинался после его закрытия
+// и переход из брифа начинался после его закрытия
 document.addEventListener('click', (event) => {
   if (!lenis || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
   const link = (event.target as Element).closest<HTMLAnchorElement>('a[href^="#"]');
@@ -45,7 +45,7 @@ document.addEventListener('click', (event) => {
     const y = target.getBoundingClientRect().top + scrollY - parseFloat(getComputedStyle(target).scrollMarginTop || '0');
     lenis?.scrollTo(y, { duration: 1.2, easing });
   };
-  // Меню/бриф закрываются своим обработчиком раньше, а класс на html снимается по событию close
+  // Бриф закрывается своим обработчиком раньше, а класс на html снимается по событию close
   const overlay = link!.closest('dialog');
   if (overlay && overlayOpen()) overlay.addEventListener('close', () => requestAnimationFrame(go), { once: true });
   else go();

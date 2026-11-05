@@ -95,8 +95,6 @@ if (brief && form) {
       if (brief.open) return;
       history.pushState({ brief: true }, '', '#brief');
       pushedHash = true;
-      // мобильное меню закрываем, чтобы бриф не открылся под ним
-      document.querySelector<HTMLDialogElement>('#mobile-menu[open]')?.close();
       open(trigger);
       return;
     }

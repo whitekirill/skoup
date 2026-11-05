@@ -118,7 +118,7 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
 
 <style is:global>
   /*
-   * Пока бриф открыт, страница под ним чуть уменьшается; шапка и sticky CTA гаснут.
+   * Пока бриф открыт, страница под ним чуть уменьшается.
    * overflow у страницы не трогаем: модальный dialog на весь экран и так забирает колесо, тач
    * и фокус (overscroll-behavior: contain), а смена overflow убирала полосу прокрутки —
    * страница прыгала вбок и перекладывалась целиком, отсюда рывки при открытии и закрытии.
@@ -128,19 +128,13 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
     overflow: visible;
   }
 
-  html.is-brief-open .header,
-  html.is-brief-open .sticky-cta {
-    opacity: 0;
-  }
 
   @media (prefers-reduced-motion: no-preference) {
-    .page > main,
-    .page > footer {
+    .page > main {
       transition: scale 700ms cubic-bezier(0.76, 0, 0.24, 1);
     }
 
-    html.is-brief-open .page > main,
-    html.is-brief-open .page > footer {
+    html.is-brief-open .page > main {
       scale: 0.96;
     }
   }
