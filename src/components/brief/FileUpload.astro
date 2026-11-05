@@ -4,10 +4,7 @@
  * Default/Hover — ссылка «Прикрепить документ до 50 МБ»; Attached/Multiple — список файлов,
  * ссылка «Прикрепить ещё»; Error — строка файла с причиной. Список рисует скрипт брифа по шаблону.
  */
-import AddIcon from '../../assets/icons/add.svg';
-import FileIcon from '../../assets/icons/file-text.svg';
-import WarnIcon from '../../assets/icons/error-warning.svg';
-import CloseIcon from '../../assets/icons/close.svg';
+import Icon from '../Icon.astro';
 import { FILES } from '../../data/brief';
 
 const accept = FILES.extensions.map((ext) => `.${ext}`).join(',');
@@ -17,7 +14,7 @@ const accept = FILES.extensions.map((ext) => `.${ext}`).join(',');
   <ul class="upload__files" data-upload-list aria-label="Прикреплённые файлы" hidden></ul>
   <input class="visually-hidden" type="file" id="brief-files" multiple accept={accept} tabindex="-1" aria-hidden="true" data-upload-input />
   <button class="upload__add" type="button" data-upload-add>
-    <AddIcon aria-hidden="true" />
+    <Icon name="plus-line" />
     <span class="upload__label t-body-m">
       <span class="upload__action" data-upload-action>Прикрепить документ</span>
       <span class="upload__limit">до 50 МБ</span>
@@ -26,14 +23,14 @@ const accept = FILES.extensions.map((ext) => `.${ext}`).join(',');
 
   <template data-upload-item>
     <li class="file">
-      <span class="file__icon file__icon--ok" aria-hidden="true"><FileIcon /></span>
-      <span class="file__icon file__icon--error" aria-hidden="true"><WarnIcon /></span>
+      <span class="file__icon file__icon--ok" aria-hidden="true"><Icon name="file-line" /></span>
+      <span class="file__icon file__icon--error" aria-hidden="true"><Icon name="exclamation-circle-line" /></span>
       <span class="file__text t-body-m">
         <span class="file__name" data-file-name></span>
         <span class="file__meta" data-file-meta></span>
       </span>
-      <button class="file__remove" type="button" data-file-remove>
-        <CloseIcon aria-hidden="true" />
+      <button class="file__remove" type="button" aria-label="Удалить файл" data-file-remove>
+        <Icon name="x-line" />
       </button>
     </li>
   </template>
@@ -64,8 +61,8 @@ const accept = FILES.extensions.map((ext) => `.${ext}`).join(',');
 
   .upload__add :global(svg) {
     flex-shrink: 0;
-    width: 24px;
-    height: 24px;
+    width: var(--space-24);
+    height: var(--space-24);
   }
 
   .upload__label {
@@ -78,7 +75,7 @@ const accept = FILES.extensions.map((ext) => `.${ext}`).join(',');
     color: var(--color-text-secondary-inversion);
   }
 
-  @media (hover: hover) {
+  @media (hover: hover) and (pointer: fine) {
     .upload__add:hover .upload__action {
       text-decoration: underline;
       text-underline-offset: from-font;
@@ -110,8 +107,8 @@ const accept = FILES.extensions.map((ext) => `.${ext}`).join(',');
 
   :global(.file__icon svg),
   :global(.file__remove svg) {
-    width: 24px;
-    height: 24px;
+    width: var(--space-24);
+    height: var(--space-24);
   }
 
   :global(.file__icon--error),
@@ -152,7 +149,7 @@ const accept = FILES.extensions.map((ext) => `.${ext}`).join(',');
     transition: color 150ms ease-out;
   }
 
-  @media (hover: hover) {
+  @media (hover: hover) and (pointer: fine) {
     :global(.file__remove:hover) {
       color: var(--color-text-primary);
     }

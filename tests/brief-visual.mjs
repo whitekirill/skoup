@@ -45,7 +45,7 @@ for (const [width, kind] of [[1440, 'desktop'], [393, 'mobile']]) {
   await page.goto(url);
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(400);
-  compare(await shot(page, width), `tests/screens/figma/brief-${kind}.png`, `brief-${kind}`);
+  compare(await shot(page, width), `tests/screens/figma/v2/brief-${kind}.png`, `brief-${kind}`);
   // экран успеха: заполняем и отправляем (мок 800 мс)
   await page.setViewportSize({ width, height: 900 });
   await page.fill('#brief-name', 'Анна Смирнова');
@@ -53,11 +53,11 @@ for (const [width, kind] of [[1440, 'desktop'], [393, 'mobile']]) {
   await page.fill('#brief-contact', 'anna@company.ru');
   await page.fill('#brief-phone', '+7 999 123-45-67');
   await page.click('.chip:has(input[value="Стратегия"])');
-  await page.click('.chip:has(input[value="более 6 млн ₽"])');
+  await page.click('.chip:has(input[value="Более 6 млн ₽"])');
   await page.click('[data-brief-submit]');
   await page.waitForSelector('[data-brief-view="success"]:not([hidden])', { timeout: 5000 });
   await page.waitForTimeout(400);
-  compare(await shot(page, width), `tests/screens/figma/brief-success-${kind}.png`, `brief-success-${kind}`);
+  compare(await shot(page, width), `tests/screens/figma/v2/brief-success-${kind}.png`, `brief-success-${kind}`);
   await page.close();
 }
 await browser.close();

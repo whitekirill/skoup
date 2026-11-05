@@ -1,19 +1,15 @@
 ---
 /**
- * Бриф — полноэкранный оверлей поверх главной (Figma: desktop 451:5845, mobile 497:3898,
- * успех 490:3907 / 514:5507). Открывается по CTA с data-brief-open и по /#brief.
- * Desktop — две колонки (заголовок секции слева, поля справа), Mobile — одна.
+ * Бриф — полноэкранный оверлей поверх главной (Figma: desktop 581:20495, mobile 633:10386,
+ * успех 628:7677 / 633:10497). Открывается по CTA с data-brief-open и по /#brief.
+ * Desktop — две колонки (заголовок секции 440 слева, поля 782 справа), Mobile — одна. Футера нет.
  */
 import Button from '../Button.astro';
-import Footer from '../Footer.astro';
+import RoundButton from '../RoundButton.astro';
+import Icon from '../Icon.astro';
 import Field from './Field.astro';
 import Chip from '../Chip.astro';
 import FileUpload from './FileUpload.astro';
-import CloseIcon from '../../assets/icons/close.svg';
-import SendIcon from '../../assets/icons/send-plane.svg';
-import MailIcon from '../../assets/icons/mail.svg';
-import DownloadIcon from '../../assets/icons/download-2.svg';
-import letter from '../../assets/brief/letter.svg?url';
 import { EMAIL, LEGAL } from '../../data/site';
 import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/brief';
 ---
@@ -22,9 +18,7 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
 <dialog class="brief" id="brief" aria-labelledby="brief-title" aria-modal="true" data-brief>
   <div class="brief__main">
     <div class="brief__bar">
-      <Button variant="secondary" class="brief__close" aria-label="Закрыть бриф" data-brief-close>
-        <CloseIcon slot="icon" />
-      </Button>
+      <RoundButton variant="filled" icon="x-line" label="Закрыть бриф" class="brief__close" data-brief-close />
     </div>
 
     <!-- Форма -->
@@ -34,11 +28,11 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
         <span class="brief__muted">
           или напишите нам в{' '}
           <a class="brief__contact brief__contact--tg" href={TELEGRAM_URL} target="_blank" rel="noopener">
-            <SendIcon aria-hidden="true" /><span>telegram</span>
+            <Icon name="paperplane" size={44} /><span>telegram</span>
           </a>{' '}
           <br class="brief__br-desktop" />или на{' '}
           <a class="brief__contact brief__contact--mail" href={`mailto:${EMAIL}`}>
-            <MailIcon aria-hidden="true" /><span>{EMAIL}</span>
+            <Icon name="envelope" size={44} /><span>{EMAIL}</span>
           </a>
         </span>
       </h2>
@@ -102,27 +96,20 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
     <!-- Экран успеха -->
     <div class="brief__view brief__success" data-brief-view="success" hidden>
       <div class="brief__success-message">
-        <img class="brief__letter" src={letter} alt="" width="132" height="132" />
+        <Icon name="check-circle" size={80} class="brief__check" />
         <div class="brief__success-text">
-          <h2 class="t-h2" tabindex="-1" data-brief-success-title>
-            Спасибо!<br />Заявка отправлена,<br />скоро свяжемся с&nbsp;вами
-          </h2>
+          <h2 class="t-h3" tabindex="-1" data-brief-success-title>Заявка отправлена,<br />скоро свяжемся с&nbsp;вами</h2>
           <p class="brief__success-note t-body-m">
             Изучим бриф, при необходимости уточним детали<br class="brief__br-desktop" /> и предложим время для звонка.
           </p>
         </div>
       </div>
       <div class="brief__success-actions">
-        <Button variant="primary" href={PRESENTATION_URL} download>
-          Скачать презентацию
-          <DownloadIcon slot="icon" />
-        </Button>
+        <Button variant="primary" href={PRESENTATION_URL} download iconRight="arrow-to-bracket-down-line">Презентация</Button>
         <Button variant="secondary" data-brief-close>На главную</Button>
       </div>
     </div>
   </div>
-
-  <Footer compact />
 </dialog>
 
 <script>
@@ -243,7 +230,7 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
     /* Контент — лесенкой: заголовок → секции → кнопка, шаг 60 мс, пока панель доезжает */
     .brief__reveal {
       opacity: 0;
-      translate: 0 24px;
+      translate: 0 var(--space-24);
       transition:
         opacity 300ms ease-out,
         translate 300ms ease-out;
@@ -286,14 +273,14 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: var(--gap-l);
-    padding: var(--layout-page-padding) var(--container-pad) var(--layout-section-padding);
+    gap: var(--layout-section-padding);
+    padding: var(--space-32) var(--container-pad) var(--layout-section-padding);
   }
 
   /* × — справа вверху, в строке заголовка (desktop) */
   .brief__bar {
     position: absolute;
-    top: var(--layout-page-padding);
+    top: var(--space-32);
     right: var(--container-pad);
     z-index: 1;
   }
@@ -301,7 +288,7 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
   .brief__view {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-l);
+    gap: var(--layout-section-padding);
   }
 
   .brief__view[hidden] {
@@ -338,26 +325,25 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
   .brief__contact {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-12);
+    gap: var(--gap-3xs);
     color: var(--color-text-secondary);
     word-spacing: normal;
     vertical-align: top;
     transition: color 200ms ease-out;
   }
 
-  .brief__contact span {
-    text-decoration: underline;
-    text-decoration-thickness: 8.5%;
-    text-underline-offset: from-font;
-  }
-
+  /* иконка 44 на desktop, на мобильном — по высоте строки H2 */
   .brief__contact :global(svg) {
-    flex-shrink: 0;
-    width: calc(var(--typography-h2-size) - 4px);
-    height: calc(var(--typography-h2-size) - 4px);
+    width: var(--space-44);
+    height: var(--space-44);
   }
 
-  @media (hover: hover) {
+  .brief__contact:focus-visible {
+    outline: none;
+    color: var(--color-text-primary);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
     .brief__contact--tg:hover {
       color: var(--color-text-accent-2);
     }
@@ -370,7 +356,7 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
   .brief__form {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-l);
+    gap: var(--layout-section-padding);
   }
 
   /* Секция: заголовок 440 слева, поля 782 справа */
@@ -412,7 +398,7 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
   .brief__chips {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-12);
+    gap: var(--gap-3xs);
   }
 
   .brief__group-error {
@@ -423,7 +409,7 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
   .brief__task {
     display: flex;
     flex-direction: column;
-    gap: var(--space-32);
+    gap: var(--gap-s);
   }
 
   .brief__submit {
@@ -456,33 +442,43 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
     transition: color 150ms ease-out;
   }
 
-  @media (hover: hover) {
+  .brief__consent a:focus-visible {
+    outline: none;
+    color: var(--color-text-accent-2-hover);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
     .brief__consent a:hover {
       color: var(--color-text-accent-2-hover);
     }
   }
 
-  /* Экран успеха */
+  /* Экран успеха: по центру, колонка 782 */
   .brief__success {
-    gap: var(--space-64);
+    align-items: center;
+    align-self: center;
+    gap: var(--space-44);
+    width: 100%;
     max-width: calc(782 / 1352 * 100%);
+    padding-top: calc(var(--space-56) + var(--layout-section-padding));
+    text-align: center;
   }
 
   .brief__success-message {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: var(--gap-s);
   }
 
-  .brief__letter {
-    width: var(--size-format-illustration);
-    height: var(--size-format-illustration);
+  .brief__success-message :global(.brief__check) {
+    color: var(--color-element-success);
   }
 
   .brief__success-text {
     display: flex;
     flex-direction: column;
-    gap: var(--space-24);
+    gap: var(--gap-2xs);
   }
 
   .brief__success-text h2 {
@@ -495,8 +491,9 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
 
   .brief__success-actions {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-12);
+    justify-content: center;
+    gap: var(--gap-3xs);
+    width: 100%;
   }
 
   @media (max-width: 767px) {
@@ -507,13 +504,18 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
     /* × — отдельной строкой сверху и закреплён при прокрутке */
     .brief__bar {
       position: sticky;
-      top: var(--layout-page-padding);
+      top: var(--space-32);
       display: flex;
       justify-content: flex-end;
     }
 
+    /* × и заголовок — gap-xs; до экрана успеха — section-padding, как в макете */
     .brief__main {
-      padding-top: var(--layout-page-padding);
+      gap: var(--gap-xs);
+    }
+
+    .brief__success {
+      padding-top: calc(var(--layout-section-padding) - var(--gap-xs));
     }
 
     .brief__title,
@@ -523,7 +525,7 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
 
     .brief__section {
       flex-direction: column;
-      gap: var(--gap-xs);
+      gap: 0;
     }
 
     .brief__heading,

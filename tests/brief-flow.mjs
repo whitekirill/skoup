@@ -115,7 +115,7 @@ await page.click('.chip:has(input[value="Стратегия"])');
 await page.click('.chip:has(input[value="Сайт"])');
 check((await errText('services')) === '', 'ошибка услуг исчезает после выбора');
 await page.click('.chip:has(input[value="3 млн ₽ - 6 млн ₽"])');
-await page.click('.chip:has(input[value="более 6 млн ₽"])');
+await page.click('.chip:has(input[value="Более 6 млн ₽"])');
 check((await page.evaluate(() => document.querySelectorAll('input[name="budget"]:checked').length)) === 1, 'бюджет — ровно один вариант');
 
 // 7. Файлы
@@ -143,7 +143,7 @@ await page.click('[data-brief-submit]');
 await page.waitForSelector('[data-brief-view="success"]:not([hidden])', { timeout: 5000 });
 check(true, 'экран успеха показан');
 const has = (k, v) => lastBody.includes(`name="${k}"\r\n\r\n${v}`);
-check(has('phone', '+79991234567') && has('name', 'Анна') && has('company', 'Банк') && has('contact', 'https://t.me/anna_skoup') && has('contact_type', 'url') && has('budget', 'более 6 млн ₽'), 'в заявке поля, телефон +79991234567, contact с https:// и contact_type=url');
+check(has('phone', '+79991234567') && has('name', 'Анна') && has('company', 'Банк') && has('contact', 'https://t.me/anna_skoup') && has('contact_type', 'url') && has('budget', 'Более 6 млн ₽'), 'в заявке поля, телефон +79991234567, contact с https:// и contact_type=url');
 check((lastBody.match(/name="services"/g) || []).length === 2, 'в заявке две услуги');
 check(lastBody.includes('filename="brief-skoup.pdf"') && !lastBody.includes('big.pdf'), 'в заявку ушёл только файл без ошибки');
 check(lastBody.includes('multipart/form-data') || /^--/.test(lastBody), 'multipart/form-data');
@@ -183,8 +183,10 @@ await page.keyboard.type('Финтех'); await page.keyboard.press('Tab');
 await page.keyboard.type('@petr_fintech'); await page.keyboard.press('Tab');
 await page.keyboard.type('+7 912 000 00 00'); await page.keyboard.press('Tab');
 await page.keyboard.press('Space'); // первая услуга
-const chipFocus = await page.evaluate(() => getComputedStyle(document.activeElement.closest('.chip')).outlineStyle);
-check(chipFocus === 'solid', 'фокус на чипсе виден (outline)');
+// обводок нет: фокус с клавиатуры — фон (element/border-2, у выбранного — surface/primary-inversion)
+await page.waitForTimeout(250);
+const chipFocus = await page.evaluate(() => { const c = getComputedStyle(document.activeElement.closest('.chip')); return { outline: c.outlineStyle, bg: c.backgroundColor }; });
+check(chipFocus.outline === 'none' && chipFocus.bg !== 'rgb(247, 247, 247)', `фокус на чипсе виден фоном, без обводки (${chipFocus.bg})`);
 // до бюджета: Tab по услугам → поле задачи → «Прикрепить» → первый вариант бюджета, стрелкой — выбор
 for (let i = 0; i < 9; i++) { await page.keyboard.press('Tab'); if (await page.evaluate(() => document.activeElement?.name === 'budget')) break; }
 await page.keyboard.press('Space');
