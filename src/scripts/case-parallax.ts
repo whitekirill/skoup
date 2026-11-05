@@ -43,7 +43,7 @@ export function mountCaseParallax() {
       else visible.delete(card);
     }
     schedule();
-  });
+  }, { rootMargin: '20% 0px' }); // считаем заранее, чтобы картинка входила в окно уже на месте
 
   const apply = () => {
     if (motion.matches) {

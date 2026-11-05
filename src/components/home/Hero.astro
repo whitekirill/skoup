@@ -71,6 +71,17 @@ import { CTA } from '../../data/site';
     gap: var(--gap-3xs);
   }
 
+  .hero__title {
+    text-wrap: balance;
+  }
+
+  /* перенос из макета — только у ширины макета, уже — строки выравниваются сами */
+  @media (max-width: 1279px) {
+    .hero__br {
+      display: none;
+    }
+  }
+
   .hero__clients {
     display: flex;
     flex-direction: column;

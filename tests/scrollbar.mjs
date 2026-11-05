@@ -12,7 +12,7 @@ const ok = (cond, name) => { console.log(`${cond ? '✓' : '✗'} ${name}`); if 
 for (const reduced of [false, true]) {
   console.log(reduced ? '— reduced motion' : '— обычный режим');
   const p = await b.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: reduced ? 'reduce' : 'no-preference' });
-  await p.goto(`http://localhost:${s.address().port}/`);
+  await p.goto(`http://localhost:${s.address().port}${process.env.PAGE ?? "/"}`);
   await p.waitForTimeout(800);
   const st = () => p.evaluate(() => {
     const t = document.querySelector('.scrollbar__thumb'); const r = t.getBoundingClientRect();
