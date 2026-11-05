@@ -2,7 +2,7 @@
 /**
  * Round button (Figma 592:13026). Style: Ghost / Filled × State: Default / Hover / Disabled.
  * Круглая 56: иконка 24 + поля 16. Стрелки отзывов, крестик закрытия брифа.
- * Hover, фокус и нажатие — кнопка чуть прозрачнее (opacity 0.8), без обводки. Иконка — цвета текста.
+ * Hover, фокус и нажатие — бледнеет иконка (opacity 0.6), плашка без изменений, без обводки. Иконка — цвета текста.
  */
 import type { HTMLAttributes } from 'astro/types';
 import Icon, { type IconName } from './Icon.astro';
@@ -45,16 +45,23 @@ const { variant = 'ghost', icon, label, disabled = false, class: className, ...r
     background: var(--color-surface-secondary);
   }
 
-  /* Hover, фокус и нажатие — чуть прозрачнее, фон не меняется */
-  .round:focus-visible,
-  .round:active {
+  /* Hover, фокус и нажатие — бледнеет только иконка, плашка не меняется */
+  .round > :global(svg) {
+    transition: opacity 150ms ease-out;
+  }
+
+  .round:focus-visible {
     outline: none;
-    opacity: 0.8;
+  }
+
+  .round:focus-visible > :global(svg),
+  .round:active > :global(svg) {
+    opacity: 0.6;
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .round:hover {
-      opacity: 0.8;
+    .round:hover > :global(svg) {
+      opacity: 0.6;
     }
   }
 

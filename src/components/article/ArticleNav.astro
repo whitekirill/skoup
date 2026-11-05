@@ -146,19 +146,26 @@ const { items } = Astro.props;
       width var(--nav-time) var(--nav-ease),
       background-color var(--nav-time) var(--nav-ease),
       color var(--nav-time) var(--nav-ease),
-      opacity 150ms ease-out,
       scale 150ms ease-out;
   }
 
-  /* Hover и фокус — чуть прозрачнее, как у всех кнопок */
+  /* Hover и фокус — бледнеют подпись и иконка, плашка не меняется, как у всех кнопок */
   .art-nav__button:focus-visible {
     outline: none;
-    opacity: 0.8;
+  }
+
+  /* бледнеет видимая подпись (раздел или «Закрыть») и иконка */
+  .art-nav:not(.is-open) .art-nav__button:is(:focus-visible, :active) .art-nav__current,
+  .art-nav.is-open .art-nav__button:is(:focus-visible, :active) .art-nav__close,
+  .art-nav__button:is(:focus-visible, :active) .art-nav__morph {
+    opacity: 0.6;
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .art-nav__button:hover {
-      opacity: 0.8;
+    .art-nav:not(.is-open) .art-nav__button:hover .art-nav__current,
+    .art-nav.is-open .art-nav__button:hover .art-nav__close,
+    .art-nav__button:hover .art-nav__morph {
+      opacity: 0.6;
     }
 
     .art-nav__item:hover {
@@ -189,6 +196,7 @@ const { items } = Astro.props;
   .art-nav__morph {
     grid-area: 1 / 2;
     flex-shrink: 0;
+    transition: opacity 150ms ease-out;
   }
 
   .art-nav__close {

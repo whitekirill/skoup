@@ -46,11 +46,12 @@
 
 ## Статья
 - `/blog/marketplaces-installments` (`src/pages/blog/*`, `src/components/article/*`): секции чередуют surface/primary и surface/tertiary, иллюстрации — экспорт кадров макета 2x (`src/assets/article/img/`) → AVIF/WebP/PNG, на мобильном в масштабе 0.6 с горизонтальной прокруткой; «Норма» — `Note.astro`; «Итог» — настоящая `<table>` с залипающей первой колонкой на мобильном.
-- Навигация (`ArticleNav.astro` + `src/scripts/article-nav.ts`): кнопка внизу по центру (24 px от низа), подпись — текущий раздел; прячется при скролле вниз (порог 10 px), видна вверху/внизу страницы, при открытом оглавлении и фокусе; оверлей static/black 16% + прогрессивный Blur/Overlay; Esc, клик по оверлею, «Закрыть», пункт — плавный скролл через Lenis.
+- Навигация (`ArticleNav.astro` + `src/scripts/article-nav.ts`): кнопка внизу по центру (24 px от низа), подпись — текущий раздел, в оглавлении он подсвечен; видна всё время между первым экраном и оффером «Заполнить бриф», на первом экране, оффере и в футере спрятана; оверлей static/black 16% + прогрессивный Blur/Overlay (в CSS только `backdrop-filter` без `-webkit-`: иначе минификатор выкидывает свойство); панель вырастает из кнопки, иконка строк превращается в крестик; Esc, клик по оверлею, «Закрыть», пункт — плавный скролл через Lenis.
+- Переход между страницами — View Transitions (`@view-transition` в `base.css`): заголовок карточки статьи перетекает в заголовок статьи (`data-vt-title`), остальное — fade + подъём; при reduced motion выключен.
 
 ## Компоненты (имена = имена в Figma)
 Button, RoundButton, ButtonSmall, Chip, TeamAvatar, BrandLink, ServiceCard, FormatCard, FactCard, CaseCard, ArticleCard, ArticleImage, ArticleNav, Input (brief/Field), FileUpload, Icon.
-Свойства компонентов в Figma = пропсы. Обводок у контролов нет ни в одном состоянии: фокус = вид Hover.
+Свойства компонентов в Figma = пропсы. Обводок у контролов нет ни в одном состоянии. Hover, фокус и нажатие — бледнеют только текст и иконка (opacity 0.6), плашка не меняется.
 
 ## Качество
 - Pixel perfect на 393 и 1440: Playwright-скриншоты страницы сравниваются со скриншотами нод Figma.

@@ -23,7 +23,7 @@ const Tag = href ? 'a' : 'article';
 <Tag class:list={['article-card', { 'article-card--soon': !href }]} href={href}>
   <ArticleImage type={image} alt={imageAlt} />
   <div class="article-card__content">
-    <p class="t-body-m">{title}<span class="article-card__rest">{rest}</span></p>
+    <p class="article-card__title t-body-m" data-vt-title={href ? '' : undefined}>{title}<span class="article-card__rest">{rest}</span></p>
     {href ? <ButtonSmall as="span">Читать статью</ButtonSmall> : <ButtonSmall disabled as="span">Скоро</ButtonSmall>}
   </div>
 </Tag>
@@ -43,8 +43,8 @@ const Tag = href ? 'a' : 'article';
     outline: none;
   }
 
-  a.article-card:focus-visible :global(.btn-s) {
-    opacity: 0.8;
+  a.article-card:focus-visible :global(.btn-s__text) {
+    opacity: 0.6;
   }
 
   .article-card__content {

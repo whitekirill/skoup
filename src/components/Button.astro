@@ -4,7 +4,7 @@
  * Type: Primary / Secondary / Inverse / Navbutton × State: Default / Hover / Focus / Disabled.
  * Всегда пилюля (radius/full). Высота и минимальная ширина — size/button/height (60 / 52):
  * кнопка с одной иконкой квадратная. Вертикальный отступ — size/button/padding-y.
- * Обводок нет ни в одном состоянии: hover, фокус и нажатие — кнопка чуть прозрачнее (opacity 0.8).
+ * Обводок нет ни в одном состоянии: hover, фокус и нажатие — текст и иконка бледнеют (opacity 0.6), плашка без изменений.
  * Иконки (iconLeft / iconRight — Amicons) всегда цвета текста кнопки.
  */
 import type { HTMLAttributes } from 'astro/types';
@@ -62,7 +62,7 @@ const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't
     white-space: nowrap;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition-property: color, background-color, opacity, scale;
+    transition-property: color, background-color, scale;
     transition-duration: 150ms;
     transition-timing-function: ease-out;
   }
@@ -101,15 +101,19 @@ const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't
     color: var(--color-text-primary);
   }
 
-  /* Hover, фокус с клавиатуры и нажатие — кнопка чуть прозрачнее, фон не меняется. Без обводки */
-  .btn:focus-visible,
-  .btn:active {
-    opacity: 0.8;
+  /* Hover, фокус с клавиатуры и нажатие — бледнеют только текст и иконка, плашка не меняется. Без обводки */
+  .btn > :global(*) {
+    transition: opacity 150ms ease-out;
+  }
+
+  .btn:focus-visible > :global(*),
+  .btn:active > :global(*) {
+    opacity: 0.6;
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .btn:hover {
-      opacity: 0.8;
+    .btn:hover > :global(*) {
+      opacity: 0.6;
     }
   }
 

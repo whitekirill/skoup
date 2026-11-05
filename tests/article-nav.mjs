@@ -1,4 +1,4 @@
-// Навигация по статье: подпись текущего раздела, прятание при скролле вниз и появление при скролле вверх,
+// Навигация по статье: подпись текущего раздела, видна между первым экраном и оффером,
 // открытие/закрытие (кнопка, Esc, оверлей, пункт), фокус, плавный переход к разделу. Пишет видео на 1440 и 393 (тач).
 // Запуск: npm run build && node tests/article-nav.mjs
 import { chromium } from '@playwright/test';
@@ -40,32 +40,24 @@ for (const [width, name] of [[1440, 'desktop'], [393, 'mobile']]) {
   const s0 = await state();
   ok(!s0.hidden && s0.bottom === 24, `${name}: после первого экрана кнопка видна, 24 px от низа (${s0.bottom})`);
   ok(mobile ? s0.width === width - 40 : s0.width === 356, `${name}: ширина кнопки ${s0.width}`);
-  // короткий скролл вниз — не прячется
-  if (mobile) await page.evaluate(() => scrollBy(0, 120)); else await page.mouse.wheel(0, 120);
+  // скролл вниз по статье — кнопка остаётся
+  if (mobile) { const y0 = await page.evaluate(() => scrollY); for (let i = 1; i <= 10; i++) { await page.evaluate((y) => window.scrollTo(0, y), y0 + i * 300); await page.waitForTimeout(60); } }
+  else { for (let i = 0; i < 12; i++) { await page.mouse.wheel(0, 300); await page.waitForTimeout(60); } }
   await page.waitForTimeout(1500);
-  ok(!(await state()).hidden, `${name}: от короткого скролла вниз (120 px) не прячется`);
-
-  // скролл вниз — прячется
-  const scrollTo = (y) => page.evaluate((y) => window.scrollTo(0, y), y);
-  if (mobile) { const y0 = await page.evaluate(() => scrollY); for (let i = 1; i <= 10; i++) { await scrollTo(y0 + i * 60); await page.waitForTimeout(60); } }
-  else { for (let i = 0; i < 12; i++) { await page.mouse.wheel(0, 60); await page.waitForTimeout(60); } }
+  ok(!(await state()).hidden, `${name}: при скролле по статье кнопка не прячется`);
+  // на оффере «Заполнить бриф» — спрятана
+  await page.evaluate(() => { const el = document.querySelector('.art-cta'); window.scrollTo(0, el.getBoundingClientRect().top + scrollY - innerHeight / 2); });
   await page.waitForTimeout(1500);
-  ok((await state()).hidden, `${name}: при скролле вниз кнопка уехала`);
-  // скролл вверх — появляется
-  if (mobile) await page.evaluate(() => scrollBy(0, -60)); else await page.mouse.wheel(0, -60);
-  await page.waitForTimeout(1200);
-  ok(!(await state()).hidden, `${name}: при скролле вверх кнопка вернулась`);
-
+  ok((await state()).hidden, `${name}: на оффере кнопка спрятана`);
   // подпись — текущий раздел
   await page.evaluate(() => { const el = document.getElementById('limit'); window.scrollTo(0, el.getBoundingClientRect().top + scrollY + 200); });
   await page.waitForTimeout(1500);
   const sl = await state();
-  ok(sl.label === 'Оформление лимита' && !sl.hidden, `${name}: при смене раздела кнопка появилась, подпись — «${sl.label}»`);
+  ok(sl.label === 'Оформление лимита' && !sl.hidden, `${name}: подпись — текущий раздел «${sl.label}»`);
   const cur = await page.evaluate(() => document.querySelector('[data-art-nav-item][aria-current="true"]')?.dataset.artNavItem);
   ok(cur === 'limit', `${name}: в оглавлении подсвечен текущий раздел (${cur})`);
 
   // открыть
-  if ((await state()).hidden) { if (mobile) await page.evaluate(() => scrollBy(0, -100)); else await page.mouse.wheel(0, -100); await page.waitForTimeout(800); }
   await page.click('[data-art-nav-button]');
   await page.waitForTimeout(500);
   const so = await state();
@@ -88,10 +80,10 @@ for (const [width, name] of [[1440, 'desktop'], [393, 'mobile']]) {
   await page.waitForTimeout(2000);
   const top = await page.evaluate(() => Math.round(document.getElementById('findings').getBoundingClientRect().top));
   ok(!(await state()).open && Math.abs(top) < 4, `${name}: пункт «Находки» — плавно к разделу и закрыть (верх раздела ${top})`);
-  // в самом низу кнопка видна
+  // в футере — спрятана
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await page.waitForTimeout(1500);
-  ok(!(await state()).hidden, `${name}: в самом низу кнопка видна`);
+  ok((await state()).hidden, `${name}: в футере кнопка спрятана`);
   await page.close();
   await ctx.close();
   const video = fs.readdirSync(OUT).filter((f) => f.endsWith('.webm') && !f.startsWith('nav-')).map((f) => path.join(OUT, f)).sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs)[0];
@@ -102,11 +94,9 @@ for (const [width, name] of [[1440, 'desktop'], [393, 'mobile']]) {
 {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
   await page.goto(url, { waitUntil: 'networkidle' });
-  await page.evaluate(async () => { scrollTo(0, document.getElementById('entry').offsetTop); await new Promise((r) => setTimeout(r, 1500)); for (let i = 1; i < 10; i++) { scrollBy(0, 60); await new Promise((r) => setTimeout(r, 50)); } });
-  await page.waitForTimeout(600);
+  await page.waitForTimeout(400);
   const r = await page.evaluate(() => { const d = getComputedStyle(document.querySelector('.art-nav__dock')); return { opacity: d.opacity, transform: d.transform }; });
-  // (на первых экранах кнопки нет — проверяем то же скрытие)
-  ok(r.opacity === '0' && r.transform === 'none', `reduced motion: кнопка гаснет без сдвига (${r.opacity}, ${r.transform})`);
+  ok(r.opacity === '0' && r.transform === 'none', `reduced motion: на первом экране кнопка скрыта прозрачностью, без сдвига (${r.opacity}, ${r.transform})`);
   await page.close();
 }
 await browser.close();
