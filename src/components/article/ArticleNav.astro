@@ -6,7 +6,6 @@
  * над кнопкой панель с разделами (текущий — Active), кнопка — «Закрыть».
  * Поведение — src/scripts/article-nav.ts.
  */
-import Icon from '../Icon.astro';
 
 interface Props {
   items: { id: string; label: string }[];
@@ -17,9 +16,10 @@ const { items } = Astro.props;
 <div class="art-nav" data-art-nav>
   <div class="art-nav__overlay" data-art-nav-overlay aria-hidden="true">
     <div class="art-nav__blur"></div>
+    <div class="art-nav__tint"></div>
   </div>
   <div class="art-nav__dock">
-    <nav class="art-nav__panel t-button-l" id="article-toc" aria-label="Содержание" data-art-nav-panel hidden>
+    <nav class="art-nav__panel t-button-l" id="article-toc" aria-label="Содержание" data-art-nav-panel inert>
       <ol class="art-nav__list">
         {
           items.map((item, i) => (
@@ -36,8 +36,13 @@ const { items } = Astro.props;
     <button class="art-nav__button t-button-l" type="button" aria-expanded="false" aria-controls="article-toc" data-art-nav-button>
       <span class="art-nav__current" data-art-nav-current>{items[0]?.label}</span>
       <span class="art-nav__close">Закрыть</span>
-      <Icon name="align-left-line" class="art-nav__icon-open" />
-      <Icon name="x-line" class="art-nav__icon-close" />
+      <!-- align-left (строки) ↔ x: две длинные строки поворачиваются в крестик, короткие гаснут -->
+      <svg class="art-nav__morph" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <line class="art-nav__line art-nav__line--1" x1="-9" x2="9" />
+        <line class="art-nav__line art-nav__line--2" x1="-6" x2="6" />
+        <line class="art-nav__line art-nav__line--3" x1="-9" x2="9" />
+        <line class="art-nav__line art-nav__line--4" x1="-6" x2="6" />
+      </svg>
     </button>
   </div>
 </div>
@@ -51,33 +56,44 @@ const { items } = Astro.props;
 <style>
   .art-nav {
     --nav-ease: cubic-bezier(0.2, 0, 0, 1);
+    --nav-time: 400ms;
   }
 
-  /* Оверлей: затемнение 16% на весь экран + размытие, которое нарастает сверху вниз */
+  /* Оверлей: размытие Blur/Overlay (0 сверху → 32 px снизу) и затемнение static/black 16% — отдельными слоями,
+     чтобы прозрачность затемнения не мешала backdrop-filter */
   .art-nav__overlay {
     position: fixed;
     inset: 0;
     z-index: 40;
-    background: color-mix(in srgb, var(--color-static-black) 16%, transparent);
-    opacity: 0;
     visibility: hidden;
-    transition:
-      opacity 250ms ease-out,
-      visibility 250ms;
+    transition: visibility var(--nav-time);
+  }
+
+  .art-nav__blur,
+  .art-nav__tint {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity var(--nav-time) var(--nav-ease);
   }
 
   .art-nav__blur {
-    position: absolute;
-    inset: 0;
     backdrop-filter: var(--effect-blur-overlay);
-    -webkit-backdrop-filter: var(--effect-blur-overlay);
     mask-image: var(--effect-blur-overlay-mask);
   }
 
+  .art-nav__tint {
+    background: color-mix(in srgb, var(--color-static-black) 16%, transparent);
+  }
+
   .art-nav.is-open .art-nav__overlay {
-    opacity: 1;
     visibility: visible;
-    transition: opacity 250ms ease-out;
+    transition: visibility 0s;
+  }
+
+  .art-nav.is-open .art-nav__blur,
+  .art-nav.is-open .art-nav__tint {
+    opacity: 1;
   }
 
   /* Кнопка и панель: по центру снизу, 24 px от низа окна */
@@ -94,16 +110,22 @@ const { items } = Astro.props;
     max-width: calc(100% - 2 * var(--layout-article-padding));
     translate: -50% 0;
     pointer-events: none;
-    transition: transform 250ms ease-out;
+    transition:
+      transform var(--nav-time) var(--nav-ease),
+      opacity var(--nav-time) var(--nav-ease);
   }
 
   .art-nav__dock > * {
     pointer-events: auto;
   }
 
-  /* Прячется при скролле вниз: уезжает за нижний край */
+  /* Спрятана (первый экран или скролл вниз): уезжает за нижний край */
   .art-nav.is-hidden:not(.is-open) .art-nav__dock {
     transform: translateY(calc(100% + var(--space-24)));
+  }
+
+  .art-nav.is-hidden:not(.is-open) .art-nav__dock > * {
+    pointer-events: none;
   }
 
   .art-nav__button {
@@ -120,23 +142,23 @@ const { items } = Astro.props;
     text-align: left;
     box-shadow: var(--effect-shadow-floating);
     -webkit-tap-highlight-color: transparent;
-    transition-property: background-color, color, scale;
-    transition-duration: 150ms;
-    transition-timing-function: ease-out;
+    transition:
+      width var(--nav-time) var(--nav-ease),
+      background-color var(--nav-time) var(--nav-ease),
+      color var(--nav-time) var(--nav-ease),
+      opacity 150ms ease-out,
+      scale 150ms ease-out;
   }
 
+  /* Hover и фокус — чуть прозрачнее, как у всех кнопок */
   .art-nav__button:focus-visible {
     outline: none;
-    background: var(--color-element-border-2);
+    opacity: 0.8;
   }
 
   @media (hover: hover) and (pointer: fine) {
     .art-nav__button:hover {
-      background: var(--color-element-border-2);
-    }
-
-    .art-nav.is-open .art-nav__button:hover {
-      background: var(--color-surface-secondary-inversion);
+      opacity: 0.8;
     }
 
     .art-nav__item:hover {
@@ -148,18 +170,29 @@ const { items } = Astro.props;
     }
   }
 
+  /* Подписи «раздел» и «Закрыть» лежат друг на друге и сменяются прозрачностью */
   .art-nav__current,
   .art-nav__close {
-    flex: 1;
+    grid-area: 1 / 1;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    transition: opacity 200ms ease-out;
   }
 
-  .art-nav__close,
-  .art-nav__button :global(.art-nav__icon-close) {
-    display: none;
+  .art-nav__button {
+    display: grid;
+    grid-template-columns: 1fr auto;
+  }
+
+  .art-nav__morph {
+    grid-area: 1 / 2;
+    flex-shrink: 0;
+  }
+
+  .art-nav__close {
+    opacity: 0;
   }
 
   .art-nav.is-open .art-nav__button {
@@ -168,30 +201,62 @@ const { items } = Astro.props;
     color: var(--color-text-primary-inversion);
   }
 
-  .art-nav.is-open .art-nav__button:focus-visible {
-    background: var(--color-surface-secondary-inversion);
+  .art-nav.is-open .art-nav__current {
+    opacity: 0;
   }
 
-  .art-nav.is-open .art-nav__current,
-  .art-nav.is-open .art-nav__button :global(.art-nav__icon-open) {
-    display: none;
+  .art-nav.is-open .art-nav__close {
+    opacity: 1;
   }
 
-  .art-nav.is-open .art-nav__close,
-  .art-nav.is-open .art-nav__button :global(.art-nav__icon-close) {
-    display: block;
+  /* Строки ↔ крестик: линии нарисованы вокруг (0,0) и расставлены transform-ом */
+  .art-nav__line {
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    transition:
+      transform var(--nav-time) var(--nav-ease),
+      opacity var(--nav-time) var(--nav-ease);
   }
 
-  /* Панель оглавления */
+  .art-nav__line--1 { transform: translate(12px, 4.5px); }
+  .art-nav__line--2 { transform: translate(9px, 9.5px); }
+  .art-nav__line--3 { transform: translate(12px, 14.5px); }
+  .art-nav__line--4 { transform: translate(9px, 19.5px); }
+
+  .art-nav.is-open .art-nav__line--1 { transform: translate(12px, 12px) rotate(45deg) scaleX(0.82); }
+  .art-nav.is-open .art-nav__line--3 { transform: translate(12px, 12px) rotate(-45deg) scaleX(0.82); }
+
+  .art-nav.is-open .art-nav__line--2,
+  .art-nav.is-open .art-nav__line--4 {
+    transform: translate(12px, 12px) scaleX(0);
+    opacity: 0;
+  }
+
+  /* Панель оглавления: растёт из кнопки — снизу, с прозрачностью и небольшим сдвигом */
   .art-nav__panel {
     width: 100%;
     padding: var(--space-24);
     border-radius: var(--radius-32);
     background: var(--color-surface-tertiary);
+    transform-origin: 50% 100%;
+    opacity: 0;
+    transform: translateY(var(--space-16)) scale(0.96);
+    visibility: hidden;
+    transition:
+      opacity var(--nav-time) var(--nav-ease),
+      transform var(--nav-time) var(--nav-ease),
+      visibility var(--nav-time);
   }
 
-  .art-nav__panel[hidden] {
-    display: none;
+  .art-nav.is-open .art-nav__panel {
+    opacity: 1;
+    transform: none;
+    visibility: visible;
+    transition:
+      opacity var(--nav-time) var(--nav-ease),
+      transform var(--nav-time) var(--nav-ease),
+      visibility 0s;
   }
 
   .art-nav__list {
@@ -207,7 +272,9 @@ const { items } = Astro.props;
     border-bottom: 1px solid transparent;
     color: var(--color-text-secondary);
     white-space: nowrap;
-    transition: color 150ms ease-out;
+    transition:
+      color 150ms ease-out,
+      border-color 150ms ease-out;
   }
 
   .art-nav__label {
@@ -238,36 +305,27 @@ const { items } = Astro.props;
     .art-nav__button:active {
       scale: 0.96;
     }
-
-    .art-nav__panel:not([hidden]) {
-      animation: none;
-      transition:
-        opacity 250ms var(--nav-ease),
-        translate 250ms var(--nav-ease);
-    }
-
-    @starting-style {
-      .art-nav__panel:not([hidden]) {
-        opacity: 0;
-        translate: 0 var(--space-12);
-      }
-    }
   }
 
-  /* reduced motion — кнопка не уезжает, а гаснет */
+  /* reduced motion — без сдвигов и превращений: только прозрачность */
   @media (prefers-reduced-motion: reduce) {
-    .art-nav__dock {
-      transition: opacity 250ms ease-out;
+    .art-nav__dock,
+    .art-nav__panel,
+    .art-nav.is-open .art-nav__panel {
+      transform: none;
     }
 
     .art-nav.is-hidden:not(.is-open) .art-nav__dock {
       transform: none;
       opacity: 0;
-      pointer-events: none;
     }
 
-    .art-nav.is-hidden:not(.is-open) .art-nav__dock > * {
-      pointer-events: none;
+    .art-nav__line {
+      transition: opacity var(--nav-time) var(--nav-ease);
+    }
+
+    .art-nav__button {
+      transition: background-color var(--nav-time), color var(--nav-time), opacity 150ms;
     }
   }
 

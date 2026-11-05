@@ -217,16 +217,23 @@ const LABEL = { yes: 'есть', no: 'нет', unknown: 'не дошли или 
     gap: var(--space-8) var(--space-24);
   }
 
-  /* Mobile (633:8590): плашка в колонке, поля 16; таблица листается, первая колонка 148 залипает */
+  /*
+   * Mobile: та же таблица, что на desktop (строки, подписи, логотипы в своём размере).
+   * Левая колонка закреплена (sticky, фон плашки и линия справа), колонки площадок листаются вбок и уходят под неё.
+   */
   @media (max-width: 767px) {
     .summary {
-      gap: var(--space-16);
-      padding: var(--space-16);
+      padding: var(--space-24) 0 var(--space-24) var(--space-16);
       border-radius: var(--radius-24);
+      overflow: hidden;
+    }
+
+    .summary__title,
+    .summary__legend {
+      padding-right: var(--space-16);
     }
 
     .summary__scroll {
-      margin-right: calc(-1 * var(--space-16));
       overflow-x: auto;
       overscroll-behavior-x: contain;
       scrollbar-width: none;
@@ -237,53 +244,23 @@ const LABEL = { yes: 'есть', no: 'нет', unknown: 'не дошли или 
     }
 
     .summary__table {
-      width: auto;
-      table-layout: fixed;
+      width: max-content;
     }
 
-    /* 148 + по 84 на площадку */
+    /* подписи строк 160, площадки по 140 — логотипы помещаются без уменьшения */
     .summary__col-label {
-      width: calc(var(--space-160) - var(--space-12));
+      width: var(--space-160);
     }
 
     .summary__table col:not(.summary__col-label) {
-      width: calc(var(--space-80) + var(--space-4));
-    }
-
-    .summary__table thead th,
-    .summary__table thead td {
-      height: var(--space-40);
-    }
-
-    .summary__table thead img {
-      height: auto;
-      max-width: calc(100% - var(--space-8));
-    }
-
-    .summary__group th,
-    .summary__group--first th {
-      padding: 0 0 var(--space-8);
-      height: calc(var(--space-32) + var(--space-4));
-      vertical-align: bottom;
-    }
-
-    .summary__row th,
-    .summary__row td {
-      height: var(--space-48);
-      padding: 0;
-    }
-
-    .summary__row .summary__label {
-      padding-right: var(--space-12);
-      font-size: var(--typography-body-xs-size);
-      line-height: var(--typography-body-xs-line-height);
-      letter-spacing: var(--typography-body-xs-letter-spacing);
+      width: calc(var(--space-120) + var(--space-20));
     }
 
     .summary__table .summary__label {
       position: sticky;
       left: 0;
       z-index: 1;
+      padding-right: var(--space-12);
       box-shadow: inset -1px 0 0 var(--color-element-border-2);
     }
 

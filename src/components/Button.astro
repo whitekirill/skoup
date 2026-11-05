@@ -4,7 +4,7 @@
  * Type: Primary / Secondary / Inverse / Navbutton × State: Default / Hover / Focus / Disabled.
  * Всегда пилюля (radius/full). Высота и минимальная ширина — size/button/height (60 / 52):
  * кнопка с одной иконкой квадратная. Вертикальный отступ — size/button/padding-y.
- * Обводок нет ни в одном состоянии: hover и фокус меняют фон или приглушают текст.
+ * Обводок нет ни в одном состоянии: hover, фокус и нажатие — кнопка чуть прозрачнее (opacity 0.8).
  * Иконки (iconLeft / iconRight — Amicons) всегда цвета текста кнопки.
  */
 import type { HTMLAttributes } from 'astro/types';
@@ -62,7 +62,7 @@ const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't
     white-space: nowrap;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition-property: color, background-color, scale;
+    transition-property: color, background-color, opacity, scale;
     transition-duration: 150ms;
     transition-timing-function: ease-out;
   }
@@ -101,40 +101,16 @@ const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't
     color: var(--color-text-primary);
   }
 
-  /* Hover и нажатие — вид Hover; фокус с клавиатуры — так же, без обводки */
-  .btn--primary:focus-visible {
-    background: var(--color-surface-secondary-inversion);
-  }
-  .btn--secondary:focus-visible,
-  .btn--nav:focus-visible {
-    background: var(--color-element-border-2);
-  }
-  .btn--inverse:focus-visible {
-    color: var(--color-text-secondary);
+  /* Hover, фокус с клавиатуры и нажатие — кнопка чуть прозрачнее, фон не меняется. Без обводки */
+  .btn:focus-visible,
+  .btn:active {
+    opacity: 0.8;
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .btn--primary:hover {
-      background: var(--color-surface-secondary-inversion);
+    .btn:hover {
+      opacity: 0.8;
     }
-    .btn--secondary:hover {
-      background: var(--color-element-border-2);
-      color: var(--color-text-secondary);
-    }
-    .btn--nav:hover {
-      background: var(--color-element-border-2);
-    }
-    .btn--inverse:hover {
-      color: var(--color-text-secondary);
-    }
-  }
-
-  .btn--primary:active {
-    background: var(--color-surface-secondary-inversion);
-  }
-  .btn--secondary:active,
-  .btn--nav:active {
-    background: var(--color-element-border-2);
   }
 
   .btn:focus-visible {

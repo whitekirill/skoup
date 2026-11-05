@@ -1,19 +1,23 @@
 // Навигация по статье.
-// Кнопка внизу: подпись — текущий раздел (IntersectionObserver по заголовкам разделов).
-// Прячется при скролле вниз и появляется при скролле вверх (порог 10 px), всегда видна в начале
-// статьи и в самом низу, пока открыто оглавление или кнопка в фокусе с клавиатуры.
+// Кнопка внизу: подпись — текущий раздел (заголовок раздела прошёл середину окна), в оглавлении он подсвечен.
+// На первом экране кнопки нет. Дальше прячется при скролле вниз — не сразу, а пройдя HIDE_AFTER px подряд,
+// и не раньше HOLD мс после того, как появилась; появляется при скролле вверх, при смене раздела и в самом низу.
+// Всегда видна, пока открыто оглавление или кнопка в фокусе с клавиатуры.
 // Источник скролла — общий: событие scroll окна (Lenis двигает нативный скролл, так что события те же).
 // Открытие: оверлей и панель, фокус на текущий пункт; закрытие — Esc, клик по оверлею, «Закрыть»,
 // выбор пункта (плавный скролл к разделу через Lenis), фокус возвращается на кнопку.
 import { getLenis } from './smooth-scroll';
 
-const THRESHOLD = 10; // px движения, чтобы кнопка спряталась или появилась
-const EDGE = 200; // px от верха и низа страницы, где кнопка видна всегда
+const HIDE_AFTER = 240; // px прокрутки вниз подряд, чтобы кнопка уехала
+const SHOW_AFTER = 24; // px прокрутки вверх, чтобы вернулась
+const HOLD = 1200; // мс после появления, пока кнопка не прячется
+const BOTTOM = 200; // px до конца страницы, где кнопка видна всегда
 const easing = (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t));
 
 export function mountArticleNav(root: HTMLElement) {
   const button = root.querySelector<HTMLButtonElement>('[data-art-nav-button]')!;
   const panel = root.querySelector<HTMLElement>('[data-art-nav-panel]')!;
+  const hero = document.querySelector<HTMLElement>('.art-hero');
   const overlay = root.querySelector<HTMLElement>('[data-art-nav-overlay]')!;
   const current = root.querySelector<HTMLElement>('[data-art-nav-current]')!;
   const links = Array.from(root.querySelectorAll<HTMLAnchorElement>('[data-art-nav-item]'));
@@ -22,7 +26,8 @@ export function mountArticleNav(root: HTMLElement) {
 
   // --- текущий раздел: последний, чей заголовок прошёл середину окна
   let active = 0;
-  const setActive = (i: number) => {
+  const setActive = (i: number, reveal = false) => {
+    if (reveal && i !== active) show();
     active = i;
     current.textContent = links[i].querySelector('.art-nav__label')!.textContent;
     links.forEach((a, j) => a.setAttribute('aria-current', String(j === i)));
@@ -32,48 +37,72 @@ export function mountArticleNav(root: HTMLElement) {
     sections.forEach((s, j) => {
       if (s.getBoundingClientRect().top < innerHeight * 0.5) i = j;
     });
-    if (i !== active) setActive(i);
+    if (i !== active) setActive(i, true);
   };
   const io = new IntersectionObserver(pick, { rootMargin: '0px 0px -50% 0px' });
   sections.forEach((s) => io.observe(s));
   setActive(0);
 
-  // --- прятать при скролле вниз
+  // --- показ и прятание
   let lastY = scrollY;
+  let down = 0; // сколько прокрутили вниз подряд
+  let up = 0; // сколько вверх подряд (медленный плавный скролл копится)
+  let shownAt = 0;
   let raf = 0;
+  let wasInHero = true;
+  const inHero = () => !!hero && hero.getBoundingClientRect().bottom > 0;
+  function show(force = false) {
+    down = 0;
+    if (!force && inHero()) return;
+    if (root.classList.contains('is-hidden')) {
+      root.classList.remove('is-hidden');
+      shownAt = performance.now();
+    }
+  }
   const update = () => {
     raf = 0;
     const y = scrollY;
+    const dy = y - lastY;
+    lastY = y;
     const max = document.documentElement.scrollHeight - innerHeight;
-    const atEdge = y < EDGE || y > max - EDGE;
-    const keep = root.classList.contains('is-open') || button.matches(':focus-visible');
-    if (atEdge || keep) {
-      root.classList.remove('is-hidden');
-      lastY = y;
-    } else if (y - lastY > THRESHOLD) {
-      root.classList.add('is-hidden');
-      lastY = y;
-    } else if (lastY - y > THRESHOLD) {
-      root.classList.remove('is-hidden');
-      lastY = y;
+    if (root.classList.contains('is-open') || button.matches(':focus-visible')) {
+      show(true);
+    } else if (inHero()) {
+      root.classList.add('is-hidden'); // первый экран — кнопки нет
+      down = up = 0;
+      wasInHero = true;
+    } else if (wasInHero) {
+      wasInHero = false; // ушли с первого экрана — кнопка появляется
+      show();
+    } else if (y > max - BOTTOM) {
+      show();
+    } else if (dy > 0) {
+      up = 0;
+      down += dy;
+      if (down > HIDE_AFTER && performance.now() - shownAt > HOLD) root.classList.add('is-hidden');
+    } else if (dy < 0) {
+      down = 0;
+      up -= dy;
+      if (up >= SHOW_AFTER) { up = 0; show(); }
     }
     pick();
   };
   addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(update); }, { passive: true });
-  button.addEventListener('focus', () => root.classList.remove('is-hidden'));
+  button.addEventListener('focus', () => { if (button.matches(':focus-visible')) show(true); });
+  update();
 
   // --- открыть / закрыть
   const isOpen = () => root.classList.contains('is-open');
   function open() {
     pick();
     root.classList.add('is-open');
-    panel.hidden = false;
+    panel.inert = false;
     button.setAttribute('aria-expanded', 'true');
     links[active].focus({ preventScroll: true });
   }
   function close(returnFocus = true) {
     root.classList.remove('is-open');
-    panel.hidden = true;
+    panel.inert = true;
     button.setAttribute('aria-expanded', 'false');
     if (returnFocus) button.focus({ preventScroll: true });
   }

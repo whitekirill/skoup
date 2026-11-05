@@ -2,7 +2,7 @@
 /**
  * Иллюстрация статьи «Image · …» (Figma 598:7137): экспорт кадра макета в 2x → AVIF / WebP + PNG.
  * Desktop — 1024 по центру (шире колонки текста), скругление radius/44.
- * Mobile — в масштабе 0.6, без обрезки: уходит за правое поле до края экрана и листается вбок.
+ * Mobile — в масштабе 0.6, листается вбок на всю ширину экрана (от поля текста до краёв, без обрезки у поля).
  */
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
@@ -57,16 +57,16 @@ const sizes = `(max-width: 767px) ${widths[0]}px, ${Math.round(w)}px`;
   }
 
   @media (max-width: 767px) {
-    /* выходим из колонки до правого края экрана, картинку листаем вбок */
+    /* область прокрутки — на всю ширину экрана: картинка стоит по полю текста и уезжает до краёв, не обрезаясь у поля */
     .art-figure {
       --scale: 0.6;
-      width: calc(100% + var(--layout-page-padding));
-      margin-right: calc(-1 * var(--layout-page-padding));
+      width: calc(100% + 2 * var(--layout-page-padding));
+      margin-inline: calc(-1 * var(--layout-page-padding));
     }
 
     .art-figure__scroll {
       justify-content: flex-start;
-      padding-right: var(--layout-page-padding);
+      padding-left: var(--layout-page-padding);
       overflow-x: auto;
       overscroll-behavior-x: contain;
       scrollbar-width: none;
@@ -74,6 +74,12 @@ const sizes = `(max-width: 767px) ${widths[0]}px, ${Math.round(w)}px`;
 
     .art-figure__scroll::-webkit-scrollbar {
       display: none;
+    }
+
+    /* правое поле у конца прокрутки: padding-right в flex-контейнере браузеры теряют */
+    .art-figure__scroll::after {
+      content: '';
+      flex: 0 0 var(--layout-page-padding);
     }
 
     .art-figure img {

@@ -1,7 +1,7 @@
 ---
 /**
  * Button small (Figma 606:11027). State: Default / Hover / Focus / Disabled; Label.
- * Default — фон element/border; Hover — тот же фон, текст приглушён; Focus — фон surface/tertiary;
+ * Default — фон element/border; Hover / Focus — кнопка чуть прозрачнее;
  * Disabled — фон surface/tertiary, текст secondary, прозрачность 0.5. Без обводок.
  * В кликабельной карточке — декоративный span (as="span"): состояния берутся от наведения на карточку.
  */
@@ -40,26 +40,22 @@ const Tag = as ?? (href && !disabled ? 'a' : 'button');
     color: var(--color-text-primary);
     white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
-    transition-property: background-color, scale;
+    transition-property: opacity, scale;
     transition-duration: 150ms;
     transition-timing-function: ease-out;
   }
 
-  .btn-s__text {
-    transition: opacity 150ms ease-out;
-  }
-
-  .btn-s:focus-visible {
+  /* Hover (свой или карточки-ссылки), фокус и нажатие — кнопка чуть прозрачнее */
+  .btn-s:focus-visible,
+  .btn-s:active {
     outline: none;
-    background: var(--color-surface-tertiary);
+    opacity: 0.8;
   }
 
-  /* Hover — свой или карточки, в которой лежит кнопка */
   @media (hover: hover) and (pointer: fine) {
-    .btn-s:not([aria-disabled='true'], :disabled):hover .btn-s__text,
-    :global(a:hover) > * .btn-s:not([aria-disabled='true']) .btn-s__text,
-    :global(a:hover) .btn-s:not([aria-disabled='true']) .btn-s__text {
-      opacity: 0.6;
+    .btn-s:not([aria-disabled='true'], :disabled):hover,
+    :global(a:hover) .btn-s:not([aria-disabled='true']) {
+      opacity: 0.8;
     }
   }
 

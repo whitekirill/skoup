@@ -2,7 +2,7 @@
 /**
  * Chip (Figma 632:7889). State: Default / Hover / Active; Label.
  * Это чекбокс (множественный выбор) или радио (один вариант): внутри настоящий input, клик переключает Default ↔ Active.
- * Default — surface/secondary; Hover и фокус с клавиатуры — element/border-2; Active — surface/primary-inversion,
+ * Default — surface/secondary; Hover и фокус с клавиатуры — чуть прозрачнее; Active — surface/primary-inversion,
  * текст инверсный. Без обводок.
  */
 interface Props {
@@ -32,7 +32,7 @@ const { type, name, value } = Astro.props;
     cursor: pointer;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
-    transition-property: background-color, color, scale;
+    transition-property: background-color, color, opacity, scale;
     transition-duration: 150ms;
     transition-timing-function: ease-out;
   }
@@ -54,13 +54,14 @@ const { type, name, value } = Astro.props;
     white-space: nowrap;
   }
 
+  /* Hover и фокус с клавиатуры — чип чуть прозрачнее, фон не меняется */
   .chip:has(.chip__input:focus-visible) {
-    background: var(--color-element-border-2);
+    opacity: 0.8;
   }
 
   @media (hover: hover) and (pointer: fine) {
     .chip:hover {
-      background: var(--color-element-border-2);
+      opacity: 0.8;
     }
   }
 

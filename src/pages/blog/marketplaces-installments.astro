@@ -310,10 +310,24 @@ const NAV = [
   }
 
   /* иллюстрации и таблица шире колонки: 1024 = 688 + 2 × 168 */
-  .art-section > :global(.art-figure),
   .art-section > .art-wide {
     width: 100%;
     max-width: calc(var(--layout-column-width) + 2 * (var(--space-160) + var(--space-8)));
+  }
+
+  @media (min-width: 768px) {
+    .art-section > :global(.art-figure) {
+      width: 100%;
+      max-width: calc(var(--layout-column-width) + 2 * (var(--space-160) + var(--space-8)));
+    }
+  }
+
+  /* на мобильном иллюстрация выходит на всю ширину экрана (поля — внутри её прокрутки) */
+  @media (max-width: 767px) {
+    .art-section > :global(.art-figure) {
+      width: calc(100% + 2 * var(--layout-page-padding));
+      max-width: none;
+    }
   }
 
   .art-section--primary {

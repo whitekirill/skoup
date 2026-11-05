@@ -215,10 +215,11 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
         visibility 0s;
     }
 
+    /* затемнение — мягче панели: без резкого перепада в середине, чуть дольше */
     .brief-shade {
       transition:
-        opacity 700ms var(--brief-ease),
-        visibility 700ms;
+        opacity 900ms cubic-bezier(0.25, 0.1, 0.25, 1),
+        visibility 900ms;
     }
 
     /* Контент — лесенкой: заголовок → секции → кнопка, шаг 60 мс, пока панель доезжает */
