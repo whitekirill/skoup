@@ -131,40 +131,37 @@
   --radius-24: 24px;
   --radius-28: 28px;
   --radius-32: 32px;
+  --radius-44: 44px;
   --radius-full: 999px;
 
-  /* ── Adaptive: лэйаут (Mobile 393 → Desktop 1440) ── */
-  --layout-page-width: 1440px;
-  --layout-page-padding: clamp(12px, -0.0115px + 3.0564vw, 44px); /* 12 → 44 */
-  --layout-section-padding: clamp(56px, 39.4842px + 4.2025vw, 100px); /* 56 → 100 */
-
-  /* ── Adaptive: зазоры ── */
-  --gap-xl: clamp(48px, 35.989px + 3.056vw, 80px);   /* 48 → 80 */
-  --gap-l: clamp(40px, 30.991px + 2.292vw, 64px);    /* 40 → 64 */
-  --gap-s: clamp(24px, 20.9971px + 0.7641vw, 32px); /* 24 → 32 */
-  --gap-xs: clamp(16px, 12.9971px + 0.7641vw, 24px); /* 16 → 24 */
-  --gap-2xs: clamp(12px, 10.4986px + 0.382vw, 16px); /* 12 → 16 */
-  --gap-3xs: clamp(8px, 6.4986px + 0.382vw, 12px); /* 8 → 12 */
-  --gap-4xs: clamp(6px, 5.2493px + 0.191vw, 8px); /* 6 → 8 */
-
-  /* ── Adaptive: размеры компонентов ── */
-  --size-button-height: clamp(52px, 50.4986px + 0.382vw, 56px); /* 52 → 56 */
-  --size-step-padding: clamp(0px, 27.5072px - 1.9102vw, 20px); /* 20 → 0 */
-  --size-fact-gap: clamp(24px, 8.9857px + 3.8204vw, 64px); /* 24 → 64 */
-  --size-format-illustration: clamp(100px, 87.9885px + 3.0564vw, 132px); /* 100 → 132 */
-  --size-format-gap: clamp(24px, -4.5272px + 7.2588vw, 100px); /* 24 → 100 */
-  --size-format-padding: clamp(24px, 16.4928px + 1.9102vw, 44px); /* 24 → 44 */
-  --size-case-media-height: clamp(402px, 282.6361px + 30.3725vw, 720px); /* 402 → 720 */
-  --size-service-illustration-width: 189px;
-  --size-service-illustration-height: 132px;
-  --size-service-padding: 16px;
-  --size-service-gap: clamp(16px, 9.9943px + 1.5282vw, 32px); /* 16 → 32 */
-  --surface-step-card: transparent;
-
-  /* ── Adaptive: типографика ── */
+  /* ── Шрифты и веса (Adaptive, одинаковые в обоих режимах) ── */
   --typography-family-sans: "Manrope", system-ui, sans-serif;
   --typography-family-mono: "Geist Mono", ui-monospace, monospace;
+  --typography-weight-medium: 500;
+  --typography-weight-light: 300;
+  --typography-body-m-weight-bold: 700;
 
+  /* ── Лэйаут: ширина колонки макета ── */
+  --layout-page-width: 1440px;
+
+  /* ── Иконки в карточках (Color: icon/*) ── */
+  --color-icon-green: #4ceb73;
+  --color-icon-purple: #c761fe;
+  --color-icon-yellow: #ebb94c;
+  --color-icon-blue: #4cabeb;
+  --color-icon-pink: #eb4c99;
+
+  /* ── Эффекты (Effect styles) ── */
+  /* Shadow/Floating — тень плавающих элементов */
+  --effect-shadow-floating: 0 24px 24px 2px rgb(0 0 0 / 12%);
+  /* Blur/Overlay — прогрессивное размытие 0 сверху → 32 px снизу: blur + маска-градиент на слое */
+  --effect-blur-overlay: blur(32px);
+  --effect-blur-overlay-mask: linear-gradient(to bottom, transparent, #000);
+
+  --surface-step-card: transparent;
+
+  /* adaptive:start */
+  /* ── Adaptive: типографика (Mobile 393 → Desktop 1440) ── */
   --typography-h1-size: clamp(40px, 27.9885px + 3.0564vw, 72px); /* 40 → 72 */
   --typography-h1-line-height: clamp(46px, 33.2378px + 3.2474vw, 80px); /* 46 → 80 */
   --typography-h1-letter-spacing: clamp(-2px, -0.6246px - 0.0955vw, -1px); /* -1 → -2 */
@@ -180,36 +177,66 @@
   --typography-h5-size: clamp(20px, 17.7479px + 0.5731vw, 26px); /* 20 → 26 */
   --typography-h5-line-height: clamp(26px, 23.7479px + 0.5731vw, 32px); /* 26 → 32 */
   --typography-h5-letter-spacing: clamp(-0.4px, -0.1249px - 0.0191vw, -0.2px); /* -0.2 → -0.4 */
-
-  --typography-body-l-size: clamp(18px, 15.748px + 0.573vw, 24px);         /* 18 → 24 */
-  --typography-body-l-line-height: clamp(26px, 23.748px + 0.573vw, 32px);  /* 26 → 32 */
+  --typography-body-l-size: clamp(18px, 15.7479px + 0.5731vw, 24px); /* 18 → 24 */
+  --typography-body-l-line-height: clamp(26px, 23.7479px + 0.5731vw, 32px); /* 26 → 32 */
   --typography-body-l-letter-spacing: 0px;
   --typography-body-m-size: clamp(16px, 14.4986px + 0.382vw, 20px); /* 16 → 20 */
-  --typography-body-m-line-height: clamp(22px, 21.2493px + 0.191vw, 24px); /* 22 → 24 */
+  --typography-body-m-line-height: clamp(26px, 23.7479px + 0.5731vw, 32px); /* 26 → 32 */
   --typography-body-m-letter-spacing: 0px;
+  --typography-body-m-paragraph-spacing: clamp(16px, 14.4986px + 0.382vw, 20px); /* 16 → 20 */
   --typography-body-s-size: clamp(14px, 13.2493px + 0.191vw, 16px); /* 14 → 16 */
-  --typography-body-s-line-height: clamp(18px, 17.2493px + 0.191vw, 20px); /* 18 → 20 */
+  --typography-body-s-line-height: clamp(22px, 21.2493px + 0.191vw, 24px); /* 22 → 24 */
   --typography-body-s-letter-spacing: clamp(-0.4px, -0.1249px - 0.0191vw, -0.2px); /* -0.2 → -0.4 */
-  --typography-body-xs-size: clamp(13px, 12.625px + 0.096vw, 14px);        /* 13 → 14 */
-  --typography-body-xs-line-height: clamp(16px, 15.249px + 0.191vw, 18px); /* 16 → 18 */
-  --typography-body-xs-letter-spacing: clamp(-0.4px, -0.125px - 0.019vw, -0.2px);
-
+  --typography-body-s-paragraph-spacing: 0px;
+  --typography-body-xs-size: clamp(13px, 12.6246px + 0.0955vw, 14px); /* 13 → 14 */
+  --typography-body-xs-line-height: clamp(16px, 15.2493px + 0.191vw, 18px); /* 16 → 18 */
+  --typography-body-xs-letter-spacing: clamp(-0.4px, -0.1249px - 0.0191vw, -0.2px); /* -0.2 → -0.4 */
   --typography-button-xl-size: clamp(18px, 15.7479px + 0.5731vw, 24px); /* 18 → 24 */
   --typography-button-xl-line-height: clamp(24px, 20.9971px + 0.7641vw, 32px); /* 24 → 32 */
   --typography-button-xl-letter-spacing: clamp(0.5px, 0.4437px + 0.0143vw, 0.65px); /* 0.5 → 0.65 */
   --typography-button-l-size: clamp(16px, 14.4986px + 0.382vw, 20px); /* 16 → 20 */
-  --typography-button-l-line-height: clamp(22px, 19.7479px + 0.5731vw, 28px); /* 22 → 28 */
+  --typography-button-l-line-height: clamp(24px, 22.4986px + 0.382vw, 28px); /* 24 → 28 */
   --typography-button-l-letter-spacing: clamp(0.5px, 0.4437px + 0.0143vw, 0.65px); /* 0.5 → 0.65 */
   --typography-button-s-size: clamp(14px, 13.2493px + 0.191vw, 16px); /* 14 → 16 */
   --typography-button-s-line-height: clamp(18px, 17.2493px + 0.191vw, 20px); /* 18 → 20 */
   --typography-button-s-letter-spacing: clamp(0.5px, 0.4437px + 0.0143vw, 0.65px); /* 0.5 → 0.65 */
-
   --typography-caption-size: clamp(12px, 10.4986px + 0.382vw, 16px); /* 12 → 16 */
   --typography-caption-line-height: clamp(16px, 14.4986px + 0.382vw, 20px); /* 16 → 20 */
   --typography-caption-letter-spacing: 0px;
   --typography-display-size: clamp(32px, 22.9914px + 2.2923vw, 56px); /* 32 → 56 */
   --typography-display-line-height: clamp(38px, 26.7393px + 2.8653vw, 68px); /* 38 → 68 */
   --typography-display-letter-spacing: clamp(-0.6px, -0.4625px - 0.0096vw, -0.5px); /* -0.5 → -0.6 */
+
+  /* ── Adaptive: зазоры (Mobile 393 → Desktop 1440) ── */
+  --gap-xl: clamp(48px, 35.9885px + 3.0564vw, 80px); /* 48 → 80 */
+  --gap-l: clamp(40px, 30.9914px + 2.2923vw, 64px); /* 40 → 64 */
+  --gap-s: clamp(24px, 20.9971px + 0.7641vw, 32px); /* 24 → 32 */
+  --gap-xs: clamp(16px, 12.9971px + 0.7641vw, 24px); /* 16 → 24 */
+  --gap-2xs: clamp(12px, 10.4986px + 0.382vw, 16px); /* 12 → 16 */
+  --gap-3xs: clamp(8px, 6.4986px + 0.382vw, 12px); /* 8 → 12 */
+  --gap-4xs: clamp(6px, 5.2493px + 0.191vw, 8px); /* 6 → 8 */
+
+  /* ── Adaptive: лэйаут (Mobile 393 → Desktop 1440) ── */
+  --layout-page-padding: clamp(20px, 18.4986px + 0.382vw, 24px); /* 20 → 24 */
+  --layout-section-padding: clamp(56px, 39.4842px + 4.2025vw, 100px); /* 56 → 100 */
+  --layout-article-padding: clamp(20px, -113.6275px + 34.0019vw, 376px); /* 20 → 376 */
+
+  /* ── Adaptive: размеры компонентов (Mobile 393 → Desktop 1440) ── */
+  --size-button-height: clamp(52px, 48.9971px + 0.7641vw, 60px); /* 52 → 60 */
+  --size-button-padding-y: clamp(14px, 13.2493px + 0.191vw, 16px); /* 14 → 16 */
+  --size-step-padding: clamp(0px, 27.5072px - 1.9102vw, 20px); /* 20 → 0 */
+  --size-fact-gap: clamp(24px, 8.9857px + 3.8204vw, 64px); /* 24 → 64 */
+  --size-format-illustration: clamp(100px, 87.9885px + 3.0564vw, 132px); /* 100 → 132 */
+  --size-format-gap: clamp(24px, -4.5272px + 7.2588vw, 100px); /* 24 → 100 */
+  --size-format-padding: clamp(24px, 16.4928px + 1.9102vw, 44px); /* 24 → 44 */
+  --size-case-media-height: clamp(402px, 282.6361px + 30.3725vw, 720px); /* 402 → 720 */
+  --size-service-illustration-width: 189px;
+  --size-service-illustration-height: 132px;
+  --size-service-padding: 16px;
+  --size-service-card-height: clamp(404px, 382.9799px + 5.3486vw, 460px); /* 404 → 460 */
+  --size-service-gap: clamp(16px, 9.9943px + 1.5282vw, 32px); /* 16 → 32 */
+  --size-note-gap: clamp(16px, 14.4986px + 0.382vw, 20px); /* 16 → 20 */
+  /* adaptive:end */
 }
 
 /* Mobile-only значения, которые нельзя интерполировать (цвета, структура) */

@@ -3,12 +3,12 @@
 .t-h1, .t-h2, .t-h3, .t-h4, .t-h5,
 .t-body-l, .t-body-m, .t-body-s, .t-body-xs {
   font-family: var(--typography-family-sans);
-  font-weight: 500;
+  font-weight: var(--typography-weight-medium);
 }
 
 .t-button-xl, .t-button-l, .t-button-s, .t-caption, .t-display {
   font-family: var(--typography-family-mono);
-  font-weight: 500;
+  font-weight: var(--typography-weight-medium);
 }
 
 .t-h1 { font-size: var(--typography-h1-size); line-height: var(--typography-h1-line-height); letter-spacing: var(--typography-h1-letter-spacing); }
@@ -19,6 +19,8 @@
 
 .t-body-l  { font-size: var(--typography-body-l-size);  line-height: var(--typography-body-l-line-height);  letter-spacing: var(--typography-body-l-letter-spacing); }
 .t-body-m  { font-size: var(--typography-body-m-size);  line-height: var(--typography-body-m-line-height);  letter-spacing: var(--typography-body-m-letter-spacing); }
+/* Body/Medium Bold — выделение фраз в тексте и подписи над абзацем («Ozon», «WB») */
+.t-body-m-bold { font-size: var(--typography-body-m-size); line-height: var(--typography-body-m-line-height); letter-spacing: var(--typography-body-m-letter-spacing); font-family: var(--typography-family-sans); font-weight: var(--typography-body-m-weight-bold); }
 .t-body-s  { font-size: var(--typography-body-s-size);  line-height: var(--typography-body-s-line-height);  letter-spacing: var(--typography-body-s-letter-spacing); }
 .t-body-xs { font-size: var(--typography-body-xs-size); line-height: var(--typography-body-xs-line-height); letter-spacing: var(--typography-body-xs-letter-spacing); }
 
@@ -27,4 +29,4 @@
 .t-button-s  { font-size: var(--typography-button-s-size);  line-height: var(--typography-button-s-line-height);  letter-spacing: var(--typography-button-s-letter-spacing);  text-transform: uppercase; }
 
 .t-caption { font-size: var(--typography-caption-size); line-height: var(--typography-caption-line-height); letter-spacing: var(--typography-caption-letter-spacing); text-transform: uppercase; }
-.t-display { font-size: var(--typography-display-size); line-height: var(--typography-display-line-height); letter-spacing: var(--typography-display-letter-spacing); font-weight: 300; }
+.t-display { font-size: var(--typography-display-size); line-height: var(--typography-display-line-height); letter-spacing: var(--typography-display-letter-spacing); font-weight: var(--typography-weight-light); }
