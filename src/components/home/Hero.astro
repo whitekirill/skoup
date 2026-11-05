@@ -1,5 +1,8 @@
 ---
-/** Первый экран (Figma: desktop 581:19339, mobile 604:9399): вордмарк «СКОУП», заголовок, кнопки, клиенты */
+/**
+ * Первый экран (Figma: desktop 581:19339, mobile 604:9399): вордмарк «СКОУП», заголовок, кнопки, клиенты.
+ * При скролле вордмарк уезжает медленнее страницы и растворяется, контент наезжает (src/scripts/hero-wordmark.ts).
+ */
 import Button from '../Button.astro';
 import ClientLogos from '../ClientLogos.astro';
 import wordmarkDesktop from '../../assets/brand/wordmark-desktop.svg?url';
@@ -28,6 +31,12 @@ import { CTA } from '../../data/site';
   </div>
 </section>
 
+<script>
+  import { mountHeroWordmark } from '../../scripts/hero-wordmark';
+  const hero = document.querySelector<HTMLElement>('.hero');
+  if (hero) mountHeroWordmark(hero);
+</script>
+
 <style>
   .hero {
     --hero-gap: var(--space-100);
@@ -38,6 +47,8 @@ import { CTA } from '../../data/site';
     padding-top: var(--layout-page-padding);
     padding-bottom: var(--layout-section-padding);
     background: var(--color-surface-primary);
+    /* вордмарк при параллаксе не выходит за первый экран */
+    overflow: clip;
   }
 
   .hero__wordmark,
@@ -45,6 +56,10 @@ import { CTA } from '../../data/site';
     display: block;
     width: 100%;
     height: auto;
+  }
+
+  .hero__wordmark {
+    will-change: transform, opacity;
   }
 
   .hero__content {
@@ -55,6 +70,9 @@ import { CTA } from '../../data/site';
     width: 100%;
     max-width: var(--layout-column-width);
     text-align: center;
+    /* контент наезжает на вордмарк — поверх него */
+    position: relative;
+    z-index: 1;
   }
 
   .hero__main {

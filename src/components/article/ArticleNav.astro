@@ -2,7 +2,7 @@
 /**
  * Навигация по статье: Article nav button (624:6528), Article nav (624:6545), Article nav item (624:6543).
  * Закрыта (598:9833): плавающая кнопка внизу по центру — текущий раздел и иконка align-left.
- * Открыта (602:12258 / 637:8984): оверлей static/black 16% + прогрессивное размытие Blur/Overlay,
+ * Открыта (602:12258 / 637:8984): оверлей — градиент static/black снизу вверх (вместо размытия из макета),
  * над кнопкой панель с разделами (текущий — Active), кнопка — «Закрыть».
  * Поведение — src/scripts/article-nav.ts.
  */
@@ -15,7 +15,6 @@ const { items } = Astro.props;
 
 <div class="art-nav" data-art-nav>
   <div class="art-nav__overlay" data-art-nav-overlay aria-hidden="true">
-    <div class="art-nav__blur"></div>
     <div class="art-nav__tint"></div>
   </div>
   <div class="art-nav__dock">
@@ -59,8 +58,7 @@ const { items } = Astro.props;
     --nav-time: 400ms;
   }
 
-  /* Оверлей: размытие Blur/Overlay (0 сверху → 32 px снизу) и затемнение static/black 16% — отдельными слоями,
-     чтобы прозрачность затемнения не мешала backdrop-filter */
+  /* Оверлей: градиент static/black — тёмный у кнопки внизу, к верху прозрачный */
   .art-nav__overlay {
     position: fixed;
     inset: 0;
@@ -69,21 +67,12 @@ const { items } = Astro.props;
     transition: visibility var(--nav-time);
   }
 
-  .art-nav__blur,
   .art-nav__tint {
     position: absolute;
     inset: 0;
+    background: linear-gradient(to top, color-mix(in srgb, var(--color-static-black) 40%, transparent), transparent);
     opacity: 0;
     transition: opacity var(--nav-time) var(--nav-ease);
-  }
-
-  .art-nav__blur {
-    backdrop-filter: var(--effect-blur-overlay);
-    mask-image: var(--effect-blur-overlay-mask);
-  }
-
-  .art-nav__tint {
-    background: color-mix(in srgb, var(--color-static-black) 16%, transparent);
   }
 
   .art-nav.is-open .art-nav__overlay {
@@ -91,7 +80,6 @@ const { items } = Astro.props;
     transition: visibility 0s;
   }
 
-  .art-nav.is-open .art-nav__blur,
   .art-nav.is-open .art-nav__tint {
     opacity: 1;
   }

@@ -78,8 +78,13 @@ const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], f
 
   /* Рамка обложки; картинка внутри чуть больше (scale 1.08) — запас под параллакс */
   .case__media {
+    /* скругление 40 — по просьбе, токена radius/40 в Figma нет */
+    --case-radius: 40px;
     display: block;
     overflow: hidden;
+    border-radius: var(--case-radius);
+    /* Safari не всегда обрезает по скруглению картинку с transform внутри — clip-path надёжнее */
+    clip-path: inset(0 round var(--case-radius));
   }
 
   .case__media img {
