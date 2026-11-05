@@ -1,27 +1,33 @@
 ---
-/** FormatCard (Figma 411:9699): Illustration, Title, Description, Terms, Payment */
+/**
+ * Format card (Figma 592:12994): Icon, Title, Description, Time, Payment. Статичная.
+ */
+import Icon, { type IconName } from './Icon.astro';
+import type { IconColor } from './ServiceCard.astro';
 
 interface Props {
+  icon: IconName;
+  color: IconColor;
   title: string;
   description: string;
-  terms: string;
+  time: string;
   payment: string;
-  illustration: string;
-  /** Сдвиг точек внутри рамки иллюстрации, как в макете (доля ширины) */
 }
 
-const { title, description, terms, payment, illustration } = Astro.props;
+const { icon, color, title, description, time, payment } = Astro.props;
 ---
 
 <article class="format">
   <div class="format__top">
-    <img class="format__illustration" src={illustration} alt="" width="132" height="132" loading="lazy" decoding="async" />
-    <h3 class="t-h3">{title}</h3>
-    <p class="format__description t-body-m">{description}</p>
+    <Icon name={icon} size={32} class={`icon-${color}`} />
+    <div class="format__text">
+      <h3 class="t-body-l">{title}</h3>
+      <p class="format__secondary t-body-s">{description}</p>
+    </div>
   </div>
   <div class="format__bottom">
-    <p class="t-button-xl">{terms}</p>
-    <p class="format__payment t-caption">{payment}</p>
+    <p class="t-button-l">{time}</p>
+    <p class="format__secondary t-caption">{payment}</p>
   </div>
 </article>
 
@@ -29,9 +35,10 @@ const { title, description, terms, payment, illustration } = Astro.props;
   .format {
     display: flex;
     flex-direction: column;
-    gap: var(--size-format-gap);
-    padding: var(--size-format-padding);
-    background: var(--color-surface-primary);
+    gap: var(--gap-l);
+    padding: var(--space-24);
+    border-radius: var(--radius-24);
+    background: var(--color-static-white);
   }
 
   .format__top {
@@ -40,20 +47,19 @@ const { title, description, terms, payment, illustration } = Astro.props;
     gap: var(--gap-s);
   }
 
-  /* 132 → 100 на мобильном; SVG прибит к левому верхнему углу (xMinYMin) */
-  .format__illustration {
-    width: var(--size-format-illustration);
-    height: var(--size-format-illustration);
-  }
-
-  .format__description,
-  .format__payment {
-    color: var(--color-text-secondary);
+  .format__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
   }
 
   .format__bottom {
     display: flex;
     flex-direction: column;
     gap: var(--gap-4xs);
+  }
+
+  .format__secondary {
+    color: var(--color-text-secondary);
   }
 </style>

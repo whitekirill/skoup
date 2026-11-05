@@ -1,49 +1,48 @@
 ---
-/** ServiceCard (Figma 411:11514): Illustration, Title, Description */
+/**
+ * Service card (Figma 592:12984): Icon + текст Body/Large — заголовок text/primary, описание text/secondary.
+ * Статичная. Цвет иконки — токен icon/*.
+ */
+import Icon, { type IconName } from './Icon.astro';
 import { typograph } from '../utils/typograph';
 
+export type IconColor = 'green' | 'purple' | 'yellow' | 'blue' | 'pink';
+
 interface Props {
+  icon: IconName;
+  color: IconColor;
   title: string;
+  /** HTML: переносы <br> из макета — только на desktop */
   description: string;
-  illustration: string;
 }
 
-const { title, description, illustration } = Astro.props;
+const { icon, color, title, description } = Astro.props;
 ---
 
 <article class="service">
-  <img class="service__illustration" src={illustration} alt="" width="189" height="132" loading="lazy" decoding="async" />
-  <div class="service__body">
-    <h3 class="service__title t-h5" set:html={title} />
-    <p class="service__description t-body-s">{typograph(description)}</p>
-  </div>
+  <Icon name={icon} size={32} class={`service__icon icon-${color}`} />
+  <p class="t-body-l">
+    <span>{typograph(title)}</span>{' '}<span class="service__description" set:html={typograph(description).replace(/\s*<br>/g, ' <br>')} />
+  </p>
 </article>
 
 <style>
-  /* Высота по содержимому; ширина — колонка сетки (258 на 1440, вся ширина на мобилке) */
   .service {
     display: flex;
     flex-direction: column;
-    gap: var(--size-service-gap);
-    padding: var(--size-service-padding);
+    gap: var(--gap-s);
+    padding: var(--space-24);
+    border-radius: var(--radius-24);
     background: var(--color-static-white);
-  }
-
-  /* 189×132; в узкой колонке уменьшается пропорционально */
-  .service__illustration {
-    width: var(--size-service-illustration-width);
-    max-width: 100%;
-    height: auto;
-    aspect-ratio: 189 / 132;
-  }
-
-  .service__body {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-12);
   }
 
   .service__description {
     color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 767px) {
+    .service__description :global(br) {
+      display: none;
+    }
   }
 </style>

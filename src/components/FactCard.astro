@@ -1,16 +1,27 @@
 ---
-/** FactCard (Figma 411:1596): подпись Caption/Mono + число Display/Mono */
+/**
+ * Fact card (Figma 592:13000): Icon, Value (Header/H3), Label (Body/Small text/secondary). Статичная.
+ */
+import Icon, { type IconName } from './Icon.astro';
+import type { IconColor } from './ServiceCard.astro';
+
 interface Props {
-  label: string;
+  icon: IconName;
+  color: IconColor;
   value: string;
+  /** HTML: переносы <br> из макета — только на desktop */
+  label: string;
 }
 
-const { label, value } = Astro.props;
+const { icon, color, value, label } = Astro.props;
 ---
 
 <div class="fact">
-  <p class="fact__label t-caption">{label}</p>
-  <p class="t-display">{value}</p>
+  <Icon name={icon} size={32} class={`icon-${color}`} />
+  <div class="fact__text">
+    <p class="t-h3">{value}</p>
+    <p class="fact__label t-body-s" set:html={label.replace(/\s*<br>/g, ' <br>')} />
+  </div>
 </div>
 
 <style>
@@ -18,11 +29,18 @@ const { label, value } = Astro.props;
     display: flex;
     flex-direction: column;
     gap: var(--size-fact-gap);
-    padding: var(--space-16);
-    border: 1px solid var(--color-element-border);
+    padding: var(--space-24);
+    border-radius: var(--radius-24);
+    background: var(--color-surface-tertiary);
   }
 
   .fact__label {
     color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 767px) {
+    .fact__label :global(br) {
+      display: none;
+    }
   }
 </style>

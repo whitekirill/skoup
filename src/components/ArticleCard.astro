@@ -1,0 +1,75 @@
+---
+/**
+ * Article card (Figma 606:12076). Breakpoint: Desktop (картинка 220, поля 24) / Mobile (132, поля 16).
+ * Картинка — Article image (Type), кнопка — Button small. Ссылка на статью; тизер без href — не кликается,
+ * кнопка Disabled «Скоро».
+ */
+import ArticleImage, { type ArticleImageType } from './ArticleImage.astro';
+import ButtonSmall from './ButtonSmall.astro';
+
+interface Props {
+  /** Заголовок: основная часть text/primary + продолжение text/secondary */
+  title: string;
+  rest: string;
+  image: ArticleImageType;
+  imageAlt?: string;
+  href?: string;
+}
+
+const { title, rest, image, imageAlt, href } = Astro.props;
+const Tag = href ? 'a' : 'article';
+---
+
+<Tag class:list={['article-card', { 'article-card--soon': !href }]} href={href}>
+  <ArticleImage type={image} alt={imageAlt} />
+  <div class="article-card__content">
+    <p class="t-body-m">{title}<span class="article-card__rest">{rest}</span></p>
+    {href ? <ButtonSmall as="span">Читать статью</ButtonSmall> : <ButtonSmall disabled as="span">Скоро</ButtonSmall>}
+  </div>
+</Tag>
+
+<style>
+  .article-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gap-xs);
+    padding: var(--space-24);
+    border-radius: var(--radius-24);
+    background: var(--color-element-primary-inversion);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  a.article-card:focus-visible {
+    outline: none;
+  }
+
+  a.article-card:focus-visible :global(.btn-s) {
+    background: var(--color-surface-tertiary);
+  }
+
+  .article-card__content {
+    display: flex;
+    flex: 1 0 0;
+    flex-direction: column;
+    align-self: stretch;
+    align-items: flex-start;
+    justify-content: space-between;
+    min-width: 0;
+  }
+
+  .article-card__rest {
+    color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 767px) {
+    .article-card {
+      padding: var(--space-16);
+    }
+
+    .article-card__content {
+      align-self: auto;
+      justify-content: flex-start;
+      gap: var(--gap-2xs);
+    }
+  }
+</style>

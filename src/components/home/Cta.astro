@@ -1,0 +1,158 @@
+---
+/**
+ * Финальный CTA (Figma: desktop 581:19556, mobile 604:9680): заголовок, кнопки брифа и почты,
+ * галерея проектов и копирайт (футера на новой главной нет).
+ * Галерея — лента от левого поля до правого края окна; со скроллом едет влево и растягивается
+ * пружинами (тот же скрипт, что у ленты шотов: src/scripts/shots-drift.ts). Reduced motion и без JS —
+ * стоит и листается горизонтально.
+ */
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Button from '../Button.astro';
+import { CTA, EMAIL } from '../../data/site';
+import { GALLERY } from '../../data/gallery';
+
+const files = import.meta.glob<{ default: ImageMetadata }>('../../assets/gallery/*.png', { eager: true });
+const items = await Promise.all(
+  GALLERY.map(async (item) => {
+    const src = files[`../../assets/gallery/${item.file}`].default;
+    const widths = [Math.round(item.width * 0.75), Math.round(item.width), Math.round(item.width * 2)];
+    const build = (format: 'avif' | 'webp') =>
+      Promise.all(widths.map((width) => getImage({ src, width, format }))).then((images) =>
+        images.map((image, i) => `${image.src} ${widths[i]}w`).join(', '),
+      );
+    const [avif, webp, fallback] = await Promise.all([build('avif'), build('webp'), getImage({ src, width: widths[1], format: 'webp' })]);
+    const sizes = `(max-width: 767px) ${widths[0]}px, ${widths[1]}px`;
+    return { ...item, avif, webp, fallback: fallback.src, sizes };
+  }),
+);
+---
+
+<section class="cta" aria-labelledby="cta-title">
+  <div class="cta__statement container">
+    <h2 class="t-h2" id="cta-title">Ваш продукт<br />начинается здесь</h2>
+    <p class="cta__text t-body-s">Обсудим продукт и ограничения, предложим формат работы и оценку в часах</p>
+  </div>
+
+  <div class="cta__buttons container">
+    <Button variant="primary" href={CTA.discuss.href} data-brief-open>Заполнить бриф</Button>
+    <Button variant="secondary" href={`mailto:${EMAIL}`} iconRight="envelope">{EMAIL}</Button>
+  </div>
+
+  <div class="shots" data-shots>
+    <ul class="shots__track" aria-label="Наши проекты">
+      {
+        items.map((item) => (
+          <li class="shots__item" style={`--w: ${item.width}; --h: ${item.height};`}>
+            <picture>
+              <source type="image/avif" srcset={item.avif} sizes={item.sizes} />
+              <source type="image/webp" srcset={item.webp} sizes={item.sizes} />
+              <img src={item.fallback} alt={item.alt} width={Math.round(item.width)} height={Math.round(item.height)} loading="lazy" decoding="async" />
+            </picture>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <p class="cta__copyright t-body-s container">© 2026 Скоуп</p>
+</section>
+
+<script>
+  import { mountShotsDrift } from '../../scripts/shots-drift';
+  const shots = document.querySelector<HTMLElement>('.cta [data-shots]');
+  if (shots) mountShotsDrift(shots);
+</script>
+
+<style>
+  .cta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-l);
+    padding-top: var(--layout-section-padding);
+    padding-bottom: var(--space-44);
+    background: var(--color-surface-primary);
+    text-align: center;
+  }
+
+  .cta__statement {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-xs);
+  }
+
+  .cta__statement > * {
+    max-width: var(--layout-column-width);
+  }
+
+  .cta__text {
+    color: var(--color-text-secondary);
+  }
+
+  .cta__copyright {
+    color: var(--color-text-secondary-inversion);
+  }
+
+  .cta__buttons {
+    display: flex;
+    justify-content: center;
+    gap: var(--gap-3xs);
+  }
+
+  /*
+   * Лента: размеры карточек из макета (px) × --u: 1 px на 1440, 0.75 px на 393 (мобильный макет — та же лента × 0.75).
+   * Между карточками space-12 × --u.
+   */
+  .shots {
+    --u: clamp(0.75px, 0.6562px + 0.02388vw, 1px);
+    padding-left: var(--container-pad);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .shots::-webkit-scrollbar {
+    display: none;
+  }
+
+  .shots:global(.is-drifting) {
+    overflow-x: clip;
+  }
+
+  .shots__track {
+    display: flex;
+    align-items: flex-start;
+    gap: calc(12 * var(--u)); /* space-12 × масштаб ленты */
+    width: max-content;
+    padding-right: var(--container-pad);
+  }
+
+  .shots__item {
+    flex: none;
+    width: calc(var(--w) * var(--u));
+    height: calc(var(--h) * var(--u));
+  }
+
+  .shots__item img {
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (max-width: 767px) {
+    .cta {
+      padding-bottom: var(--layout-page-padding);
+    }
+
+    .cta__buttons {
+      flex-direction: column;
+    }
+
+    .cta__copyright {
+      text-align: left;
+    }
+
+    .cta__buttons :global(.btn) {
+      width: 100%;
+    }
+  }
+</style>

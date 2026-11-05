@@ -1,0 +1,75 @@
+---
+/**
+ * Brand link (Figma 85:8596 Uzum, 85:8610 AliExpress, 85:8626 Раунда, 85:8642 Kilde).
+ * Логотип 44 (Mobile 36) + подпись Header/H3 text/secondary. Hover (только desktop): подпись в фирменный цвет.
+ * Ссылки на клиентов внутри фразы «Кто мы». Без href — просто логотип с подписью.
+ */
+import uzum from '../assets/logos/uzum.svg?url';
+import aliexpress from '../assets/logos/aliexpress.svg?url';
+import round from '../assets/logos/round.svg?url';
+import vk from '../assets/logos/vk.svg?url';
+
+type Brand = 'uzum' | 'aliexpress' | 'round' | 'vk';
+
+interface Props {
+  brand: Brand;
+  href?: string;
+}
+
+const LOGOS: Record<Brand, string> = { uzum, aliexpress, round, vk };
+const { brand, href } = Astro.props;
+const Tag = href ? 'a' : 'span';
+---
+
+<Tag class:list={['brand', `brand--${brand}`]} href={href}>
+  <img class="brand__logo" src={LOGOS[brand]} alt="" width="44" height="44" loading="lazy" decoding="async" />
+  <span class="brand__text"><slot /></span>
+</Tag>
+
+<style>
+  .brand {
+    --brand-logo: var(--space-44);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-3xs);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    vertical-align: middle;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .brand__logo {
+    flex-shrink: 0;
+    width: var(--brand-logo);
+    height: var(--brand-logo);
+  }
+
+  a.brand {
+    transition: color 150ms ease-out;
+  }
+
+  a.brand:focus-visible {
+    outline: none;
+  }
+
+  .brand--uzum { --brand-color: var(--color-text-brand-uzum); }
+  .brand--aliexpress { --brand-color: var(--color-text-brand-aliexpress); }
+  .brand--round { --brand-color: var(--color-text-brand-round); }
+  .brand--vk { --brand-color: var(--color-text-brand-vk); }
+
+  a.brand:focus-visible {
+    color: var(--brand-color);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    a.brand:hover {
+      color: var(--brand-color);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .brand {
+      --brand-logo: calc(var(--space-32) + var(--space-4)); /* 36 — отдельного токена нет */
+    }
+  }
+</style>

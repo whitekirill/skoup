@@ -1,0 +1,117 @@
+---
+/** «Форматы работы» + «Включено во все форматы» (Figma: desktop 581:19417, mobile 604:9478) */
+import FormatCard from '../FormatCard.astro';
+import Icon from '../Icon.astro';
+
+const INCLUDED = [
+  'Регуляторика в макетах',
+  'Документация к проверкам',
+  'Спецификации для разработки',
+  'Дизайн-система',
+  'Арт-директор в команде',
+  'Один менеджер на связи',
+  'Общий чат с командой',
+  'Созвон раз в неделю',
+  'Отчёт по часам',
+  'Файлы и права — ваши',
+  'Договор и NDA',
+];
+---
+
+<section class="formats container" id="formats" aria-labelledby="formats-title">
+  <h2 class="section-label t-button-l" id="formats-title">Форматы работы</h2>
+
+  <div class="formats__cards">
+    <FormatCard
+      icon="bolt-vertical"
+      color="yellow"
+      title="Спринт"
+      description="Одна задача за неделю: новый сценарий, доработка экранов или аудит. На выходе — макеты и спецификации, которые можно сразу отдавать в разработку"
+      time="5 дней · 40 часов"
+      payment="Оплата после каждого спринта"
+    />
+    <FormatCard
+      icon="arrows-rotate-cw-horizontal"
+      color="blue"
+      title="Ретейнер"
+      description="Постоянная дизайн-команда внутри вашего продукта. Берём задачи из бэклога, участвуем в планировании и держим дизайн-систему в порядке"
+      time="от 40 ч / месяц"
+      payment="Оплата раз в месяц"
+    />
+  </div>
+
+  <div class="formats__included">
+    <h3 class="formats__included-title t-button-s">
+      Включено во все форматы
+      <Icon name="arrow-down-line" size={20} />
+    </h3>
+    <ul class="formats__list t-button-s">
+      {
+        INCLUDED.map((item, i) => (
+          <Fragment>
+            {i > 0 && <li class="formats__slash" aria-hidden="true">/</li>}
+            <li>{item}</li>
+          </Fragment>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .formats {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-l);
+    padding-block: var(--layout-section-padding);
+    background: var(--color-surface-tertiary);
+  }
+
+  .formats__cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    gap: var(--gap-2xs);
+    width: 100%;
+    max-width: var(--layout-column-width);
+  }
+
+  .formats__included {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-l);
+    width: 100%;
+    max-width: var(--layout-column-width);
+  }
+
+  .formats__included-title {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-4xs);
+    color: var(--color-text-secondary);
+  }
+
+  .formats__list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--gap-2xs) var(--space-16);
+    text-align: center;
+  }
+
+  .formats__slash {
+    color: var(--color-text-secondary-inversion);
+  }
+
+  @media (max-width: 767px) {
+    .formats__cards {
+      grid-template-columns: 1fr;
+    }
+
+    .formats__list {
+      column-gap: var(--space-8);
+    }
+  }
+</style>

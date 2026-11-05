@@ -1,7 +1,8 @@
 ---
 /**
- * CaseCard (Figma 411:10525): Media (Desktop / Mobile — отдельные кадрирования), Logo, Client, Title.
+ * Case card (Figma 411:10525): Media (Desktop / Mobile — отдельные кадрирования), Logo, Client, Title.
  * Ступенька в сетке на десктопе — offset (padding-top spacing/160).
+ * Параллакс (src/scripts/case-parallax.ts): двигается только картинка внутри рамки, карточка стоит.
  */
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
@@ -15,9 +16,11 @@ interface Props {
   wide?: boolean;
   /** Ступенька сверху на десктопе */
   offset?: boolean;
+  /** id для ссылок на кейс из фразы «Кто мы» */
+  id?: string;
 }
 
-const { title, client, logo, media, wide = false, offset = false } = Astro.props;
+const { title, client, logo, media, wide = false, offset = false, id } = Astro.props;
 
 const desktopWidths = wide ? [1352, 2704] : [660, 1320];
 const mobileWidths = [369, 738];
@@ -37,7 +40,7 @@ const [mobileAvif, mobileWebp, desktopAvif, desktopWebp] = await Promise.all([
 const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], format: 'webp' });
 ---
 
-<article class:list={['case', { 'case--offset': offset }]} data-case={offset ? 'offset' : ''}>
+<article class:list={['case', { 'case--offset': offset }]} id={id} data-case>
   <picture class="case__media">
     <source media="(max-width: 767px)" type="image/avif" srcset={mobileAvif} sizes="100vw" />
     <source media="(max-width: 767px)" type="image/webp" srcset={mobileWebp} sizes="100vw" />
@@ -73,7 +76,7 @@ const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], f
     padding-top: var(--space-160);
   }
 
-  /* Картинка увеличивается при наведении, контейнер остаётся прежнего размера */
+  /* Рамка обложки; картинка внутри чуть больше (scale 1.08) — запас под параллакс */
   .case__media {
     display: block;
     overflow: hidden;
@@ -85,35 +88,10 @@ const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], f
     object-fit: cover;
   }
 
-  /* При наведении обложка скругляется до 32px — как hover-скругление кнопок */
-  @media (hover: hover) {
-    .case__media {
-      transition: border-radius 300ms cubic-bezier(0.2, 0, 0, 1);
-    }
-
-    .case:hover .case__media {
-      border-radius: var(--radius-32);
-    }
-  }
-
-  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-    .case__media img {
-      transition: scale 400ms cubic-bezier(0.2, 0, 0, 1);
-    }
-
-    .case:hover .case__media img {
-      scale: 1.04;
-    }
-
-    :global(.cases.is-parallax) .case:hover .case__media img {
-      scale: 1.12;
-    }
-  }
-
-  /* С параллаксом (скрипт в Cases.astro) обложка чуть крупнее — запас под сдвиг внутри рамки */
   @media (prefers-reduced-motion: no-preference) {
     :global(.cases.is-parallax) .case__media img {
       scale: 1.08;
+      will-change: transform;
     }
   }
 
@@ -132,8 +110,8 @@ const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], f
 
   .case__client img {
     flex-shrink: 0;
-    width: 24px;
-    height: 24px;
+    width: var(--space-24);
+    height: var(--space-24);
   }
 
   @media (max-width: 767px) {

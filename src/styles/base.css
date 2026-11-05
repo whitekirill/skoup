@@ -73,6 +73,8 @@ button {
  * Процент считается от ширины секции в месте использования.
  */
 :root {
+  /* Колонка текста 688 = 1440 − 2 × layout/article-padding; на узких экранах — вся ширина */
+  --layout-column-width: 688px;
   --container-pad: max(var(--layout-page-padding), calc((100% - var(--layout-page-width)) / 2 + var(--layout-page-padding)));
 }
 
@@ -175,4 +177,17 @@ html::-webkit-scrollbar,
   .scrollbar.is-active .scrollbar__thumb {
     transition-duration: 150ms;
   }
+}
+
+/* Цвета иконок в карточках (icon/* в Figma) */
+.icon-green { color: var(--color-icon-green); }
+.icon-purple { color: var(--color-icon-purple); }
+.icon-yellow { color: var(--color-icon-yellow); }
+.icon-blue { color: var(--color-icon-blue); }
+.icon-pink { color: var(--color-icon-pink); }
+
+/* Подпись секции — Button/Large text/secondary по центру */
+.section-label {
+  color: var(--color-text-secondary);
+  text-align: center;
 }

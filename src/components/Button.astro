@@ -1,10 +1,14 @@
 ---
 /**
- * Button (Figma 31:15794).
+ * Button (Figma 31:15794, внутренний .Button 31:15826).
  * Type: Primary / Secondary / Inverse / Navbutton × State: Default / Hover / Focus / Disabled.
- * Hover — скругление в pill. Высота — size/button/height (56 desktop / 52 mobile), Navbutton — 32.
+ * Всегда пилюля (radius/full). Высота и минимальная ширина — size/button/height (60 / 52):
+ * кнопка с одной иконкой квадратная. Вертикальный отступ — size/button/padding-y.
+ * Обводок нет ни в одном состоянии: hover и фокус меняют фон или приглушают текст.
+ * Иконки (iconLeft / iconRight — Amicons) всегда цвета текста кнопки.
  */
 import type { HTMLAttributes } from 'astro/types';
+import Icon, { type IconName } from './Icon.astro';
 
 type Variant = 'primary' | 'secondary' | 'inverse' | 'nav';
 
@@ -18,11 +22,16 @@ interface Props extends HTMLAttributes<'a'> {
   as?: 'span';
   /** Для кнопки отправки формы */
   type?: 'button' | 'submit';
+  iconLeft?: IconName;
+  iconRight?: IconName;
+  /** Подпись для кнопки только с иконкой */
+  label?: string;
 }
 
-const { variant = 'primary', href, block = false, disabled = false, as, type = 'button', class: className, ...rest } = Astro.props;
+const { variant = 'primary', href, block = false, disabled = false, as, type = 'button', iconLeft, iconRight, label, class: className, ...rest } = Astro.props;
 const Tag = as ?? (href && !disabled ? 'a' : 'button');
-const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't-button-l', block && 'btn--block', className];
+const hasText = Astro.slots.has('default');
+const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't-button-l', block && 'btn--block', !hasText && 'btn--icon-only', className];
 ---
 
 <Tag
@@ -30,50 +39,40 @@ const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't
   href={Tag === 'a' ? href : undefined}
   type={Tag === 'button' ? type : undefined}
   disabled={Tag === 'button' && disabled ? true : undefined}
+  aria-disabled={Tag !== 'button' && disabled ? 'true' : undefined}
+  aria-label={label}
   {...rest}
 >
-  {Astro.slots.has('default') && <span class="btn__text"><slot /></span>}
-  {Astro.slots.has('icon') && <span class="btn__icon" aria-hidden="true"><slot name="icon" /></span>}
+  {iconLeft && <Icon name={iconLeft} />}
+  {hasText && <span class="btn__text"><slot /></span>}
+  {iconRight && <Icon name={iconRight} />}
 </Tag>
 
 <style>
   .btn {
-    position: relative;
+    --btn-height: var(--size-button-height);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    min-width: 64px;
-    /* высота — в переменной, чтобы hover-скругление шло ровно до половины высоты */
-    --btn-height: var(--size-button-height);
+    min-width: var(--btn-height);
     height: var(--btn-height);
-    padding: var(--space-14) var(--gap-3xs);
-    border-radius: 0;
+    padding: var(--size-button-padding-y) var(--gap-3xs);
+    border-radius: var(--radius-full);
     white-space: nowrap;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    /*
-     * hover — скругление в pill. Анимируем до половины высоты, а не до radius-full (999px):
-     * иначе почти весь переход «пустой» и скругление прыгает в самом конце.
-     * press — scale 0.96 (better-ui).
-     */
-    transition-property: border-radius, color, background-color, box-shadow, scale;
-    transition-duration: 200ms, 150ms, 150ms, 150ms, 150ms;
-    transition-timing-function: cubic-bezier(0.2, 0, 0, 1), ease-out, ease-out, ease-out, ease-out;
+    transition-property: color, background-color, scale;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
   }
 
   .btn__text {
     padding-inline: var(--space-8);
   }
 
-  .btn__icon {
-    display: flex;
-    flex-shrink: 0;
-  }
-
-  .btn__icon :global(svg) {
-    width: 24px;
-    height: 24px;
+  .btn--icon-only {
+    padding-inline: 0;
   }
 
   .btn--block {
@@ -81,42 +80,65 @@ const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't
     width: 100%;
   }
 
-  /* Primary */
   .btn--primary {
     background: var(--color-surface-primary-inversion);
     color: var(--color-text-primary-inversion);
   }
 
-  /* Secondary */
   .btn--secondary {
     background: var(--color-surface-secondary);
     color: var(--color-text-primary);
   }
 
-  /* Inverse — на тёмном фоне */
   .btn--inverse {
     background: var(--color-surface-primary);
     color: var(--color-text-primary);
   }
 
-  /* Navbutton — пункт навигации */
   .btn--nav {
-    --btn-height: 32px;
-    padding: var(--gap-3xs) 8px;
+    padding-inline: var(--space-8);
     background: var(--color-surface-tertiary);
     color: var(--color-text-primary);
   }
 
-  @media (hover: hover) {
-    .btn:hover {
-      border-radius: calc(var(--btn-height) / 2);
+  /* Hover и нажатие — вид Hover; фокус с клавиатуры — так же, без обводки */
+  .btn--primary:focus-visible {
+    background: var(--color-surface-secondary-inversion);
+  }
+  .btn--secondary:focus-visible,
+  .btn--nav:focus-visible {
+    background: var(--color-element-border-2);
+  }
+  .btn--inverse:focus-visible {
+    color: var(--color-text-secondary);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn--primary:hover {
+      background: var(--color-surface-secondary-inversion);
     }
     .btn--secondary:hover {
+      background: var(--color-element-border-2);
       color: var(--color-text-secondary);
     }
-    .btn--inverse:hover {
-      box-shadow: inset 0 0 0 2.5px var(--color-element-primary);
+    .btn--nav:hover {
+      background: var(--color-element-border-2);
     }
+    .btn--inverse:hover {
+      color: var(--color-text-secondary);
+    }
+  }
+
+  .btn--primary:active {
+    background: var(--color-surface-secondary-inversion);
+  }
+  .btn--secondary:active,
+  .btn--nav:active {
+    background: var(--color-element-border-2);
+  }
+
+  .btn:focus-visible {
+    outline: none;
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -125,22 +147,11 @@ const classes = ['btn', `btn--${variant}`, variant === 'nav' ? 't-button-s' : 't
     }
   }
 
-  .btn:focus-visible {
-    outline: none;
-    box-shadow: inset 0 0 0 2px var(--color-element-blue);
-  }
-
   .btn:disabled,
   .btn[aria-disabled='true'] {
     opacity: 0.5;
     color: var(--color-text-secondary);
-    border-radius: 0;
-    box-shadow: none;
+    cursor: default;
     pointer-events: none;
-  }
-
-  .btn--nav:disabled,
-  .btn--nav[aria-disabled='true'] {
-    opacity: 0.5;
   }
 </style>

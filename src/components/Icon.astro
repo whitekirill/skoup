@@ -1,0 +1,61 @@
+---
+/**
+ * Icon — иконки Amicons Rounded (Figma: страница Icons, фрейм 569:5050).
+ * SVG из макета лежат в src/assets/icons/amicons/<имя>.svg, заливка — currentColor:
+ * иконка всегда цвета текста родителя. Размер — size (px); по умолчанию 24, как в паке.
+ * Без label — декоративная (aria-hidden); с label — role="img" и подпись.
+ */
+const icons = import.meta.glob<{ default: (props: Record<string, unknown>) => unknown }>('../assets/icons/amicons/*.svg', { eager: true });
+
+export type IconName =
+  | 'align-left-line'
+  | 'arrow-down-line'
+  | 'arrow-to-bracket-down-line'
+  | 'arrows-rotate-cw-horizontal'
+  | 'body-standing'
+  | 'bolt-vertical'
+  | 'check-circle'
+  | 'chevron-small-left-line'
+  | 'chevron-small-right-line'
+  | 'circle-line'
+  | 'dollar-circle'
+  | 'envelope'
+  | 'graduation-cap'
+  | 'hand'
+  | 'key'
+  | 'key-line'
+  | 'magnifying-glass'
+  | 'paperplane'
+  | 'plus-line'
+  | 'text-i-circle'
+  | 'toggle-left'
+  | 'video-camera-slash'
+  | 'wrench'
+  | 'x-circle'
+  | 'x-line';
+
+interface Props {
+  name: IconName;
+  size?: number;
+  class?: string;
+  label?: string;
+}
+
+const { name, size = 24, class: className, label } = Astro.props;
+const Svg = icons[`../assets/icons/amicons/${name}.svg`]?.default as any;
+if (!Svg) throw new Error(`Нет иконки Amicons «${name}»`);
+---
+
+{
+  label ? (
+    <Svg class:list={['icon', className]} width={size} height={size} role="img" aria-label={label} />
+  ) : (
+    <Svg class:list={['icon', className]} width={size} height={size} aria-hidden="true" focusable="false" />
+  )
+}
+
+<style>
+  .icon {
+    flex-shrink: 0;
+  }
+</style>

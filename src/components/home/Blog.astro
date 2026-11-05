@@ -1,0 +1,37 @@
+---
+/** «Блог» (Figma: desktop 593:1279, mobile 604:9616): статья и тизер следующей (606:12160 / 634:10370) */
+import ArticleCard from '../ArticleCard.astro';
+import { ARTICLE_HREF } from '../../data/site';
+---
+
+<section class="blog container" id="blog" aria-labelledby="blog-title">
+  <h2 class="section-label t-button-l" id="blog-title">Блог</h2>
+  <div class="blog__list">
+    <ArticleCard
+      href={ARTICLE_HREF}
+      title="Покупка частями в кредит "
+      rest="на Ozon, Wildberries и Яндекс Маркете: как это выглядит и что говорит закон"
+      image="marketplaces"
+    />
+    <ArticleCard title="Passkeys в финтехе" rest=": вход безопаснее, интерфейс удобнее, шагов меньше" image="passkeys" />
+  </div>
+</section>
+
+<style>
+  .blog {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-l);
+    padding-block: var(--layout-section-padding);
+    background: var(--color-surface-tertiary);
+  }
+
+  .blog__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    width: 100%;
+    max-width: var(--layout-column-width);
+  }
+</style>

@@ -1,0 +1,234 @@
+---
+/**
+ * «Кто мы» + «Отзывы» (Figma: desktop 581:19463, mobile 604:9524).
+ * Фраза из слов и Brand link (ссылки ведут на карточки кейсов на этой странице), аватары команды
+ * с перекрытием −12, две Fact card, отзыв с переключателем.
+ */
+import BrandLink from '../BrandLink.astro';
+import TeamAvatar from '../TeamAvatar.astro';
+import FactCard from '../FactCard.astro';
+import Button from '../Button.astro';
+import pavel from '../../assets/about/face-pavel.png';
+import kirill from '../../assets/about/face-kirill.png';
+import anna from '../../assets/about/face-anna.png';
+import andrey from '../../assets/about/face-andrey.png';
+import round from '../../assets/logos/round.svg?url';
+
+const TEAM = [
+  { name: 'Павел', role: 'CEO', photo: pavel },
+  { name: 'Кирилл', role: 'Product Designer', photo: kirill },
+  { name: 'Анна', role: 'Менеджер', photo: anna },
+  { name: 'Андрей', role: 'Юрист', photo: andrey },
+];
+
+// Пока один отзыв: стрелки переключают, если их станет больше
+const REVIEWS = [
+  {
+    text: '«Скоуп с первых встреч вник в наш продукт и сразу учёл требования регулятора, поэтому макеты прошли проверку без переделок. Команда работала как часть нашей: быстро принимала решения, опиралась на данные и каждую неделю показывала результат. Запустились раньше плана, и в работе с ними ни разу не пришлось ничего дожимать»',
+    name: 'Рачко Роман',
+    company: 'Банк «Раунд»',
+    logo: round,
+  },
+];
+---
+
+<section class="about container" id="about" aria-labelledby="about-title">
+  <h2 class="section-label t-button-l" id="about-title">Кто мы</h2>
+
+  <div class="about__content">
+    <p class="about__statement t-h3">
+      <span class="about__primary">Продуктовая</span>
+      <span class="about__primary">команда.</span>
+      <span>Проектируем</span>
+      <span>финтех</span>
+      <span>и&nbsp;работаем</span>
+      <span>вдолгую</span>
+      <span>с&nbsp;клиентами</span>
+      <span class="about__brand"><BrandLink brand="uzum" href="#case-atm">Uzum</BrandLink><span class="about__comma t-h2">,</span></span>
+      <span class="about__brand"><BrandLink brand="aliexpress" href="#case-installments">AliExpress</BrandLink><span class="about__comma t-h2">,</span></span>
+      <BrandLink brand="round" href="#case-business-loans">Раунда</BrandLink>
+      <span class="about__brand about__brand--gap">и&nbsp;<BrandLink brand="vk">Вконтакте</BrandLink>&nbsp;—</span>
+      <span>от&nbsp;исследования</span>
+      <span>до&nbsp;запуска</span>
+    </p>
+
+    <div class="about__team">
+      {TEAM.map((person) => <TeamAvatar {...person} />)}
+    </div>
+
+    <div class="about__facts">
+      <FactCard icon="body-standing" color="purple" value="30 млн +" label="Пользователей у продуктов наших клиентов" />
+      <FactCard icon="dollar-circle" color="green" value="16+ лет" label="Делаем цифровые<br>финтех продукты" />
+    </div>
+  </div>
+
+  <h2 class="section-label t-button-l" id="reviews-title">Отзывы</h2>
+
+  <div class="reviews" data-reviews aria-labelledby="reviews-title" aria-roledescription="карусель">
+    {
+      REVIEWS.map((review, i) => (
+        <figure class="reviews__item" hidden={i > 0} aria-label={`${i + 1} из ${REVIEWS.length}`}>
+          <blockquote class="t-body-l">{review.text}</blockquote>
+          <figcaption class="reviews__author">
+            <img src={review.logo} alt="" width="56" height="56" loading="lazy" decoding="async" />
+            <span class="reviews__who">
+              <span class="t-body-m">{review.name}</span>
+              <span class="reviews__company t-body-xs">{review.company}</span>
+            </span>
+          </figcaption>
+        </figure>
+      ))
+    }
+    <div class="reviews__nav">
+      <Button variant="secondary" iconLeft="chevron-small-left-line" label="Предыдущий отзыв" disabled data-reviews-prev />
+      <Button variant="secondary" iconLeft="chevron-small-right-line" label="Следующий отзыв" disabled={REVIEWS.length < 2} data-reviews-next />
+    </div>
+  </div>
+</section>
+
+<script>
+  // Переключение отзывов: стрелки неактивны на краях
+  const root = document.querySelector<HTMLElement>('[data-reviews]');
+  if (root) {
+    const items = Array.from(root.querySelectorAll<HTMLElement>('.reviews__item'));
+    const prev = root.querySelector<HTMLButtonElement>('[data-reviews-prev]')!;
+    const next = root.querySelector<HTMLButtonElement>('[data-reviews-next]')!;
+    let index = 0;
+    const show = (i: number) => {
+      index = Math.max(0, Math.min(items.length - 1, i));
+      items.forEach((item, j) => (item.hidden = j !== index));
+      prev.disabled = index === 0;
+      next.disabled = index === items.length - 1;
+    };
+    prev.addEventListener('click', () => show(index - 1));
+    next.addEventListener('click', () => show(index + 1));
+  }
+</script>
+
+<style>
+  .about {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-l);
+    padding-block: var(--layout-section-padding);
+    background: var(--color-surface-primary);
+  }
+
+  .about__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--layout-section-padding);
+    width: 100%;
+    max-width: var(--layout-column-width);
+  }
+
+  /* Фраза — слова и логотипы отдельными блоками, как в макете: перенос только между ними */
+  .about__statement {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4) var(--gap-4xs);
+    color: var(--color-text-secondary);
+  }
+
+  .about__statement > * {
+    white-space: nowrap;
+  }
+
+  .about__primary {
+    color: var(--color-text-primary);
+  }
+
+  .about__brand {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .about__brand--gap {
+    gap: 0;
+  }
+
+  .about__team {
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .about__team > :global(* + *) {
+    margin-left: calc(-1 * var(--space-12));
+  }
+
+  .about__facts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap-2xs);
+    width: 100%;
+  }
+
+  .reviews {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--gap-s);
+    width: 100%;
+    max-width: var(--layout-column-width);
+    min-height: calc(var(--space-160) * 2);
+    position: relative;
+  }
+
+  .reviews__item blockquote {
+    margin: 0;
+  }
+
+  .reviews__item {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--gap-s);
+    margin: 0;
+  }
+
+  .reviews__author {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-3xs);
+    /* место под стрелки справа */
+    min-height: var(--size-button-height);
+  }
+
+  .reviews__author img {
+    width: var(--space-56);
+    height: var(--space-56);
+  }
+
+  .reviews__who {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .reviews__company {
+    color: var(--color-text-secondary);
+  }
+
+  .reviews__nav {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 767px) {
+    .about__facts {
+      grid-template-columns: 1fr;
+    }
+
+    .reviews {
+      min-height: 0;
+    }
+  }
+</style>

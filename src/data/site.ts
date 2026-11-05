@@ -52,3 +52,6 @@ export const FOOTER_NAV = [
 /** Якорь секции главной (#cases) с другой страницы ведёт на главную (/#cases) */
 export const pageHref = (href: string, pathname: string) =>
   href.startsWith('#') && href.length > 1 && pathname.replace(/\/$/, '') !== '' ? `/${href}` : href;
+
+/** Статья блога (главная → карточка «Покупка частями в кредит…») */
+export const ARTICLE_HREF = '/blog/marketplaces-installments';

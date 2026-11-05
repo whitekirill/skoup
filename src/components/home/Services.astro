@@ -1,0 +1,49 @@
+---
+/** «Что мы умеем» (Figma: desktop 581:19367, mobile 604:9427): 5 Service card, 2 колонки в 688 / столбик */
+import ServiceCard from '../ServiceCard.astro';
+
+// Переносы <br> — из макета, только desktop. «Регулиторика» в макете — опечатка, исправлено
+const SERVICES = [
+  { icon: 'magnifying-glass', color: 'green', title: 'Стратегия и исследования.', description: 'Изучаем бизнес<br>и клиентов, строим план продукта с учётом закона' },
+  { icon: 'toggle-left', color: 'purple', title: 'Интерфейсы и дизайн-системы.', description: 'Проектируем экраны и сценарии, которые разработка берёт без правок' },
+  { icon: 'graduation-cap', color: 'yellow', title: 'Регуляторика.', description: 'Встраиваем требования регуляторов<br>в интерфейс и готовим документы' },
+  { icon: 'bolt-vertical', color: 'blue', title: 'Аналитика и рост.', description: 'Изучаем данные<br> и проводим A/B-тесты, чтобы конверсия росла дальше' },
+  { icon: 'wrench', color: 'pink', title: 'Аудит и исправления.', description: 'Проверяем удобство<br>и соответствие закону, помогаем всё исправить' },
+] as const;
+---
+
+<section class="services container" id="services" aria-labelledby="services-title">
+  <h2 class="section-label t-button-l" id="services-title">Что мы умеем</h2>
+  <div class="services__grid">
+    {SERVICES.map((s) => <ServiceCard {...s} />)}
+  </div>
+</section>
+
+<style>
+  .services {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-l);
+    padding-block: var(--layout-section-padding);
+    background: var(--color-surface-tertiary);
+  }
+
+  .services__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* строки одной высоты, как в макете (по самой высокой карточке) */
+    grid-auto-rows: 1fr;
+    gap: var(--gap-2xs);
+    width: 100%;
+    max-width: var(--layout-column-width);
+  }
+
+  @media (max-width: 767px) {
+    .services__grid {
+      grid-template-columns: 1fr;
+      grid-auto-rows: auto;
+      gap: var(--space-8);
+    }
+  }
+</style>

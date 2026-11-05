@@ -1,69 +1,65 @@
-// Карточки кейсов «живут» при скролле: обложка едет внутри рамки медленнее карточки,
-// а карточки со ступенькой (правая колонка) чуть обгоняют соседние. Сдвиг зависит от положения
-// карточки в окне: в центре экрана всё стоит ровно как в макете. Только transform, без раскладки.
+// Параллакс обложек кейсов: двигается только картинка внутри рамки Case media, карточка и текст стоят.
+// Картинка крупнее рамки (scale 1.08 в CaseCard), рамка обрезает края. Пока карточка проходит через окно —
+// от входа снизу до выхода сверху — картинка линейно смещается по Y от −24 до +24 px (mobile ±12).
+// Только translate3d в requestAnimationFrame и только для карточек в зоне видимости (IntersectionObserver).
+// Источник скролла — общий: события scroll окна, которые генерирует и Lenis (он двигает нативный скролл).
 // При prefers-reduced-motion ничего не двигаем.
 
-const MEDIA_SHIFT = 4; // %, сдвиг обложки от центра до края окна (запас — scale 1.08 в CaseCard)
-const DRIFT = 48; // px, обгон карточек со ступенькой; только на десктопе (на мобильном — столбик)
+const SHIFT = { desktop: 24, mobile: 12 }; // px
+const SCALE = 1.08; // scale картинки из CaseCard: transform идёт после scale, поэтому сдвиг делим на него
 
 export function mountCaseParallax() {
   const section = document.querySelector<HTMLElement>('.cases');
   if (!section) return;
   const motion = matchMedia('(prefers-reduced-motion: no-preference)');
-  const desktop = matchMedia('(min-width: 768px)');
+  const mobile = matchMedia('(max-width: 767px)');
   const cards = Array.from(section.querySelectorAll<HTMLElement>('[data-case]')).map((el) => ({
-    el,
+    frame: el.querySelector<HTMLElement>('.case__media')!,
     img: el.querySelector<HTMLElement>('.case__media img')!,
-    offset: el.dataset.case === 'offset',
   }));
-
-  let raf = 0, visible = false, lastY = NaN, lastH = 0;
+  const visible = new Set<(typeof cards)[number]>();
+  let raf = 0;
 
   function render() {
-    raf = visible ? requestAnimationFrame(render) : 0;
+    raf = 0;
     const vh = innerHeight;
-    if (scrollY === lastY && vh === lastH) return; // страница стоит — кадр не трогаем
-    lastY = scrollY;
-    lastH = vh;
-    const drift = desktop.matches ? DRIFT : 0;
-    for (const card of cards) {
-      // собственный сдвиг карточки вычитаем, чтобы он не влиял на расчёт положения
-      const r = card.el.getBoundingClientRect();
-      const own = card.offset ? parseFloat(card.el.style.translate.split(' ')[1] || '0') : 0;
-      const center = r.top - own + r.height / 2;
-      // −1 — карточка уходит вверх за край, 0 — в центре окна, 1 — входит снизу
-      const p = Math.max(-1, Math.min(1, (center - vh / 2) / (vh / 2 + r.height / 2)));
-      card.img.style.translate = `0 ${(-p * MEDIA_SHIFT).toFixed(3)}%`;
-      if (card.offset) card.el.style.translate = `0 ${(p * drift).toFixed(2)}px`;
+    const shift = mobile.matches ? SHIFT.mobile : SHIFT.desktop;
+    for (const card of visible) {
+      const r = card.frame.getBoundingClientRect();
+      // 0 — верх рамки у низа окна (вход), 1 — низ рамки у верха окна (выход)
+      const p = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
+      card.img.style.transform = `translate3d(0, ${(((p * 2 - 1) * shift) / SCALE).toFixed(2)}px, 0)`;
     }
   }
-
-  const reset = () => {
-    for (const card of cards) {
-      card.img.style.translate = '';
-      card.el.style.translate = '';
-    }
+  const schedule = () => {
+    if (!raf && visible.size) raf = requestAnimationFrame(render);
   };
 
-  const io = new IntersectionObserver(([entry]) => {
-    visible = entry.isIntersecting;
-    if (visible && !raf) { lastY = NaN; raf = requestAnimationFrame(render); }
-  }, { rootMargin: '20% 0px' });
+  const io = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      const card = cards.find((c) => c.frame === entry.target);
+      if (!card) continue;
+      if (entry.isIntersecting) visible.add(card);
+      else visible.delete(card);
+    }
+    schedule();
+  });
 
   const apply = () => {
     if (motion.matches) {
       section.classList.add('is-parallax');
-      io.observe(section);
+      cards.forEach((c) => io.observe(c.frame));
+      addEventListener('scroll', schedule, { passive: true });
+      addEventListener('resize', schedule);
     } else {
       io.disconnect();
-      visible = false;
-      cancelAnimationFrame(raf);
-      raf = 0;
+      visible.clear();
+      removeEventListener('scroll', schedule);
+      removeEventListener('resize', schedule);
       section.classList.remove('is-parallax');
-      reset();
+      cards.forEach((c) => (c.img.style.transform = ''));
     }
   };
   motion.addEventListener('change', apply);
-  desktop.addEventListener('change', () => { lastY = NaN; });
   apply();
 }

@@ -1,0 +1,74 @@
+---
+/**
+ * Round button (Figma 592:13026). Style: Ghost / Filled × State: Default / Hover / Disabled.
+ * Круглая 56: иконка 24 + поля 16. Стрелки отзывов, крестик закрытия брифа.
+ * Hover и фокус с клавиатуры — фон element/border-2, без обводки. Иконка — цвета текста.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import Icon, { type IconName } from './Icon.astro';
+
+interface Props extends HTMLAttributes<'button'> {
+  variant?: 'ghost' | 'filled';
+  icon: IconName;
+  /** Подпись для скринридера */
+  label: string;
+  disabled?: boolean;
+}
+
+const { variant = 'ghost', icon, label, disabled = false, class: className, ...rest } = Astro.props;
+---
+
+<button type="button" class:list={['round', `round--${variant}`, className]} aria-label={label} disabled={disabled || undefined} {...rest}>
+  <Icon name={icon} />
+</button>
+
+<style>
+  .round {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-16);
+    border-radius: var(--radius-full);
+    color: var(--color-text-primary);
+    -webkit-tap-highlight-color: transparent;
+    transition-property: background-color, opacity, scale;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+
+  .round--ghost {
+    background: var(--color-surface-primary);
+  }
+
+  .round--filled {
+    background: var(--color-surface-secondary);
+  }
+
+  .round:focus-visible {
+    outline: none;
+    background: var(--color-element-border-2);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .round:hover {
+      background: var(--color-element-border-2);
+    }
+  }
+
+  .round:active {
+    background: var(--color-element-border-2);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .round:not(:disabled):active {
+      scale: 0.96;
+    }
+  }
+
+  .round:disabled {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+  }
+</style>

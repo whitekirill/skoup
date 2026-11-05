@@ -1,0 +1,103 @@
+---
+/** Первый экран (Figma: desktop 581:19339, mobile 604:9399): вордмарк «СКОУП», заголовок, кнопки, клиенты */
+import Button from '../Button.astro';
+import ClientLogos from '../ClientLogos.astro';
+import wordmarkDesktop from '../../assets/brand/wordmark-desktop.svg?url';
+import wordmarkMobile from '../../assets/brand/wordmark-mobile.svg?url';
+import { CTA } from '../../data/site';
+---
+
+<section class="hero container" aria-labelledby="hero-title">
+  <picture class="hero__wordmark">
+    <source media="(max-width: 767px)" srcset={wordmarkMobile} width="353" height="82" />
+    <img src={wordmarkDesktop} alt="" width="1392" height="324" decoding="async" />
+  </picture>
+
+  <div class="hero__content">
+    <div class="hero__main">
+      <h1 class="hero__title t-h2" id="hero-title">Проектируем финтех, который проходит<br class="hero__br" /> проверку регулятора</h1>
+      <div class="hero__buttons">
+        <Button variant="primary" href={CTA.discuss.href} data-brief-open>{CTA.discuss.label}</Button>
+        <Button variant="secondary" href={CTA.presentation.href} iconRight="arrow-to-bracket-down-line">{CTA.presentation.label}</Button>
+      </div>
+    </div>
+    <div class="hero__clients">
+      <p class="hero__clients-label t-button-s">успешно работали<br />внутри команд</p>
+      <ClientLogos />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    --hero-gap: var(--space-100);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--hero-gap);
+    padding-top: var(--layout-page-padding);
+    padding-bottom: var(--layout-section-padding);
+    background: var(--color-surface-primary);
+  }
+
+  .hero__wordmark,
+  .hero__wordmark img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .hero__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--hero-gap);
+    width: 100%;
+    max-width: var(--layout-column-width);
+    text-align: center;
+  }
+
+  .hero__main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-44);
+    width: 100%;
+  }
+
+  .hero__buttons {
+    display: flex;
+    justify-content: center;
+    gap: var(--gap-3xs);
+  }
+
+  .hero__clients {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-24);
+  }
+
+  .hero__clients-label {
+    color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 767px) {
+    .hero {
+      --hero-gap: var(--gap-xl);
+    }
+
+    .hero__br {
+      display: none;
+    }
+
+    .hero__buttons {
+      flex-direction: column;
+      align-self: stretch;
+    }
+
+    .hero__buttons :global(.btn) {
+      width: 100%;
+    }
+  }
+</style>

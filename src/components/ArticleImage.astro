@@ -1,0 +1,93 @@
+---
+/**
+ * Article image (Figma 606:11834). Type: Marketplaces / Passkeys (тизер); Breakpoint: Desktop 220 / Mobile 132.
+ * Marketplaces — экспорт макета картинкой (@2x, desktop и mobile отдельно).
+ * Passkeys — фон tint/blue и иконка Icon / Passkey (642:10421, SVG) 96 / 56 цвета icon/blue.
+ */
+import { getImage } from 'astro:assets';
+import marketDesktop from '../assets/blog/marketplaces-desktop.png';
+import marketMobile from '../assets/blog/marketplaces-mobile.png';
+import Passkey from '../assets/blog/passkey.svg';
+
+export type ArticleImageType = 'marketplaces' | 'passkeys';
+
+interface Props {
+  type: ArticleImageType;
+  alt?: string;
+}
+
+const { type, alt = '' } = Astro.props;
+
+const set = async (src: typeof marketDesktop, size: number, format: 'avif' | 'webp') => {
+  const [x1, x2] = await Promise.all([1, 2].map((d) => getImage({ src, width: size * d, format })));
+  return `${x1.src} 1x, ${x2.src} 2x`;
+};
+const images =
+  type === 'marketplaces'
+    ? {
+        mAvif: await set(marketMobile, 132, 'avif'),
+        mWebp: await set(marketMobile, 132, 'webp'),
+        dAvif: await set(marketDesktop, 220, 'avif'),
+        dWebp: await set(marketDesktop, 220, 'webp'),
+        fallback: (await getImage({ src: marketDesktop, width: 220, format: 'webp' })).src,
+      }
+    : null;
+---
+
+{
+  images ? (
+    <picture class="art-image">
+      <source media="(max-width: 767px)" type="image/avif" srcset={images.mAvif} />
+      <source media="(max-width: 767px)" type="image/webp" srcset={images.mWebp} />
+      <source type="image/avif" srcset={images.dAvif} />
+      <source type="image/webp" srcset={images.dWebp} />
+      <img src={images.fallback} alt={alt} width="220" height="220" loading="lazy" decoding="async" />
+    </picture>
+  ) : (
+    <div class="art-image art-image--passkeys" role={alt ? 'img' : undefined} aria-label={alt || undefined}>
+      <Passkey class="art-image__icon icon-blue" aria-hidden="true" />
+    </div>
+  )
+}
+
+<style>
+  .art-image {
+    /* размер картинки из макета: 220 / 132 — токенов нет, это размер иллюстрации */
+    --art-size: 220px;
+    display: block;
+    flex-shrink: 0;
+    width: var(--art-size);
+    height: var(--art-size);
+    overflow: hidden;
+    border-radius: var(--radius-24);
+  }
+
+  .art-image img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .art-image--passkeys {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-tint-blue);
+  }
+
+  .art-image__icon {
+    width: var(--space-96);
+    height: var(--space-96);
+  }
+
+  @media (max-width: 767px) {
+    .art-image {
+      --art-size: 132px;
+      border-radius: var(--radius-16);
+    }
+
+    .art-image__icon {
+      width: var(--space-56);
+      height: var(--space-56);
+    }
+  }
+</style>

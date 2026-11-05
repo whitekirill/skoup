@@ -1,0 +1,80 @@
+---
+/**
+ * Button small (Figma 606:11027). State: Default / Hover / Focus / Disabled; Label.
+ * Default — фон element/border; Hover — тот же фон, текст приглушён; Focus — фон surface/tertiary;
+ * Disabled — фон surface/tertiary, текст secondary, прозрачность 0.5. Без обводок.
+ * В кликабельной карточке — декоративный span (as="span"): состояния берутся от наведения на карточку.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'a'> {
+  href?: string;
+  disabled?: boolean;
+  as?: 'span';
+}
+
+const { href, disabled = false, as, class: className, ...rest } = Astro.props;
+const Tag = as ?? (href && !disabled ? 'a' : 'button');
+---
+
+<Tag
+  class:list={['btn-s', 't-button-s', className]}
+  href={Tag === 'a' ? href : undefined}
+  type={Tag === 'button' ? 'button' : undefined}
+  disabled={Tag === 'button' && disabled ? true : undefined}
+  aria-disabled={Tag !== 'button' && disabled ? 'true' : undefined}
+  {...rest}
+>
+  <span class="btn-s__text"><slot /></span>
+</Tag>
+
+<style>
+  .btn-s {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: var(--space-8) var(--space-16);
+    border-radius: var(--radius-full);
+    background: var(--color-element-border);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    transition-property: background-color, scale;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+
+  .btn-s__text {
+    transition: opacity 150ms ease-out;
+  }
+
+  .btn-s:focus-visible {
+    outline: none;
+    background: var(--color-surface-tertiary);
+  }
+
+  /* Hover — свой или карточки, в которой лежит кнопка */
+  @media (hover: hover) and (pointer: fine) {
+    .btn-s:not([aria-disabled='true'], :disabled):hover .btn-s__text,
+    :global(a:hover) > * .btn-s:not([aria-disabled='true']) .btn-s__text,
+    :global(a:hover) .btn-s:not([aria-disabled='true']) .btn-s__text {
+      opacity: 0.6;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .btn-s:not(:disabled, [aria-disabled='true']):active {
+      scale: 0.96;
+    }
+  }
+
+  .btn-s:disabled,
+  .btn-s[aria-disabled='true'] {
+    opacity: 0.5;
+    background: var(--color-surface-tertiary);
+    color: var(--color-text-secondary);
+    cursor: default;
+    pointer-events: none;
+  }
+</style>
