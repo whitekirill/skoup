@@ -1,0 +1,85 @@
+---
+/**
+ * Иллюстрация статьи «Image · …» (Figma 598:7137): экспорт кадра макета в 2x → AVIF / WebP + PNG.
+ * Desktop — 1024 по центру (шире колонки текста), скругление radius/44.
+ * Mobile — в масштабе 0.6, без обрезки: уходит за правое поле до края экрана и листается вбок.
+ */
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+}
+
+const { src, alt } = Astro.props;
+const w = src.width / 2; // ширина в макете
+const widths = [Math.round(w * 0.6), Math.round(w), Math.round(w * 1.2), Math.round(w * 2)];
+const build = (format: 'avif' | 'webp' | 'png') =>
+  Promise.all(widths.map((width) => getImage({ src, width, format }))).then((images) =>
+    images.map((image, i) => `${image.src} ${widths[i]}w`).join(', '),
+  );
+const [avif, webp, png] = await Promise.all([build('avif'), build('webp'), build('png')]);
+const fallback = await getImage({ src, width: Math.round(w), format: 'png' });
+const sizes = `(max-width: 767px) ${widths[0]}px, ${Math.round(w)}px`;
+---
+
+<figure class="art-figure" style={`--w: ${w}; --h: ${src.height / 2};`}>
+  <div class="art-figure__scroll" tabindex="0" role="group" aria-label={alt}>
+    <picture>
+      <source type="image/avif" srcset={avif} sizes={sizes} />
+      <source type="image/webp" srcset={webp} sizes={sizes} />
+      <img src={fallback.src} srcset={png} sizes={sizes} alt={alt} width={Math.round(w)} height={Math.round(src.height / 2)} loading="lazy" decoding="async" />
+    </picture>
+  </div>
+</figure>
+
+<style>
+  .art-figure {
+    --scale: 1;
+    width: 100%;
+    margin: 0;
+  }
+
+  .art-figure__scroll {
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    outline: none;
+  }
+
+  .art-figure img {
+    display: block;
+    width: calc(var(--w) * var(--scale) * 1px);
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-44);
+  }
+
+  @media (max-width: 767px) {
+    /* выходим из колонки до правого края экрана, картинку листаем вбок */
+    .art-figure {
+      --scale: 0.6;
+      width: calc(100% + var(--layout-page-padding));
+      margin-right: calc(-1 * var(--layout-page-padding));
+    }
+
+    .art-figure__scroll {
+      justify-content: flex-start;
+      padding-right: var(--layout-page-padding);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+
+    .art-figure__scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .art-figure img {
+      flex-shrink: 0;
+      max-width: none;
+      border-radius: var(--radius-24);
+    }
+  }
+</style>

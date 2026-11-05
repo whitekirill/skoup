@@ -1,0 +1,47 @@
+---
+/**
+ * Блок «Норма» (Figma 598:8959): фон tint/green, слева линия 2 px element/success,
+ * между линией и текстом size/note/gap. Текст — Body/Medium, ссылка на закон — Body/Small text/secondary.
+ */
+interface Props {
+  law: string;
+}
+const { law } = Astro.props;
+---
+
+<aside class="note" aria-label="Что говорит закон">
+  <div class="note__body">
+    <div class="note__text t-body-m"><slot /></div>
+    <p class="note__law t-body-s">{law}</p>
+  </div>
+</aside>
+
+<style>
+  .note {
+    display: flex;
+    gap: var(--size-note-gap);
+    padding: var(--space-24);
+    border-radius: var(--radius-24);
+    background: var(--color-tint-green);
+  }
+
+  .note::before {
+    content: '';
+    flex-shrink: 0;
+    width: var(--space-2);
+    border-radius: var(--radius-full);
+    background: var(--color-element-success);
+  }
+
+  .note__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    min-width: 0;
+  }
+
+  .note__law {
+    color: var(--color-text-secondary);
+  }
+</style>

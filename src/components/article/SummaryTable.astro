@@ -1,0 +1,295 @@
+---
+/**
+ * Итоговая таблица «Итог» (Figma: desktop 617:5773, mobile 633:8590) — настоящая <table>.
+ * Desktop: плашка element/border, radius/44. Mobile: плашка уходит до правого края экрана и листается вбок,
+ * первая колонка залипает (sticky left: 0) с фоном и линией справа.
+ * Иконки: check-circle solid — есть, x-circle solid — нет, circle line — не дошли или не проверили.
+ */
+import Icon from '../Icon.astro';
+import ozon from '../../assets/article/logos/pill-ozon.svg?url';
+import wb from '../../assets/article/logos/pill-wb.svg?url';
+import ym from '../../assets/article/logos/pill-ym.svg?url';
+
+type Mark = 'yes' | 'no' | 'unknown';
+type Cell = Mark | [Mark, string];
+const GROUPS: { title: string; rows: [string, Cell, Cell, Cell][] }[] = [
+  {
+    title: 'Точка входа',
+    rows: [
+      ['На плашке написано «кредит» или «заём»', 'no', 'no', 'no'],
+      ['Скидка за оплату своим продуктом', 'yes', 'yes', 'yes'],
+      ['Можно выбрать срок', 'yes', 'no', 'yes'],
+      ['Переплату видно заранее', 'yes', 'yes', 'yes'],
+    ],
+  },
+  {
+    title: 'Оформление',
+    rows: [
+      ['Сумму лимита выбираешь сам', 'yes', ['unknown', '¹'], 'unknown'],
+      ['Предупреждают о паузе перед выдачей денег', 'no', ['yes', '¹'], 'unknown'],
+      ['Отдельный код для кредитной истории', 'no', 'yes', 'yes'],
+      ['Договор открывается отдельной кнопкой', 'no', 'no', 'no'],
+    ],
+  },
+  {
+    title: 'Покупка',
+    rows: [
+      ['Видно, сколько осталось от лимита', 'yes', ['unknown', '²'], 'yes'],
+      ['Есть график платежей', 'yes', ['unknown', '²'], 'yes'],
+      ['Можно погасить раньше', 'yes', ['unknown', '²'], 'no'],
+    ],
+  },
+  {
+    title: 'Деньги на карту',
+    rows: [['Можно перевести лимит на карту', 'yes', ['unknown', '³'], 'no']],
+  },
+];
+const ICON = { yes: 'check-circle', no: 'x-circle', unknown: 'circle-line' } as const;
+const LABEL = { yes: 'есть', no: 'нет', unknown: 'не дошли или не проверили' } as const;
+---
+
+<figure class="summary" aria-labelledby="summary-title">
+  <h3 class="summary__title t-h3" id="summary-title">Итог</h3>
+  <div class="summary__scroll" tabindex="0" role="group" aria-label="Итоговая таблица, листается вбок">
+    <table class="summary__table">
+      <colgroup>
+        <col class="summary__col-label" />
+        <col /><col /><col />
+      </colgroup>
+      <thead>
+        <tr>
+          <td class="summary__label"></td>
+          <th scope="col"><img src={ozon} alt="Ozon" width="75" height="26" /></th>
+          <th scope="col"><img src={wb} alt="Wildberries" width="124" height="26" /></th>
+          <th scope="col"><img src={ym} alt="Яндекс Маркет" width="115" height="26" /></th>
+        </tr>
+      </thead>
+      {
+        GROUPS.map((group, g) => (
+          <tbody>
+            <tr class:list={['summary__group', { 'summary__group--first': g === 0 }]}>
+              <th class="summary__label t-caption" scope="colgroup" colspan="1">{group.title}</th>
+              <td colspan="3" />
+            </tr>
+            {group.rows.map(([label, ...cells]) => (
+              <tr class="summary__row">
+                <th class="summary__label t-body-s" scope="row">{label}</th>
+                {cells.map((cell) => {
+                  const [mark, note] = Array.isArray(cell) ? cell : [cell, ''];
+                  return (
+                    <td>
+                      <span class:list={['summary__mark', `summary__mark--${mark}`]}>
+                        <Icon name={ICON[mark]} label={LABEL[mark]} />
+                        {note && <sup class="summary__note t-body-xs">{note}</sup>}
+                      </span>
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        ))
+      }
+    </table>
+  </div>
+  <figcaption class="summary__legend t-body-xs">
+    <ul class="summary__keys">
+      {
+        (['yes', 'no', 'unknown'] as const).map((mark) => (
+          <li class:list={['summary__mark', `summary__mark--${mark}`]}>
+            <Icon name={ICON[mark]} />
+            <span>{LABEL[mark]}</span>
+          </li>
+        ))
+      }
+    </ul>
+    <p>
+      ¹ Видели в WB Кэш, это другой продукт ВБ Банка.<br />
+      ² Есть в бесплатном «Частями», «Частями Плюс» нам не открыли.<br />
+      ³ По справке WB можно, сами не проверяли.
+    </p>
+  </figcaption>
+</figure>
+
+<style>
+  .summary {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    width: 100%;
+    margin: 0;
+    padding: var(--space-44) var(--space-44) var(--space-48);
+    border-radius: var(--radius-44);
+    background: var(--color-element-border);
+  }
+
+  .summary__scroll {
+    outline: none;
+  }
+
+  .summary__table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  /* 410 + 16 под подпись строки, по 170 на площадку (из 936) */
+  .summary__col-label {
+    width: calc(426 / 936 * 100%);
+  }
+
+  .summary__table th,
+  .summary__table td {
+    padding: var(--space-12) 0;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: inherit;
+  }
+
+  .summary__table thead th,
+  .summary__table thead td {
+    padding: 0;
+  }
+
+  .summary__table thead img {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .summary__table .summary__label {
+    padding-right: var(--space-16);
+    text-align: left;
+    color: var(--color-text-primary);
+    background: var(--color-element-border);
+  }
+
+  .summary__group th {
+    padding: var(--space-32) 0 var(--space-12);
+    color: var(--color-text-secondary);
+  }
+
+  .summary__group--first th {
+    padding-top: var(--space-16);
+  }
+
+  .summary__row + .summary__row {
+    border-top: 1px solid var(--color-element-border-2);
+  }
+
+  .summary__mark {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-8);
+    vertical-align: middle;
+  }
+
+  .summary__mark--yes :global(svg) {
+    color: var(--color-text-primary);
+  }
+
+  .summary__mark--no :global(svg) {
+    color: var(--color-text-secondary);
+  }
+
+  .summary__mark--unknown :global(svg) {
+    color: var(--color-element-border-2);
+  }
+
+  .summary__note {
+    position: absolute;
+    top: calc(-1 * var(--space-4));
+    left: calc(100% + var(--space-2));
+    color: var(--color-text-secondary);
+    line-height: 1;
+  }
+
+  .summary__legend {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+    color: var(--color-text-secondary);
+  }
+
+  .summary__keys {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-8) var(--space-24);
+  }
+
+  /* Mobile (633:8590): плашка в колонке, поля 16; таблица листается, первая колонка 148 залипает */
+  @media (max-width: 767px) {
+    .summary {
+      gap: var(--space-16);
+      padding: var(--space-16);
+      border-radius: var(--radius-24);
+    }
+
+    .summary__scroll {
+      margin-right: calc(-1 * var(--space-16));
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+
+    .summary__scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .summary__table {
+      width: auto;
+      table-layout: fixed;
+    }
+
+    /* 148 + по 84 на площадку */
+    .summary__col-label {
+      width: calc(var(--space-160) - var(--space-12));
+    }
+
+    .summary__table col:not(.summary__col-label) {
+      width: calc(var(--space-80) + var(--space-4));
+    }
+
+    .summary__table thead th,
+    .summary__table thead td {
+      height: var(--space-40);
+    }
+
+    .summary__table thead img {
+      height: auto;
+      max-width: calc(100% - var(--space-8));
+    }
+
+    .summary__group th,
+    .summary__group--first th {
+      padding: 0 0 var(--space-8);
+      height: calc(var(--space-32) + var(--space-4));
+      vertical-align: bottom;
+    }
+
+    .summary__row th,
+    .summary__row td {
+      height: var(--space-48);
+      padding: 0;
+    }
+
+    .summary__row .summary__label {
+      padding-right: var(--space-12);
+      font-size: var(--typography-body-xs-size);
+      line-height: var(--typography-body-xs-line-height);
+      letter-spacing: var(--typography-body-xs-letter-spacing);
+    }
+
+    .summary__table .summary__label {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      box-shadow: inset -1px 0 0 var(--color-element-border-2);
+    }
+
+    .summary__keys {
+      flex-direction: column;
+      gap: var(--space-8);
+    }
+  }
+</style>
