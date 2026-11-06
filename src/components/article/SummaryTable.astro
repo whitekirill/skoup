@@ -163,6 +163,11 @@ const LABEL = { yes: 'есть', no: 'нет', unknown: 'не дошли или 
     background: var(--color-element-border);
   }
 
+  /* заголовки групп («Покупка», «Деньги на карту») — text/secondary; селектор сильнее общего правила подписей */
+  .summary__table .summary__group .summary__label {
+    color: var(--color-text-secondary);
+  }
+
   .summary__group th {
     padding: var(--space-32) 0 var(--space-12);
     color: var(--color-text-secondary);

@@ -70,6 +70,9 @@ const investor = {
       <CaseCard {...investor} offset />
     </div>
   </div>
+
+  <!-- Плашка вместо курсора над обложками (src/scripts/case-hover.ts) -->
+  <span class="case-cursor t-button-s" aria-hidden="true">Скоро покажем</span>
 </section>
 
 <script>
@@ -97,6 +100,22 @@ const investor = {
 
   .cases__title {
     text-align: center;
+  }
+
+  /* одна плашка на все кейсы: в окне, поверх всего, без событий мыши */
+  .case-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 30;
+    padding: var(--space-8) var(--space-16);
+    border-radius: var(--radius-full);
+    background: var(--color-surface-primary-inversion);
+    color: var(--color-text-primary-inversion);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform, opacity;
   }
 
   .cases__grid {

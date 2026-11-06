@@ -3,7 +3,7 @@
  * Case card (Figma 411:10525): Media (Desktop / Mobile — отдельные кадрирования), Logo, Client, Title.
  * Ступенька в сетке на десктопе — offset (padding-top spacing/160).
  * Параллакс (src/scripts/case-parallax.ts): двигается только картинка внутри рамки, карточка стоит.
- * Наведение (src/scripts/case-hover.ts): картинка приближается, за курсором плывёт плашка «Кейс скоро».
+ * Наведение (src/scripts/case-hover.ts): картинка приближается, курсор заменяется общей плашкой «Скоро покажем» (Cases.astro).
  */
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
@@ -55,7 +55,6 @@ const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], f
       loading="lazy"
       decoding="async"
     />
-    <span class="case__cursor t-button-s" aria-hidden="true">Кейс скоро</span>
   </picture>
   <div class="case__text">
     <p class="case__client">
@@ -99,29 +98,9 @@ const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], f
     object-fit: cover;
   }
 
-  /* Плашка за курсором (src/scripts/case-hover.ts): появляется при наведении */
-  .case__cursor {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    padding: var(--space-8) var(--space-16);
-    border-radius: var(--radius-full);
-    background: var(--color-surface-primary-inversion);
-    color: var(--color-text-primary-inversion);
-    white-space: nowrap;
-    opacity: 0;
-    scale: 0.6;
-    pointer-events: none;
-    will-change: transform;
-    transition:
-      opacity 250ms ease-out,
-      scale 350ms cubic-bezier(0.2, 0, 0, 1);
-  }
-
-  .case__media:global(.is-hover) .case__cursor {
-    opacity: 1;
-    scale: 1;
+  /* плашка заменяет курсор: системный над обложкой не показываем */
+  .case__media:global(.is-hover) {
+    cursor: none;
   }
 
   /* картинка медленно приближается при наведении */
