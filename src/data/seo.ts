@@ -23,12 +23,13 @@ export interface ArticleMeta {
   ogImageAlt: string;
 }
 
-// TODO: дату публикации подтвердить
+// Даты — только для поисковиков (на странице не выводятся): публикация — выход статьи на skoup.ru.
+// Обновили текст статьи — поменяйте modified.
 export const ARTICLE_MARKETPLACES: ArticleMeta = {
   path: '/blog/marketplaces-installments/',
   headline: 'Покупка частями в кредит на Ozon, Wildberries и Яндекс Маркете: как это выглядит и что говорит закон',
   section: 'Финтех и регуляторика',
-  published: '2026-11-05',
+  published: '2026-11-06',
   modified: '2026-11-06',
   ogImage: '/og/marketplaces-installments.png',
   ogImageAlt: 'Покупка частями в кредит на Ozon, Wildberries и Яндекс Маркете',
