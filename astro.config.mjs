@@ -4,6 +4,7 @@ import sitemap from '@astrojs/sitemap';
 import typograph from './scripts/typograph-integration.mjs';
 
 // В логе сборки: включена ли индексация и какие переменные про ветку/коммит видит сборщик
+/** @type {import('astro').AstroIntegration} */
 const buildInfo = {
   name: 'skoup-build-info',
   hooks: {
