@@ -3,6 +3,7 @@
  * Case card (Figma 411:10525): Media (Desktop / Mobile — отдельные кадрирования), Logo, Client, Title.
  * Ступенька в сетке на десктопе — offset (padding-top spacing/160).
  * Параллакс (src/scripts/case-parallax.ts): двигается только картинка внутри рамки, карточка стоит.
+ * Наведение (src/scripts/case-hover.ts): картинка приближается, за курсором плывёт плашка «Кейс скоро».
  */
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
@@ -54,6 +55,7 @@ const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], f
       loading="lazy"
       decoding="async"
     />
+    <span class="case__cursor t-button-s" aria-hidden="true">Кейс скоро</span>
   </picture>
   <div class="case__text">
     <p class="case__client">
@@ -87,10 +89,50 @@ const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], f
     clip-path: inset(0 round var(--case-radius));
   }
 
+  .case__media {
+    position: relative;
+  }
+
   .case__media img {
     width: 100%;
     height: var(--size-case-media-height);
     object-fit: cover;
+  }
+
+  /* Плашка за курсором (src/scripts/case-hover.ts): появляется при наведении */
+  .case__cursor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    padding: var(--space-8) var(--space-16);
+    border-radius: var(--radius-full);
+    background: var(--color-surface-primary-inversion);
+    color: var(--color-text-primary-inversion);
+    white-space: nowrap;
+    opacity: 0;
+    scale: 0.6;
+    pointer-events: none;
+    will-change: transform;
+    transition:
+      opacity 250ms ease-out,
+      scale 350ms cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .case__media:global(.is-hover) .case__cursor {
+    opacity: 1;
+    scale: 1;
+  }
+
+  /* картинка медленно приближается при наведении */
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .case__media img {
+      transition: scale 900ms cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    :global(.cases.is-parallax) .case__media:hover img {
+      scale: 1.14;
+    }
   }
 
   @media (prefers-reduced-motion: no-preference) {

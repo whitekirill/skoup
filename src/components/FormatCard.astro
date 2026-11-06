@@ -21,7 +21,7 @@ const { icon, color, title, description, time, payment } = Astro.props;
   <div class="format__top">
     <Icon name={icon} size={32} class={`icon-${color}`} />
     <div class="format__text">
-      <h3 class="t-body-l">{title}</h3>
+      <h3 class="format__title t-body-l">{title}</h3>
       <p class="format__secondary t-body-s">{description}</p>
     </div>
   </div>
@@ -61,5 +61,14 @@ const { icon, color, title, description, time, payment } = Astro.props;
 
   .format__secondary {
     color: var(--color-text-secondary);
+  }
+
+  /* на мобильном заголовок на ступень крупнее — Header/H5 (20 / 26) */
+  @media (max-width: 767px) {
+    .format__title {
+      font-size: var(--typography-h5-size);
+      line-height: var(--typography-h5-line-height);
+      letter-spacing: var(--typography-h5-letter-spacing);
+    }
   }
 </style>

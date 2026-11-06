@@ -23,18 +23,19 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
 
     <!-- Форма -->
     <div class="brief__view" data-brief-view="form">
+      <!-- Заголовок как в макете: слова и ссылки — отдельные блоки с зазором gap-4xs, переносятся целиком -->
       <h2 class="brief__title t-h2 brief__reveal" id="brief-title" style="--i: 0" tabindex="-1">
-        Расскажите о&nbsp;проекте<br />
-        <span class="brief__muted">
-          или напишите нам в{' '}
-          <a class="brief__contact brief__contact--tg" href={TELEGRAM_URL} target="_blank" rel="noopener">
-            <Icon name="paperplane" size={44} /><span>telegram</span>
-          </a>{' '}
-          <br class="brief__br-desktop" />или на{' '}
-          <a class="brief__contact brief__contact--mail" href={`mailto:${EMAIL}`}>
-            <Icon name="envelope" size={44} /><span>{EMAIL}</span>
-          </a>
-        </span>
+        <span>Расскажите</span> <span>о</span> <span>проекте</span>
+        <span class="brief__break" aria-hidden="true"></span>
+        <span class="brief__muted">или напишите нам</span> <span class="brief__muted">в</span>
+        <a class="brief__contact brief__contact--tg" href={TELEGRAM_URL} target="_blank" rel="noopener">
+          <Icon name="paperplane" size={44} /><span>telegram</span>
+        </a>
+        <span class="brief__break brief__break--desktop" aria-hidden="true"></span>
+        <span class="brief__muted">или</span> <span class="brief__muted">на</span>
+        <a class="brief__contact brief__contact--mail" href={`mailto:${EMAIL}`}>
+          <Icon name="envelope" size={44} /><span>{EMAIL}</span>
+        </a>
       </h2>
 
       <form class="brief__form" novalidate data-brief-form>
@@ -85,7 +86,7 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
               <p class="brief__send-error t-body-s" role="alert" data-brief-send-error></p>
             </div>
             <p class="brief__consent t-body-m">
-              Нажимая на кнопку, вы даёте согласие на <a href={LEGAL[0].href}>обработку персональных данных</a><br />
+              Нажимая на кнопку, вы даёте согласие на <a href={LEGAL[0].href}>обработку персональных данных</a><br class="brief__br-desktop" />
               и соглашаетесь с <a href={LEGAL[0].href}>политикой конфиденциальности</a>.
             </p>
           </div>
@@ -306,11 +307,25 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
     }
   }
 
-  /* Заголовок: слова через фиксированный зазор gap-4xs, как в макете */
+  /* Заголовок: слова — флекс-блоки с зазором gap-4xs (desktop 0 / 8, mobile 4 / 6), как в макете */
   .brief__title {
+    --brief-icon: var(--space-44);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--gap-4xs);
     max-width: calc(782 / 1352 * 100%);
-    word-spacing: calc(var(--gap-4xs) - 0.2em - 2.25 * var(--typography-h2-letter-spacing));
     outline: none;
+  }
+
+  .brief__title > * {
+    white-space: nowrap;
+  }
+
+  /* перенос строки внутри флекса */
+  .brief__break {
+    flex-basis: 100%;
+    height: 0;
   }
 
   .brief__muted {
@@ -322,15 +337,13 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
     align-items: center;
     gap: var(--gap-3xs);
     color: var(--color-text-secondary);
-    word-spacing: normal;
-    vertical-align: top;
     transition: color 200ms ease-out;
   }
 
-  /* иконка 44 на desktop, на мобильном — по высоте строки H2 */
+  /* иконка 44 на desktop, 32 на mobile */
   .brief__contact :global(svg) {
-    width: var(--space-44);
-    height: var(--space-44);
+    width: var(--brief-icon);
+    height: var(--brief-icon);
   }
 
   .brief__contact:focus-visible {
@@ -520,7 +533,16 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
 
     .brief__section {
       flex-direction: column;
-      gap: 0;
+      gap: var(--gap-xs);
+    }
+
+    .brief__title {
+      --brief-icon: var(--space-32);
+      gap: var(--space-4) var(--gap-4xs);
+    }
+
+    .brief__break--desktop {
+      display: none;
     }
 
     .brief__heading,

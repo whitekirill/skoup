@@ -13,6 +13,7 @@ import kirill from '../../assets/team/kirill.png';
 import anna from '../../assets/team/anna.png';
 import andrey from '../../assets/team/andrey.png';
 import round from '../../assets/logos/round.svg?url';
+import uzum from '../../assets/logos/uzum.svg?url';
 
 const TEAM = [
   { name: 'Павел', role: 'CEO', photo: pavel },
@@ -21,13 +22,19 @@ const TEAM = [
   { name: 'Андрей', role: 'Юрист', photo: andrey },
 ];
 
-// Пока один отзыв: стрелки переключают, если их станет больше
+// Отзывы клиентов; стрелки переключают, на краях неактивны
 const REVIEWS = [
   {
     text: '«Скоуп с первых встреч вник в наш продукт и сразу учёл требования регулятора, поэтому макеты прошли проверку без переделок. Команда работала как часть нашей: быстро принимала решения, опиралась на данные и каждую неделю показывала результат. Запустились раньше плана, и в работе с ними ни разу не пришлось ничего дожимать»',
     name: 'Рачко Роман',
     company: 'Банк «Раунд»',
     logo: round,
+  },
+  {
+    text: '«По ощущениям это было куда больше похоже на ещё одного сильного продуктового специалиста в команде, чем на работу с агентством. Работа Скоупа поддержала портфель из более чем 5 000 000 выпущенных карт и помогла выйти примерно на $421 000 000 в кредитовании. Скоуп глубоко погрузился в продукт, спорил с нашими идеями и по-настоящему переживал за итоговый результат»',
+    name: 'Дмитрий Смола',
+    company: 'Uzum Bank',
+    logo: uzum,
   },
 ];
 ---
@@ -65,9 +72,10 @@ const REVIEWS = [
   <h2 class="section-label t-button-l" id="reviews-title">Отзывы</h2>
 
   <div class="reviews" data-reviews aria-labelledby="reviews-title" aria-roledescription="карусель">
+    <div class="reviews__items" aria-live="polite">
     {
       REVIEWS.map((review, i) => (
-        <figure class="reviews__item" hidden={i > 0} aria-label={`${i + 1} из ${REVIEWS.length}`}>
+        <figure class:list={['reviews__item', { 'is-active': i === 0 }]} aria-hidden={i > 0 ? 'true' : undefined} inert={i > 0} aria-label={`${i + 1} из ${REVIEWS.length}`}>
           <blockquote class="t-body-l">{review.text}</blockquote>
           <figcaption class="reviews__author">
             <img src={review.logo} alt="" width="56" height="56" loading="lazy" decoding="async" />
@@ -79,6 +87,7 @@ const REVIEWS = [
         </figure>
       ))
     }
+    </div>
     <div class="reviews__nav">
       <Button variant="secondary" iconLeft="chevron-small-left-line" label="Предыдущий отзыв" disabled data-reviews-prev />
       <Button variant="secondary" iconLeft="chevron-small-right-line" label="Следующий отзыв" disabled={REVIEWS.length < 2} data-reviews-next />
@@ -87,7 +96,7 @@ const REVIEWS = [
 </section>
 
 <script>
-  // Переключение отзывов: стрелки неактивны на краях
+  // Переключение отзывов: сменяются прозрачностью на одном месте (высота — по самому длинному), стрелки неактивны на краях
   const root = document.querySelector<HTMLElement>('[data-reviews]');
   if (root) {
     const items = Array.from(root.querySelectorAll<HTMLElement>('.reviews__item'));
@@ -96,7 +105,13 @@ const REVIEWS = [
     let index = 0;
     const show = (i: number) => {
       index = Math.max(0, Math.min(items.length - 1, i));
-      items.forEach((item, j) => (item.hidden = j !== index));
+      items.forEach((item, j) => {
+        const on = j === index;
+        item.classList.toggle('is-active', on);
+        item.inert = !on;
+        if (on) item.removeAttribute('aria-hidden');
+        else item.setAttribute('aria-hidden', 'true');
+      });
       prev.disabled = index === 0;
       next.disabled = index === items.length - 1;
     };
@@ -182,13 +197,32 @@ const REVIEWS = [
     margin: 0;
   }
 
+  /* отзывы лежат друг на друге: высота блока — по самому длинному, при смене ничего не прыгает */
+  .reviews__items {
+    display: grid;
+    flex: 1;
+  }
+
   .reviews__item {
     display: flex;
-    flex: 1;
+    grid-area: 1 / 1;
     flex-direction: column;
     justify-content: space-between;
     gap: var(--gap-s);
     margin: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 400ms cubic-bezier(0.2, 0, 0, 1),
+      visibility 400ms;
+  }
+
+  .reviews__item.is-active {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 400ms cubic-bezier(0.2, 0, 0, 1) 100ms,
+      visibility 0s;
   }
 
   .reviews__author {
@@ -229,6 +263,12 @@ const REVIEWS = [
 
     .reviews {
       min-height: 0;
+    }
+
+    /* логотип автора — высотой с кнопки переключения */
+    .reviews__author img {
+      width: var(--size-button-height);
+      height: var(--size-button-height);
     }
   }
 </style>

@@ -53,7 +53,7 @@ const sizes = `(max-width: 767px) ${widths[0]}px, ${Math.round(w)}px`;
     width: calc(var(--w) * var(--scale) * 1px);
     max-width: 100%;
     height: auto;
-    border-radius: var(--radius-44);
+    /* скругление radius/44 — в самой картинке (прозрачные углы), CSS-обрезка давала тонкую кайму */
   }
 
   @media (max-width: 767px) {
@@ -85,7 +85,6 @@ const sizes = `(max-width: 767px) ${widths[0]}px, ${Math.round(w)}px`;
     .art-figure img {
       flex-shrink: 0;
       max-width: none;
-      border-radius: var(--radius-24);
     }
   }
 </style>

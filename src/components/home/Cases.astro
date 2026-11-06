@@ -74,7 +74,10 @@ const investor = {
 
 <script>
   import { mountCaseParallax } from '../../scripts/case-parallax';
+  import { mountCaseHover } from '../../scripts/case-hover';
   mountCaseParallax();
+  const cases = document.querySelector<HTMLElement>('.cases');
+  if (cases) mountCaseHover(cases);
 </script>
 
 <style>

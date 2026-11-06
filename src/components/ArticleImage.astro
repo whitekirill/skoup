@@ -2,12 +2,12 @@
 /**
  * Article image (Figma 606:11834). Type: Marketplaces / Passkeys (тизер); Breakpoint: Desktop 220 / Mobile 132.
  * Marketplaces — экспорт макета картинкой (@2x, desktop и mobile отдельно).
- * Passkeys — фон tint/blue и иконка Icon / Passkey (642:10421, SVG) 96 / 56 цвета icon/blue.
+ * Passkeys — фон tint/blue и иконка Amicons key (как в макете 640:10461) 96 / 56 цвета icon/blue.
  */
 import { getImage } from 'astro:assets';
 import marketDesktop from '../assets/blog/marketplaces-desktop.png';
 import marketMobile from '../assets/blog/marketplaces-mobile.png';
-import Passkey from '../assets/blog/passkey.svg';
+import Icon from './Icon.astro';
 
 export type ArticleImageType = 'marketplaces' | 'passkeys';
 
@@ -45,7 +45,7 @@ const images =
     </picture>
   ) : (
     <div class="art-image art-image--passkeys" role={alt ? 'img' : undefined} aria-label={alt || undefined}>
-      <Passkey class="art-image__icon icon-blue" aria-hidden="true" />
+      <Icon name="key" size={96} class="art-image__icon icon-blue" />
     </div>
   )
 }
@@ -74,7 +74,7 @@ const images =
     background: var(--color-tint-blue);
   }
 
-  .art-image__icon {
+  .art-image :global(.art-image__icon) {
     width: var(--space-96);
     height: var(--space-96);
   }
@@ -85,7 +85,7 @@ const images =
       border-radius: var(--radius-16);
     }
 
-    .art-image__icon {
+    .art-image :global(.art-image__icon) {
       width: var(--space-56);
       height: var(--space-56);
     }

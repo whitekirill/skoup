@@ -222,15 +222,18 @@ const LABEL = { yes: 'есть', no: 'нет', unknown: 'не дошли или 
    * Левая колонка закреплена (sticky, фон плашки и линия справа), колонки площадок листаются вбок и уходят под неё.
    */
   @media (max-width: 767px) {
+    /* плашка на всю ширину экрана, без скруглений: больше места колонкам площадок */
     .summary {
-      padding: var(--space-24) 0 var(--space-24) var(--space-16);
-      border-radius: var(--radius-24);
+      width: calc(100% + 2 * var(--layout-page-padding));
+      margin-inline: calc(-1 * var(--layout-page-padding));
+      padding: var(--space-24) 0 var(--space-24) var(--layout-page-padding);
+      border-radius: 0;
       overflow: hidden;
     }
 
     .summary__title,
     .summary__legend {
-      padding-right: var(--space-16);
+      padding-right: var(--layout-page-padding);
     }
 
     .summary__scroll {
@@ -247,13 +250,13 @@ const LABEL = { yes: 'есть', no: 'нет', unknown: 'не дошли или 
       width: max-content;
     }
 
-    /* подписи строк 160, площадки по 140 — логотипы помещаются без уменьшения */
+    /* подписи строк 150, площадки по 130 — на 393 видно две площадки целиком, третья — листанием */
     .summary__col-label {
-      width: var(--space-160);
+      width: calc(var(--space-160) - var(--space-10));
     }
 
     .summary__table col:not(.summary__col-label) {
-      width: calc(var(--space-120) + var(--space-20));
+      width: calc(var(--space-120) + var(--space-10));
     }
 
     .summary__table .summary__label {
