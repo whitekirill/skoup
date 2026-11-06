@@ -1,7 +1,7 @@
 // Проверка полей брифа. Чистые функции — без DOM, чтобы их можно было прогнать отдельно.
 import { FILES } from '../../data/brief';
 
-export type ContactType = 'email' | 'telegram' | 'url';
+type ContactType = 'email' | 'telegram' | 'url';
 
 /** Тип контакта и нормализованное значение; null — не похоже ни на почту, ни на ник, ни на ссылку */
 export function parseContact(raw: string): { type: ContactType; value: string } | null {
@@ -47,7 +47,7 @@ export const isPhone = (raw: string) => phoneDigits(raw).length === 10;
 
 export const isName = (raw: string) => raw.trim().length >= 2;
 
-export type FileProblem = 'size' | 'type' | null;
+type FileProblem = 'size' | 'type' | null;
 
 export function checkFile(file: { name: string; size: number }): FileProblem {
   const ext = file.name.split('.').pop()?.toLowerCase() ?? '';

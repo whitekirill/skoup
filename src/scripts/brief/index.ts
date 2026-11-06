@@ -324,7 +324,7 @@ if (brief && form) {
     for (const name of ['services', 'budget'] as GroupName[]) {
       const message = groupError(name);
       showGroupError(name, message);
-      if (message && !first) first = form.querySelector<HTMLElement>(`input[name="${name}"]`);
+      if (message && !first) first = form!.querySelector<HTMLElement>(`input[name="${name}"]`);
     }
     return first;
   }
@@ -344,9 +344,9 @@ if (brief && form) {
     data.set('contact', contact.value);
     data.set('contact_type', contact.type);
     data.set('phone', `+7${phoneDigits(control('phone').value)}`);
-    for (const input of form.querySelectorAll<HTMLInputElement>('input[name="services"]:checked')) data.append('services', input.value);
-    data.set('task', (form.elements.namedItem('task') as HTMLTextAreaElement).value.trim());
-    data.set('budget', form.querySelector<HTMLInputElement>('input[name="budget"]:checked')!.value);
+    for (const input of form!.querySelectorAll<HTMLInputElement>('input[name="services"]:checked')) data.append('services', input.value);
+    data.set('task', (form!.elements.namedItem('task') as HTMLTextAreaElement).value.trim());
+    data.set('budget', form!.querySelector<HTMLInputElement>('input[name="budget"]:checked')!.value);
     for (const { file, problem } of files) if (!problem) data.append('files', file, file.name);
     return data;
   }

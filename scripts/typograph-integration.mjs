@@ -9,7 +9,7 @@ const NBSP = ' ';
 const SHORT = /(^|[\s(«„"—>])([а-яёА-ЯЁ]{1,2}|[A-Za-z]|[Дд]ля|[Бб]ез|[Пп]ри|[Пп]ро|[Пп]од|[Нн]ад)[ \t\n]+(?=[^\s<])/g;
 const DASH = /[ \t\n]+—/g;
 
-export function typographText(text) {
+function typographText(text) {
   // два прохода — для цепочек коротких слов («и в банке»)
   return text.replace(SHORT, `$1$2${NBSP}`).replace(SHORT, `$1$2${NBSP}`).replace(DASH, `${NBSP}—`);
 }
@@ -17,7 +17,7 @@ export function typographText(text) {
 // блоки, внутри которых текст не трогаем: вырезаются целиком, остальное — текст между тегами
 const RAW = /<(script|style|svg|textarea|pre|code)\b[\s\S]*?<\/\1>/gi;
 
-export function typographHtml(html) {
+function typographHtml(html) {
   let out = '';
   let last = 0;
   for (const m of html.matchAll(RAW)) {

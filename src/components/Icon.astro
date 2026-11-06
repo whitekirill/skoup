@@ -8,7 +8,6 @@
 const icons = import.meta.glob<{ default: (props: Record<string, unknown>) => unknown }>('../assets/icons/amicons/*.svg', { eager: true });
 
 export type IconName =
-  | 'align-left-line'
   | 'arrow-down-line'
   | 'arrow-to-bracket-down-line'
   | 'arrows-rotate-cw-horizontal'
@@ -25,13 +24,11 @@ export type IconName =
   | 'graduation-cap'
   | 'hand'
   | 'key'
-  | 'key-line'
   | 'magnifying-glass'
   | 'paperplane'
   | 'plus-line'
   | 'text-i-circle'
   | 'toggle-left'
-  | 'video-camera-slash'
   | 'wrench'
   | 'x-circle'
   | 'x-line';

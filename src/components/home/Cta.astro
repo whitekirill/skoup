@@ -7,6 +7,7 @@
  * стоит и листается горизонтально.
  */
 import { getImage } from 'astro:assets';
+import { srcset } from '../../utils/images';
 import type { ImageMetadata } from 'astro';
 import Button from '../Button.astro';
 import { CTA, EMAIL } from '../../data/site';
@@ -17,11 +18,7 @@ const items = await Promise.all(
   GALLERY.map(async (item) => {
     const src = files[`../../assets/gallery/${item.file}`].default;
     const widths = [Math.round(item.width * 0.75), Math.round(item.width), Math.round(item.width * 2)];
-    const build = (format: 'avif' | 'webp') =>
-      Promise.all(widths.map((width) => getImage({ src, width, format }))).then((images) =>
-        images.map((image, i) => `${image.src} ${widths[i]}w`).join(', '),
-      );
-    const [avif, webp, fallback] = await Promise.all([build('avif'), build('webp'), getImage({ src, width: widths[1], format: 'webp' })]);
+    const [avif, webp, fallback] = await Promise.all([srcset(src, widths, 'avif'), srcset(src, widths, 'webp'), getImage({ src, width: widths[1], format: 'webp' })]);
     const sizes = `(max-width: 767px) ${widths[0]}px, ${widths[1]}px`;
     return { ...item, avif, webp, fallback: fallback.src, sizes };
   }),
