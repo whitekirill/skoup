@@ -26,12 +26,12 @@ await p.evaluate(() => {
   requestAnimationFrame(tick);
   new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__loaf.push({ y: Math.round(scrollY), dur: Math.round(e.duration), render: Math.round(e.renderStart ? e.startTime + e.duration - e.renderStart : 0), style: Math.round(e.styleAndLayoutStart ? e.startTime + e.duration - e.styleAndLayoutStart : 0), scripts: e.scripts.map((sc) => `${sc.invoker} ${Math.round(sc.duration)}ms ${sc.sourceURL.split('/').pop()}`) }); }).observe({ type: 'long-animation-frame', buffered: false });
 });
-await p.mouse.move(200, 450); // слева от иллюстрации: замер именно скролла (наведение во время скролла — tests/hero-scroll.mjs)
+await p.mouse.move(200, 450); // слева от иллюстрации: замер именно скролла 
 for (let i = 0; i < 90; i++) { await p.mouse.wheel(0, 120); await p.waitForTimeout(60); }
 await p.waitForTimeout(1500);
 const r = await p.evaluate(() => ({ frames: window.__frames, loaf: window.__loaf }));
 const ft = r.frames.map((f) => f[0]).sort((a, b) => a - b);
 console.log(`кадров ${ft.length}, медиана ${ft[ft.length >> 1].toFixed(1)} мс, p95 ${ft[Math.floor(ft.length * 0.95)].toFixed(1)}, p99 ${ft[Math.floor(ft.length * 0.99)].toFixed(1)}, >25мс: ${ft.filter((x) => x > 25).length}, >50мс: ${ft.filter((x) => x > 50).length}`);
 console.log('долгие кадры (scrollY: мс):', r.frames.filter((f) => f[0] > 25).map((f) => `${f[1]}:${Math.round(f[0])}`).join(' '));
-console.log('hero live:', await p.evaluate(() => document.documentElement.className)); console.log('LoAF:'); for (const l of r.loaf.slice(0, 40)) console.log(`  y=${l.y} ${l.dur}мс render=${l.render} style/layout=${l.style} ${l.scripts.join(' | ')}`);
+console.log('LoAF:'); for (const l of r.loaf.slice(0, 40)) console.log(`  y=${l.y} ${l.dur}мс render=${l.render} style/layout=${l.style} ${l.scripts.join(' | ')}`);
 await b.close(); s.close();

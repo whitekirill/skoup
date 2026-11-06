@@ -10,7 +10,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test:visual": "node tests/compare.mjs desktop && node tests/compare.mjs mobile"
+    "test:visual": "node tests/home.mjs && node tests/article.mjs && node tests/brief-visual.mjs"
   },
   "dependencies": {
     "astro": "7.3.8",

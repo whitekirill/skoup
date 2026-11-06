@@ -24,8 +24,8 @@ const url = `http://localhost:${server.address().port}/blog/marketplaces-install
 
 // секции: селектор на странице, верх и низ в макете
 const FIGMA = {
-  1440: { file: 'v2/article-desktop.png', sections: [['первый экран', '.art-hero', 0, 703], ['введение', '#intro', 703, 2171], ['точка входа', '#entry', 2171, 6571], ['лимит', '#limit', 6571, 16857], ['покупка', '#purchase', 16857, 20716], ['на карту', '#transfer', 20716, 22377], ['сравнение', '#compare', 22377, 24025], ['находки', '#findings', 24025, 28985], ['cta', '.cta', 28985, 29965]] },
-  393: { file: 'v2/article-mobile.png', sections: [['первый экран', '.art-hero', 0, 501], ['введение', '#intro', 501, 2175], ['точка входа', '#entry', 2175, 5820], ['лимит', '#limit', 5820, 14305], ['покупка', '#purchase', 14305, 17515], ['на карту', '#transfer', 17515, 18825], ['сравнение', '#compare', 18825, 20259], ['находки', '#findings', 20259, 24373], ['cta', '.cta', 24373, 25263]] },
+  1440: { file: 'figma/article-desktop.png', sections: [['первый экран', '.art-hero', 0, 703], ['введение', '#intro', 703, 2171], ['точка входа', '#entry', 2171, 6571], ['лимит', '#limit', 6571, 16857], ['покупка', '#purchase', 16857, 20716], ['на карту', '#transfer', 20716, 22377], ['сравнение', '#compare', 22377, 24025], ['находки', '#findings', 24025, 28985], ['cta', '.cta', 28985, 29965]] },
+  393: { file: 'figma/article-mobile.png', sections: [['первый экран', '.art-hero', 0, 501], ['введение', '#intro', 501, 2175], ['точка входа', '#entry', 2175, 5820], ['лимит', '#limit', 5820, 14305], ['покупка', '#purchase', 14305, 17515], ['на карту', '#transfer', 17515, 18825], ['сравнение', '#compare', 18825, 20259], ['находки', '#findings', 20259, 24373], ['cta', '.cta', 24373, 25263]] },
 };
 
 let fails = 0;
@@ -51,7 +51,7 @@ for (const width of [1440, 1024, 768, 393, 360]) {
 
   const ref = FIGMA[width];
   if (ref) {
-    const figma = PNG.sync.read(fs.readFileSync(path.resolve('tests/screens/figma', ref.file)));
+    const figma = PNG.sync.read(fs.readFileSync(path.resolve('tests/reference', ref.file)));
     const shot = PNG.sync.read(fs.readFileSync(file));
     const crop = (img, y, height) => {
       const out = new PNG({ width, height });

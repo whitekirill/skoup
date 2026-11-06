@@ -7,3 +7,7 @@ playwright-report/
 tests/screens/actual/
 tests/screens/diff/
 tests/.brief-dist
+# результаты тестов: скриншоты, видео, диффы, отчёты Lighthouse (эталоны Figma — в tests/reference)
+tests/screens/
+tests/.lighthouse/
+tests/.videos/

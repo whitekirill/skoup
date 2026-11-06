@@ -24,8 +24,8 @@ const url = `http://localhost:${server.address().port}/`;
 
 // секции: селектор на странице, верх и низ в макете
 const FIGMA = {
-  1440: { file: 'v2/home-desktop.png', sections: [['первый экран', '.hero', 0, 1040], ['что мы умеем', '.services', 1040, 2276], ['кейсы', '.cases', 2276, 5692], ['форматы', '.formats', 5692, 6684], ['кто мы', '.about', 6684, 8176], ['блог', '.blog', 8176, 9028], ['cta', '.cta', 9028, 10008]] },
-  393: { file: 'v2/home-mobile.png', sections: [['первый экран', '.hero', 0, 640], ['что мы умеем', '.services', 640, 1802], ['кейсы', '.cases', 1802, 4738], ['форматы', '.formats', 4738, 5878], ['кто мы', '.about', 5878, 7234], ['блог', '.blog', 7234, 7850], ['cta', '.cta', 7850, 8624]] },
+  1440: { file: 'figma/home-desktop.png', sections: [['первый экран', '.hero', 0, 1040], ['что мы умеем', '.services', 1040, 2276], ['кейсы', '.cases', 2276, 5692], ['форматы', '.formats', 5692, 6684], ['кто мы', '.about', 6684, 8176], ['блог', '.blog', 8176, 9028], ['cta', '.cta', 9028, 10008]] },
+  393: { file: 'figma/home-mobile.png', sections: [['первый экран', '.hero', 0, 640], ['что мы умеем', '.services', 640, 1802], ['кейсы', '.cases', 1802, 4738], ['форматы', '.formats', 4738, 5878], ['кто мы', '.about', 5878, 7234], ['блог', '.blog', 7234, 7850], ['cta', '.cta', 7850, 8624]] },
 };
 
 let fails = 0;
@@ -51,7 +51,7 @@ for (const width of [1440, 1024, 768, 393, 360]) {
 
   const ref = FIGMA[width];
   if (ref) {
-    const figma = PNG.sync.read(fs.readFileSync(path.resolve('tests/screens/figma', ref.file)));
+    const figma = PNG.sync.read(fs.readFileSync(path.resolve('tests/reference', ref.file)));
     const shot = PNG.sync.read(fs.readFileSync(file));
     const crop = (img, y, height) => {
       const out = new PNG({ width, height });

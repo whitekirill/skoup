@@ -28,6 +28,6 @@ const run = async (label, action) => {
   const shifts = new Set(x.map((v) => v.toFixed(1)));
   console.log(`${label}: кадров ${f.length}, медиана ${sorted[f.length >> 1].toFixed(1)} мс, макс ${sorted.at(-1).toFixed(1)} мс, >25 мс: ${f.filter((v) => v > 25).length}; левый край main: ${[...shifts].slice(0, 6).join(' → ')}`);
 };
-await run('открытие', () => p.click('[data-sticky-cta] [data-brief-open], .hero [data-brief-open]').catch(() => p.evaluate(() => document.querySelector('[data-brief-open]').click())));
+await run('открытие', () => p.click('.hero [data-brief-open]').catch(() => p.evaluate(() => document.querySelector('[data-brief-open]').click())));
 await run('закрытие', () => p.click('.brief__close'));
 await b.close(); s.close();
