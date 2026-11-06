@@ -3,7 +3,8 @@
  * Итоговая таблица «Итог» (Figma: desktop 617:5773, mobile 633:8590) — настоящая <table>.
  * Desktop: плашка element/border, radius/44. Mobile: плашка уходит до правого края экрана и листается вбок,
  * первая колонка залипает (sticky left: 0) с фоном и линией справа.
- * Иконки: check-circle solid — есть, x-circle solid — нет, circle line — не дошли или не проверили.
+ * Иконки: check-circle solid — есть, x-circle solid — нет, circle line — не дошли или не проверили
+ * (расшифровку под таблицей убрали по просьбе — подписи остаются у самих иконок для скринридеров).
  */
 import Icon from '../Icon.astro';
 import ozon from '../../assets/article/logos/pill-ozon.svg?url';
@@ -93,16 +94,6 @@ const LABEL = { yes: 'есть', no: 'нет', unknown: 'не дошли или 
     </table>
   </div>
   <figcaption class="summary__legend t-body-xs">
-    <ul class="summary__keys">
-      {
-        (['yes', 'no', 'unknown'] as const).map((mark) => (
-          <li class:list={['summary__mark', `summary__mark--${mark}`]}>
-            <Icon name={ICON[mark]} />
-            <span>{LABEL[mark]}</span>
-          </li>
-        ))
-      }
-    </ul>
     <p>
       ¹ Видели в WB Кэш, это другой продукт ВБ Банка.<br />
       ² Есть в бесплатном «Частями», «Частями Плюс» нам не открыли.<br />
@@ -214,12 +205,6 @@ const LABEL = { yes: 'есть', no: 'нет', unknown: 'не дошли или 
     flex-direction: column;
     gap: var(--space-12);
     color: var(--color-text-secondary);
-  }
-
-  .summary__keys {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-8) var(--space-24);
   }
 
   /*
