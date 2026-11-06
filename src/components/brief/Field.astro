@@ -14,9 +14,11 @@ interface Props {
   type?: 'text' | 'tel';
   autocomplete?: HTMLAttributes<'input'>['autocomplete'];
   inputmode?: HTMLAttributes<'input'>['inputmode'];
+  /** для почты и ников: без проверки орфографии и заглавной первой буквы */
+  plain?: boolean;
 }
 
-const { name, label, multiline = false, required = false, type = 'text', autocomplete, inputmode } = Astro.props;
+const { name, label, multiline = false, required = false, type = 'text', autocomplete, inputmode, plain = false } = Astro.props;
 const id = `brief-${name}`;
 const errorId = `${id}-error`;
 ---
@@ -35,6 +37,8 @@ const errorId = `${id}-error`;
         placeholder={label}
         autocomplete={autocomplete}
         inputmode={inputmode}
+        spellcheck={plain ? 'false' : undefined}
+        autocapitalize={plain ? 'off' : undefined}
         aria-required={required ? 'true' : undefined}
       />
     )
