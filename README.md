@@ -3,38 +3,52 @@
 Лендинг студии «Скоуп». Astro + TypeScript, обычный CSS. Подробности — в `CLAUDE.md`.
 
 ```sh
-nvm use            # Node 22 (.nvmrc)
+nvm use            # Node 22 (.nvmrc), нужен >= 22.12
 npm ci
 npm run dev        # http://localhost:4321
 npm run build      # статическая сборка в dist/
 ```
 
-## Сверка с Figma
+## Проверки
 
-Эталоны — скриншоты нод Figma в `tests/screens/figma/` (Desktop 1440, Mobile 393).
+Все — по собранному `dist/` (`npm run build`). Результаты (скриншоты, видео, диффы) пишутся в `tests/screens/` и в git не попадают; эталоны Figma лежат в `tests/reference/figma/`.
 
-```sh
-npm run build
-node tests/compare.mjs desktop 0 836   # вьюпорт, диапазон по Y
-node tests/compare.mjs mobile 0 934
-```
-
-Результат «сайт | Figma | diff» — в `tests/screens/diff/`. Если страница сдвинута относительно макета, четвёртый аргумент — начало того же участка в Figma: `node tests/compare.mjs mobile 6038 6960 6070`.
+| Что | Команда |
+|---|---|
+| Сверка главной, статьи и брифа с Figma на 1440 и 393 | `npm run test:visual` |
+| Регресс «ни пикселя не изменилось» | `node tests/regress.mjs shoot <папка>` → после правок `node tests/regress.mjs compare <папка> <новая>` |
+| Размеры JS и CSS сборки | `node tests/sizes.mjs` |
+| Lighthouse mobile и desktop (главная, статья, бриф) | `bash tests/lighthouse.sh [папка]` |
+| Видео анимаций (вордмарк, кейсы, галерея, навигация статьи) | `node tests/anim-video.mjs <папка>` |
+| Бриф: сценарии, плавность | `node tests/brief-flow.mjs`, `node tests/brief-perf.mjs` |
+| Навигация статьи, параллакс кейсов, свой ползунок | `node tests/article-nav.mjs`, `node tests/case-parallax.mjs`, `node tests/scrollbar.mjs` |
+| Плавность скролла (CPU ×4) | `node tests/scroll-perf.mjs` |
 
 Координаты элементов для отладки: `node tests/measure.mjs 1440 "<js-выражение>"`.
 
-Живая иллюстрация первого экрана: `node tests/hero-anim.mjs desktop|mobile [папка]` — кадры сборки, наведение, шлейф, касание и замер кадров. Сверка с Figma (`compare.mjs`) идёт с reduced motion, по статичной картинке.
+## SEO и индексация
 
-Бриф: `node tests/brief-visual.mjs` — скриншоты формы и экрана успеха на 1440/393 против Figma; `node tests/brief-flow.mjs` — сценарии из ТЗ; `node tests/brief-perf.mjs` — плавность открытия/закрытия (CPU ×4, видимая полоса прокрутки) (валидация, файлы, отправка, Esc/«Назад», `/#brief`, клавиатура). Адрес отправки — env `PUBLIC_BRIEF_ENDPOINT`, без него мок.
+| Переменная сборки | Что делает |
+|---|---|
+| `PUBLIC_INDEXABLE=true` | Сайт открыт для поиска. Без неё на всех страницах `<meta name="robots" content="noindex, nofollow">` — так собираются превью. Ставить только для сборки, которая уходит на skoup.ru |
+| `PUBLIC_YANDEX_VERIFICATION` | Код подтверждения Яндекс.Вебмастера → `<meta name="yandex-verification">` |
+| `PUBLIC_GOOGLE_SITE_VERIFICATION` | Код Google Search Console → `<meta name="google-site-verification">` |
+| `PUBLIC_BRIEF_ENDPOINT` | Адрес отправки брифа (без неё — мок) |
 
-Плавность скролла (долгие кадры при прокрутке, CPU ×4): `node tests/scroll-perf.mjs`. Иллюстрация первого экрана под курсором во время скролла: `node tests/hero-scroll.mjs`.
+- `robots.txt`, `sitemap-index.xml` (через `@astrojs/sitemap`, только реальные страницы), страница `404.html` — в сборке.
+- Адреса — со слешем на конце (`trailingSlash: 'always'`). Без слеша — 301: на Layero через `public/_redirects`.
+- Файлы, которые подключатся сами, как только появятся в `public/`: `favicon.svg`, `favicon.ico`, `apple-touch-icon.png` (180×180), `site.webmanifest`, `og/home.png` и `og/marketplaces-installments.png` (1200×630). Пока файла нет, тег не выводится.
+- JSON-LD: `Organization` и `WebSite` на всех страницах, `Article` и `BreadcrumbList` на статье (`src/components/Seo.astro`, данные — `src/data/seo.ts`).
 
-Свой ползунок прокрутки (появление/скрытие, перетаскивание, клик по дорожке, бриф, reduced motion): `node tests/scrollbar.mjs`.
+### Свой сервер (nginx)
 
-Сверка отдельного блока со скриншотом ноды Figma: `node tests/compare-node.mjs 1440 ".services" tests/screens/figma/node-376-8149.png`.
+```nginx
+# адреса без слеша → со слешем
+rewrite ^(/[^.]*[^/])$ $1/ permanent;
+# своя страница 404
+error_page 404 /404.html;
+```
 
 ## Деплой
 
-Сборка: `npm ci && npm run build`, результат — `dist/`.
-
-Страница «О нас» (/about): `node tests/about.mjs` — скриншоты на 1440/1024/768/393/360 и сверка секций 1440 и 393 с Figma; `node tests/about-motion.mjs` — закреплённый заголовок, лента шотов (сдвиг со скроллом, растяжение и сборка, параллакс, кадры при CPU ×4), видео на 1440 и 393, заливка абзаца, reduced motion, без JS.
+Сборка: `npm ci && npm run build`, результат — `dist/`. Превью — Layero, каждая ветка получает свой адрес `skoup-<ветка>.layero.app` (Layero сам отдаёт превью с `X-Robots-Tag: noindex`).

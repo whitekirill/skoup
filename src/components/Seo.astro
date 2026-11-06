@@ -1,0 +1,124 @@
+---
+/**
+ * SEO в <head>: canonical, robots, Open Graph, Twitter, фавиконы, подтверждение в поисковиках, JSON-LD.
+ *
+ * Индексация: только при сборке с PUBLIC_INDEXABLE=true (production на skoup.ru). Без неё —
+ * <meta name="robots" content="noindex, nofollow">: превью и любые сборки по умолчанию закрыты.
+ * Файлы, которых пока нет (og-картинки, фавиконы), не выводятся — ссылки не бьются;
+ * как только файл появляется в public/, тег подключается сам при следующей сборке.
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import { ORGANIZATION, SITE_NAME, SITE_URL } from '../data/seo';
+
+export interface Breadcrumb {
+  name: string;
+  path: string;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  type?: 'website' | 'article';
+  /** og-картинка 1200×630 в public/ */
+  image?: string;
+  imageAlt?: string;
+  article?: { published: string; modified: string; section: string; headline: string; image?: string };
+  breadcrumbs?: Breadcrumb[];
+  /** страница не для поиска (404) — noindex всегда */
+  noindex?: boolean;
+}
+
+const { title, description, type = 'website', image, imageAlt, article, breadcrumbs, noindex = false } = Astro.props;
+const site = Astro.site ?? new URL(SITE_URL);
+const canonical = new URL(Astro.url.pathname, site).href;
+const abs = (p: string) => new URL(p, site).href;
+const inPublic = (p: string) => fs.existsSync(path.join(process.cwd(), 'public', p));
+
+const indexable = import.meta.env.PUBLIC_INDEXABLE === 'true' && !noindex;
+const ogImage = image && inPublic(image) ? abs(image) : undefined;
+
+const favicon = {
+  svg: inPublic('favicon.svg'),
+  ico: inPublic('favicon.ico'),
+  apple: inPublic('apple-touch-icon.png'),
+  manifest: inPublic('site.webmanifest'),
+};
+const logo = favicon.apple ? abs('/apple-touch-icon.png') : favicon.svg ? abs('/favicon.svg') : undefined;
+
+const yandex = import.meta.env.PUBLIC_YANDEX_VERIFICATION;
+const google = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
+
+const org = { '@type': 'Organization', '@id': `${SITE_URL}/#organization`, name: ORGANIZATION.name, url: ORGANIZATION.url, email: ORGANIZATION.email, ...(logo && { logo }) };
+const graph: Record<string, unknown>[] = [
+  org,
+  { '@type': 'WebSite', '@id': `${SITE_URL}/#website`, name: SITE_NAME, url: SITE_URL, inLanguage: 'ru', publisher: { '@id': org['@id'] } },
+];
+if (article) {
+  graph.push({
+    '@type': 'Article',
+    headline: article.headline,
+    description,
+    ...(article.image || ogImage ? { image: article.image ?? ogImage } : {}),
+    datePublished: article.published,
+    dateModified: article.modified,
+    articleSection: article.section,
+    inLanguage: 'ru',
+    mainEntityOfPage: canonical,
+    author: { '@id': org['@id'] },
+    publisher: { '@id': org['@id'] },
+  });
+}
+if (breadcrumbs?.length) {
+  graph.push({
+    '@type': 'BreadcrumbList',
+    itemListElement: breadcrumbs.map((b, i) => ({ '@type': 'ListItem', position: i + 1, name: b.name, item: abs(b.path) })),
+  });
+}
+const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph });
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{!indexable && <meta name="robots" content="noindex, nofollow" />}
+{yandex && <meta name="yandex-verification" content={yandex} />}
+{google && <meta name="google-site-verification" content={google} />}
+
+{favicon.svg && <link rel="icon" href="/favicon.svg" type="image/svg+xml" />}
+{favicon.ico && <link rel="icon" href="/favicon.ico" sizes="32x32" />}
+{!favicon.svg && !favicon.ico && <link rel="icon" href="data:," />}
+{favicon.apple && <link rel="apple-touch-icon" href="/apple-touch-icon.png" />}
+{favicon.manifest && <link rel="manifest" href="/site.webmanifest" />}
+
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={SITE_NAME} />
+<meta property="og:locale" content="ru_RU" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+{
+  ogImage && (
+    <>
+      <meta property="og:image" content={ogImage} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      {imageAlt && <meta property="og:image:alt" content={imageAlt} />}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:image" content={ogImage} />
+      {imageAlt && <meta name="twitter:image:alt" content={imageAlt} />}
+    </>
+  )
+}
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+{
+  article && (
+    <>
+      <meta property="article:published_time" content={article.published} />
+      <meta property="article:modified_time" content={article.modified} />
+      <meta property="article:section" content={article.section} />
+    </>
+  )
+}
+<script type="application/ld+json" set:html={jsonLd} />

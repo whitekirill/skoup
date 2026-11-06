@@ -15,4 +15,4 @@ export const LEGAL = [
 ] as const;
 
 /** Статья блога (главная → карточка «Покупка частями в кредит…») */
-export const ARTICLE_HREF = '/blog/marketplaces-installments';
+export const ARTICLE_HREF = '/blog/marketplaces-installments/';

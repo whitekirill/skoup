@@ -14,6 +14,7 @@ import Note from '../../components/article/Note.astro';
 import SummaryTable from '../../components/article/SummaryTable.astro';
 import ArticleNav from '../../components/article/ArticleNav.astro';
 import { CTA } from '../../data/site';
+import { ARTICLE_MARKETPLACES as META } from '../../data/seo';
 import ozon from '../../assets/article/logos/ozon.svg?url';
 import wb from '../../assets/article/logos/wb.svg?url';
 import ym from '../../assets/article/logos/ym.svg?url';
@@ -44,6 +45,11 @@ const NAV = [
 <Base
   title="Покупка частями в кредит на Ozon, Wildberries и Яндекс Маркете — Скоуп"
   description="Прошли путь покупки частями на трёх маркетплейсах: где предлагают кредит, как оформляют лимит, что видно после покупки и что говорит закон."
+  type="article"
+  image={META.ogImage}
+  imageAlt={META.ogImageAlt}
+  article={{ published: META.published, modified: META.modified, section: META.section, headline: META.headline, image: new URL(heroFallback.src, Astro.site).href }}
+  breadcrumbs={[{ name: 'Главная', path: '/' }, { name: 'Покупка частями в кредит на Ozon, Wildberries и Яндекс Маркете', path: META.path }]}
 >
   <main class="article">
     <!-- Первый экран: крошки, заголовок, иллюстрация -->

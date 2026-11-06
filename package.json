@@ -13,6 +13,7 @@
     "test:visual": "node tests/home.mjs && node tests/article.mjs && node tests/brief-visual.mjs"
   },
   "dependencies": {
+    "@astrojs/sitemap": "3.7.4",
     "astro": "7.3.8",
     "lenis": "1.3.27"
   },

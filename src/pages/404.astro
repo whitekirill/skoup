@@ -1,0 +1,32 @@
+---
+/** Страница 404: заголовок, пояснение и кнопка на главную. Не индексируется, в sitemap не попадает. */
+import Base from '../layouts/Base.astro';
+import Button from '../components/Button.astro';
+---
+
+<Base title="Страница не найдена — Скоуп" description="Такой страницы на сайте Скоупа нет. Перейдите на главную." noindex>
+  <main class="not-found container">
+    <p class="section-label t-button-l">Ошибка 404</p>
+    <h1 class="t-h2">Такой страницы нет</h1>
+    <p class="not-found__text t-body-m">Возможно, адрес изменился или в нём опечатка</p>
+    <Button variant="primary" href="/">На главную</Button>
+  </main>
+</Base>
+
+<style>
+  .not-found {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-xs);
+    min-height: 100svh;
+    padding-block: var(--layout-section-padding);
+    text-align: center;
+  }
+
+  .not-found__text {
+    margin-bottom: var(--gap-xs);
+    color: var(--color-text-secondary);
+  }
+</style>
