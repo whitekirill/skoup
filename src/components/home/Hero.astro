@@ -13,7 +13,7 @@ import { CTA } from '../../data/site';
 <section class="hero container" aria-labelledby="hero-title">
   <picture class="hero__wordmark">
     <source media="(max-width: 767px)" srcset={wordmarkMobile} width="353" height="82" />
-    <img src={wordmarkDesktop} alt="" width="1392" height="324" decoding="async" />
+    <img src={wordmarkDesktop} alt="" width="1392" height="324" decoding="async" fetchpriority="high" />
   </picture>
 
   <div class="hero__content">

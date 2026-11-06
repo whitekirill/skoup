@@ -3,7 +3,7 @@
 # Запуск: npm run build && bash tests/lighthouse.sh [outDir]
 set -u
 OUT=${1:-tests/.lighthouse}
-mkdir -p "$OUT"
+mkdir -p "$OUT"; OUT=$(cd "$OUT" && pwd)
 CHROME=${CHROME_PATH:-/opt/pw-browsers/chromium-1194/chrome-linux/chrome}
 npx -y serve@14 dist -l 4321 >/dev/null 2>&1 &
 SERVER=$!

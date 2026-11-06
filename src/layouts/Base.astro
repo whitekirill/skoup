@@ -14,9 +14,11 @@ interface Props {
   article?: { published: string; modified: string; section: string; headline: string; image?: string };
   breadcrumbs?: Breadcrumb[];
   noindex?: boolean;
+  /** шрифты первого экрана сверх общих — имена файлов из /public/fonts */
+  preloadFonts?: string[];
 }
 
-const props = Astro.props;
+const { preloadFonts = [], ...props } = Astro.props;
 ---
 
 <!doctype html>
@@ -31,6 +33,7 @@ const props = Astro.props;
     <!-- латиница Manrope — цифры и «UX» в крупном тексте; без предзагрузки подмена шрифта сдвигает строки -->
     <link rel="preload" href="/fonts/manrope-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/geist-mono-cyrillic-500-normal.woff2" as="font" type="font/woff2" crossorigin />
+    {preloadFonts.map((file) => <link rel="preload" href={`/fonts/${file}`} as="font" type="font/woff2" crossorigin />)}
   </head>
   <body>
     <div class="page">

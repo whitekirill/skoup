@@ -20,7 +20,7 @@ const { title, rest, image, imageAlt, href } = Astro.props;
 const Tag = href ? 'a' : 'article';
 ---
 
-<Tag class:list={['article-card', { 'article-card--soon': !href }]} href={href}>
+<Tag class:list={['article-card', { 'article-card--soon': !href }]} href={href} data-astro-prefetch={href ? 'viewport' : undefined}>
   <ArticleImage type={image} alt={imageAlt} />
   <div class="article-card__content">
     <p class="article-card__title t-body-m" data-vt-title={href ? '' : undefined}>{title}<span class="article-card__rest">{rest}</span></p>

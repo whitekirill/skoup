@@ -78,9 +78,13 @@ const investor = {
 <script>
   import { mountCaseParallax } from '../../scripts/case-parallax';
   import { mountCaseHover } from '../../scripts/case-hover';
-  mountCaseParallax();
+  import { whenNear } from '../../scripts/when-near';
   const cases = document.querySelector<HTMLElement>('.cases');
-  if (cases) mountCaseHover(cases);
+  if (cases)
+    whenNear(cases, () => {
+      mountCaseParallax();
+      mountCaseHover(cases);
+    });
 </script>
 
 <style>

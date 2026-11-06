@@ -57,8 +57,9 @@ const items = await Promise.all(
 
 <script>
   import { mountShotsDrift } from '../../scripts/shots-drift';
+  import { whenNear } from '../../scripts/when-near';
   const shots = document.querySelector<HTMLElement>('.cta [data-shots]');
-  if (shots) mountShotsDrift(shots);
+  if (shots) whenNear(shots, () => mountShotsDrift(shots));
 </script>
 
 <style>

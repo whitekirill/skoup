@@ -50,6 +50,7 @@ const NAV = [
   imageAlt={META.ogImageAlt}
   article={{ published: META.published, modified: META.modified, section: META.section, headline: META.headline, image: new URL(heroFallback.src, Astro.site).href }}
   breadcrumbs={[{ name: 'Главная', path: '/' }, { name: 'Покупка частями в кредит на Ozon, Wildberries и Яндекс Маркете', path: META.path }]}
+  preloadFonts={["geist-mono-latin-500-normal.woff2"]}
 >
   <main class="article">
     <!-- Первый экран: крошки, заголовок, иллюстрация -->

@@ -23,6 +23,8 @@ export default defineConfig({
   build: {
     inlineStylesheets: 'always',
   },
+  // предзагрузка страниц только по data-astro-prefetch (карточка статьи в блоге)
+  prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
   integrations: [
     buildInfo,
     // sitemap: только страницы сайта (404 Astro не включает)

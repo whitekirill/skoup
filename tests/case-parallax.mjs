@@ -7,10 +7,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = path.resolve('dist');
+const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.png': 'image/png', '.webp': 'image/webp', '.avif': 'image/avif' };
 const server = http.createServer((req, res) => {
   let file = path.join(ROOT, decodeURIComponent(new URL(req.url, 'http://x').pathname));
   if (fs.existsSync(file) && fs.statSync(file).isDirectory()) file = path.join(file, 'index.html');
   if (!fs.existsSync(file)) return res.writeHead(404).end();
+  res.writeHead(200, { 'content-type': TYPES[path.extname(file)] ?? 'application/octet-stream' });
   fs.createReadStream(file).pipe(res);
 }).listen(0);
 const url = `http://localhost:${server.address().port}/`;
