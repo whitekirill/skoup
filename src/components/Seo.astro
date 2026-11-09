@@ -44,7 +44,8 @@ const favicon = {
   apple: inPublic('apple-touch-icon.png'),
   manifest: inPublic('site.webmanifest'),
 };
-const logo = favicon.apple ? abs('/apple-touch-icon.png') : favicon.svg ? abs('/favicon.svg') : undefined;
+// логотип организации для поисковиков: крупная квадратная иконка, если есть
+const logo = inPublic('icon-512.png') ? abs('/icon-512.png') : favicon.apple ? abs('/apple-touch-icon.png') : favicon.svg ? abs('/favicon.svg') : undefined;
 
 const yandex = import.meta.env.PUBLIC_YANDEX_VERIFICATION;
 const google = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
@@ -85,8 +86,9 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': grap
 {yandex && <meta name="yandex-verification" content={yandex} />}
 {google && <meta name="google-site-verification" content={google} />}
 
-{favicon.svg && <link rel="icon" href="/favicon.svg" type="image/svg+xml" />}
+{/* сначала ico (старые браузеры), потом svg — современные берут последний подходящий, то есть svg */}
 {favicon.ico && <link rel="icon" href="/favicon.ico" sizes="32x32" />}
+{favicon.svg && <link rel="icon" href="/favicon.svg" type="image/svg+xml" />}
 {!favicon.svg && !favicon.ico && <link rel="icon" href="data:," />}
 {favicon.apple && <link rel="apple-touch-icon" href="/apple-touch-icon.png" />}
 {favicon.manifest && <link rel="manifest" href="/site.webmanifest" />}
