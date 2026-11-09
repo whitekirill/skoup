@@ -1,0 +1,59 @@
+---
+/**
+ * Хлебные крошки статьи (Figma 746:12773): «Главная / название». Button/Small, главная — text/primary,
+ * разделитель и название — text/secondary, название обрезается многоточием.
+ * Используются в первом экране статьи и во всплывающей шапке (ArticleHead.astro).
+ */
+interface Props {
+  title: string;
+  label?: string;
+}
+
+const { title, label = 'Хлебные крошки' } = Astro.props;
+---
+
+<nav class="crumbs t-button-s" aria-label={label}>
+  <ol>
+    <li><a href="/">Главная</a></li>
+    <li aria-current="page"><span>{title}</span></li>
+  </ol>
+</nav>
+
+<style>
+  .crumbs ol {
+    display: flex;
+    gap: var(--gap-3xs);
+    min-width: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .crumbs li {
+    display: flex;
+    gap: var(--gap-3xs);
+    white-space: nowrap;
+  }
+
+  .crumbs li + li::before {
+    content: '/';
+  }
+
+  .crumbs li:last-child {
+    min-width: 0;
+  }
+
+  .crumbs li:last-child span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .crumbs a {
+    color: var(--color-text-primary);
+    transition: color 150ms ease-out;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .crumbs a:hover {
+      color: var(--color-text-secondary);
+    }
+  }
+</style>

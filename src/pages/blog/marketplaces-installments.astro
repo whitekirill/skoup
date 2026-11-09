@@ -13,6 +13,8 @@ import ArticleFigure from '../../components/article/ArticleFigure.astro';
 import Note from '../../components/article/Note.astro';
 import SummaryTable from '../../components/article/SummaryTable.astro';
 import ArticleNav from '../../components/article/ArticleNav.astro';
+import ArticleHead from '../../components/article/ArticleHead.astro';
+import Crumbs from '../../components/article/Crumbs.astro';
 import { CTA } from '../../data/site';
 import { ARTICLE_MARKETPLACES as META } from '../../data/seo';
 import ozon from '../../assets/article/logos/ozon.svg?url';
@@ -24,6 +26,7 @@ const img = (name: string) => files[`../../assets/article/img/${name}.png`].defa
 import type { ImageMetadata } from 'astro';
 import { getImage } from 'astro:assets';
 
+const CRUMB = 'Покупка частями в кредит на ozon, wildberries';
 const hero = img('00-hero');
 const heroSet = async (format: 'avif' | 'webp') => {
   const [a, b] = await Promise.all([1, 2].map((d) => getImage({ src: hero, width: 688 * d, format })));
@@ -56,12 +59,7 @@ const NAV = [
     <!-- Первый экран: крошки, заголовок, иллюстрация -->
     <header class="art-hero art-section art-section--primary">
       <div class="art-hero__head">
-        <nav class="crumbs t-button-s" aria-label="Хлебные крошки">
-          <ol>
-            <li><a href="/">Главная</a></li>
-            <li aria-current="page"><span>Покупка частями в кредит на ozon, wildberries</span></li>
-          </ol>
-        </nav>
+        <Crumbs title={CRUMB} />
         <h1 class="t-h3" data-vt-title>Покупка частями в кредит<br /><span class="muted">на Ozon, Wildberries и Яндекс Маркете: как это выглядит и что говорит закон</span></h1>
       </div>
       <picture class="art-hero__image">
@@ -296,6 +294,7 @@ const NAV = [
     <Cta />
   </main>
 
+  <ArticleHead title={CRUMB} />
   <ArticleNav items={NAV} />
   <Brief />
 </Base>
@@ -360,43 +359,6 @@ const NAV = [
 
   .muted {
     color: var(--color-text-secondary);
-  }
-
-  .crumbs ol {
-    display: flex;
-    gap: var(--gap-3xs);
-    min-width: 0;
-    color: var(--color-text-secondary);
-  }
-
-  .crumbs li {
-    display: flex;
-    gap: var(--gap-3xs);
-    white-space: nowrap;
-  }
-
-  .crumbs li + li::before {
-    content: '/';
-  }
-
-  .crumbs li:last-child {
-    min-width: 0;
-  }
-
-  .crumbs li:last-child span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .crumbs a {
-    color: var(--color-text-primary);
-    transition: color 150ms ease-out;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .crumbs a:hover {
-      color: var(--color-text-secondary);
-    }
   }
 
   .art-hero__image img {
