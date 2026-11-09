@@ -28,8 +28,8 @@ export default defineConfig({
   prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
   integrations: [
     buildInfo,
-    // sitemap: только страницы сайта (404 Astro не включает)
-    sitemap(),
+    // sitemap: только страницы сайта (404 Astro не включает); юридические заглушки — пока без них
+    sitemap({ filter: (page) => !['/privacy/', '/consent/'].some((path) => page.endsWith(path)) }),
     // неразрывные пробелы после предлогов и перед тире во всём тексте сайта
     typograph(),
   ],

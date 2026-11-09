@@ -1,7 +1,9 @@
 // Бриф: варианты чипсов, ограничения файлов, тексты ошибок (по ТЗ брифа)
+import { CTA } from './site';
 
 export const TELEGRAM_URL = 'https://t.me/TODO'; // TODO: ссылка на Telegram студии
-export const PRESENTATION_URL = '/skoup-presentation.pdf'; // TODO: файл презентации
+/** Презентация — та же ссылка, что на главной (Google Диск) */
+export const PRESENTATION_URL = CTA.presentation.href;
 
 export const SERVICES = [
   'Продуктовый дизайн',

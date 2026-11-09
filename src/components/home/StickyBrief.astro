@@ -1,0 +1,70 @@
+---
+/**
+ * Фиксированная кнопка «Заполнить бриф» на главной: внизу по центру, 24 px от низа (как кнопка навигации
+ * статьи), по ширине текста на всех экранах. Появляется, когда первый экран ушёл, и уходит, когда
+ * в окно входит последний блок (CTA со своей кнопкой брифа). Выезжает снизу; при reduced motion —
+ * только прозрачность. Пока открыт бриф — спрятана. Вне <main>: бриф уменьшает main, кнопка не прыгает.
+ */
+import Button from '../Button.astro';
+import { CTA } from '../../data/site';
+---
+
+<div class="sticky-brief is-hidden" data-sticky-brief inert>
+  <Button variant="primary" href={CTA.discuss.href} data-brief-open>Заполнить бриф</Button>
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-sticky-brief]');
+  const hero = document.querySelector('.hero');
+  const cta = document.querySelector('.cta');
+  if (root && hero && cta) {
+    let inHero = true;
+    let atCta = false;
+    const update = () => {
+      const hidden = inHero || atCta;
+      root.classList.toggle('is-hidden', hidden);
+      root.inert = hidden;
+    };
+    new IntersectionObserver(([e]) => {
+      inHero = e.isIntersecting;
+      update();
+    }).observe(hero);
+    new IntersectionObserver(([e]) => {
+      atCta = e.isIntersecting;
+      update();
+    }).observe(cta);
+  }
+</script>
+
+<style>
+  .sticky-brief {
+    --sticky-time: 400ms;
+    --sticky-ease: cubic-bezier(0.2, 0, 0, 1);
+    position: fixed;
+    bottom: var(--space-24);
+    left: 50%;
+    z-index: 30;
+    translate: -50% 0;
+    transition:
+      transform var(--sticky-time) var(--sticky-ease),
+      opacity var(--sticky-time) var(--sticky-ease);
+  }
+
+  /* спрятана: уезжает за нижний край */
+  .sticky-brief.is-hidden {
+    transform: translateY(calc(100% + var(--space-24)));
+    pointer-events: none;
+  }
+
+  :global(html.is-brief-open) .sticky-brief {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sticky-brief.is-hidden {
+      transform: none;
+      opacity: 0;
+    }
+  }
+</style>

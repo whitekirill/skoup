@@ -1,4 +1,6 @@
 # Единый вид адресов: без слеша на конце → со слешем (301)
 /blog/marketplaces-installments /blog/marketplaces-installments/ 301
+/privacy /privacy/ 301
+/consent /consent/ 301
 # всё остальное — своя страница 404 с кодом 404
 /* /404.html 404

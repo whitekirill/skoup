@@ -86,8 +86,8 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
               <p class="brief__send-error t-body-s" role="alert" data-brief-send-error></p>
             </div>
             <p class="brief__consent t-body-m">
-              Нажимая на кнопку, вы даёте согласие на <a href={LEGAL[0].href}>обработку персональных данных</a>{" "}<br class="brief__br-desktop" />
-              и соглашаетесь с <a href={LEGAL[0].href}>политикой конфиденциальности</a>.
+              Нажимая на кнопку, вы даёте согласие на <a href={LEGAL.consent.href} target="_blank" rel="noopener">обработку персональных данных</a>{" "}<br class="brief__br-desktop" />
+              и соглашаетесь с <a href={LEGAL.privacy.href} target="_blank" rel="noopener">политикой конфиденциальности</a>.
             </p>
           </div>
         </div>
@@ -106,7 +106,7 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
         </div>
       </div>
       <div class="brief__success-actions">
-        <Button variant="primary" href={PRESENTATION_URL} download iconRight="arrow-to-bracket-down-line">Презентация</Button>
+        <Button variant="primary" href={PRESENTATION_URL} target="_blank" rel="noopener" iconRight="arrow-to-bracket-down-line">Презентация</Button>
         <Button variant="secondary" data-brief-close>На главную</Button>
       </div>
     </div>
