@@ -49,13 +49,13 @@ for (const [width, height] of [[1440, 900], [393, 852]]) {
   await page.close();
 }
 
-// стекло: четыре варианта над одним и тем же местом статьи (иллюстрация под шапкой)
+// скриншот стекла над иллюстрацией (для глаз)
 if (out) {
   fs.mkdirSync(out, { recursive: true });
   for (const [width, height] of [[1440, 900], [393, 852]]) {
-    for (const glass of ['progressive', 'frosted', 'soft', 'plain']) {
+    for (const glass of ['progressive']) {
       const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 2 });
-      await page.goto(`${url}?glass=${glass}`, { waitUntil: 'networkidle' });
+      await page.goto(url, { waitUntil: 'networkidle' });
       await page.evaluate(async () => {
         const fig = document.querySelectorAll('.art-figure')[1];
         fig.scrollIntoView({ block: 'start' });

@@ -8,10 +8,6 @@ const THRESHOLD = 12; // px в одну сторону, после которы�
 export function mountArticleHead(root: HTMLElement) {
   const hero = document.querySelector<HTMLElement>('.art-hero');
 
-  // временно, для выбора стекла на превью: ?glass=progressive | frosted | soft | plain
-  const glass = new URLSearchParams(location.search).get('glass');
-  if (glass) root.dataset.glass = glass;
-
   let lastY = scrollY;
   let travel = 0; // накопленный сдвиг в текущем направлении
   let shown = false;
