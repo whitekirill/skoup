@@ -71,7 +71,8 @@ const INCLUDED = [
   .formats__cards {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    align-items: start;
+    /* карточки одной высоты — по самой высокой */
+    align-items: stretch;
     gap: var(--gap-2xs);
     width: 100%;
     max-width: var(--layout-column-width);

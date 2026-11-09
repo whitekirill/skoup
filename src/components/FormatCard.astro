@@ -53,7 +53,9 @@ const { icon, color, title, description, time, payment } = Astro.props;
     gap: var(--space-12);
   }
 
+  /* цена и оплата прижаты к низу: у карточек одной высоты строки стоят на одной линии */
   .format__bottom {
+    margin-top: auto;
     display: flex;
     flex-direction: column;
     gap: var(--gap-4xs);
