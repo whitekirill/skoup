@@ -12,8 +12,8 @@ import { CTA } from '../../data/site';
 
 <section class="hero container" aria-labelledby="hero-title">
   <picture class="hero__wordmark">
-    <source media="(max-width: 767px)" srcset={wordmarkMobile} width="353" height="82" />
-    <img src={wordmarkDesktop} alt="" width="1392" height="324" decoding="async" fetchpriority="high" />
+    <source media="(max-width: 767px)" srcset={wordmarkMobile} width="382" height="70" />
+    <img src={wordmarkDesktop} alt="" width="1392" height="255" decoding="async" fetchpriority="high" />
   </picture>
 
   <div class="hero__content">
@@ -114,6 +114,19 @@ import { CTA } from '../../data/site';
   @media (max-width: 767px) {
     .hero {
       --hero-gap: var(--gap-xl);
+      padding-top: var(--space-8);
+    }
+
+    /* на мобильном вордмарк шире колонки: в макете выходит за поля на 16 px слева и 12.7 справа */
+    .hero__wordmark {
+      width: calc(100% * 381.685 / 353);
+      max-width: none;
+      margin-left: calc(-100% * 16 / 353);
+      align-self: flex-start;
+    }
+
+    .hero__wordmark img {
+      width: 100%;
     }
 
     .hero__br {
