@@ -102,7 +102,7 @@ if (brief && form) {
   });
 
   // Ссылки на разделы главной из футера брифа: закрываем бриф без шага назад по истории,
-  // дальше обычный переход по якорю (плавный — через smooth-scroll, после закрытия)
+  // дальше обычный переход по якорю (плавный — через anchor-scroll, после закрытия)
   brief.addEventListener('click', (event) => {
     const link = (event.target as Element).closest<HTMLAnchorElement>('a[href^="#"]');
     if (!link || link.getAttribute('href') === '#') return;

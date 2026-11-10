@@ -2,12 +2,10 @@
 // Кнопка внизу: подпись — текущий раздел (заголовок раздела прошёл середину окна), в оглавлении он подсвечен.
 // Видна всё время между первым экраном и оффером «Заполнить бриф»; на первом экране, на оффере и ниже
 // (источники, футер) — спрятана. Всегда видна, пока открыто оглавление или кнопка в фокусе с клавиатуры.
-// Источник скролла — общий: событие scroll окна (Lenis двигает нативный скролл, так что события те же).
+// Источник скролла — событие scroll окна.
 // Открытие: оверлей и панель, фокус на текущий пункт; закрытие — Esc, клик по оверлею, «Закрыть»,
-// выбор пункта (плавный скролл к разделу через Lenis), фокус возвращается на кнопку.
-import { getLenis } from './smooth-scroll';
-
-const easing = (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t));
+// выбор пункта (плавный нативный скролл к разделу), фокус возвращается на кнопку.
+import { scrollPageTo } from './anchor-scroll';
 
 export function mountArticleNav(root: HTMLElement) {
   const button = root.querySelector<HTMLButtonElement>('[data-art-nav-button]')!;
@@ -17,7 +15,6 @@ export function mountArticleNav(root: HTMLElement) {
   const current = root.querySelector<HTMLElement>('[data-art-nav-current]')!;
   const links = Array.from(root.querySelectorAll<HTMLAnchorElement>('[data-art-nav-item]'));
   const sections = links.map((a) => document.getElementById(a.dataset.artNavItem!)).filter(Boolean) as HTMLElement[];
-  const motion = matchMedia('(prefers-reduced-motion: no-preference)');
 
   // --- текущий раздел: последний, чей заголовок прошёл середину окна
   let active = 0;
@@ -87,10 +84,7 @@ export function mountArticleNav(root: HTMLElement) {
       const target = sections[i];
       close(false);
       setActive(i);
-      const lenis = getLenis();
-      const y = target.getBoundingClientRect().top + scrollY;
-      if (lenis) lenis.scrollTo(y, { duration: 1.2, easing });
-      else scrollTo({ top: y, behavior: motion.matches ? 'smooth' : 'auto' });
+      scrollPageTo(target.getBoundingClientRect().top + scrollY);
       history.replaceState(null, '', `#${target.id}`);
       // фокус — на заголовок раздела, чтобы клавиатура продолжила оттуда
       const heading = target.querySelector<HTMLElement>('h2, h3') ?? target;

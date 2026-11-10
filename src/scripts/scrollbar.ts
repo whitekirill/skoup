@@ -3,7 +3,7 @@
 // под мышью утолщается, её можно тянуть, клик по дорожке — переход к этому месту.
 // Пока открыт бриф, ползунок показывает и крутит бриф, а не страницу под ним.
 // Клавиатура, колесо и тач работают как обычно — ползунок только для глаз и мыши.
-import { getLenis } from './smooth-scroll';
+import { scrollPageTo } from './anchor-scroll';
 
 const HIDE_DELAY = 1000;
 const MIN_THUMB = 40;
@@ -29,12 +29,10 @@ const metrics = () =>
 
 function scrollToY(y: number, smooth: boolean) {
   if (briefOpen()) {
-    brief!.scrollTo({ top: y, behavior: smooth && motion.matches ? 'smooth' : 'auto' });
+    brief!.scrollTo({ top: y, behavior: smooth && motion.matches ? 'smooth' : 'instant' });
     return;
   }
-  const lenis = getLenis();
-  if (lenis) lenis.scrollTo(y, smooth ? { duration: 0.6 } : { immediate: true, force: true });
-  else scrollTo({ top: y, behavior: smooth && motion.matches ? 'smooth' : 'auto' });
+  scrollPageTo(y, smooth);
 }
 
 let thumbSize = 0;

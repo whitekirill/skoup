@@ -123,11 +123,7 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
    * overflow у страницы не трогаем: модальный dialog на весь экран и так забирает колесо, тач
    * и фокус (overscroll-behavior: contain), а смена overflow убирала полосу прокрутки —
    * страница прыгала вбок и перекладывалась целиком, отсюда рывки при открытии и закрытии.
-   * Lenis на паузе, но без своего overflow: clip.
    */
-  html.lenis.is-brief-open.lenis-stopped {
-    overflow: visible;
-  }
 
 
   @media (prefers-reduced-motion: no-preference) {
