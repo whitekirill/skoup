@@ -21,6 +21,8 @@ export default defineConfig({
   output: 'static',
   // единый вид адресов — со слешем на конце; без слеша — 301 (public/_redirects для Layero, nginx — в README)
   trailingSlash: 'always',
+  // панель разработчика Astro внизу страницы в `npm run dev` — выключена, чтобы не путать с интерфейсом сайта
+  devToolbar: { enabled: false },
   build: {
     inlineStylesheets: 'always',
   },
