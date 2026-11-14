@@ -1,5 +1,6 @@
 // Бриф: открытие/закрытие оверлея, валидация формы, файлы, отправка и экран успеха.
 import { ERRORS, FILES } from '../../data/brief';
+import { LEGAL_EDITION } from '../../data/site';
 import { PHONE_PREFIX, checkFile, formatPhone, formatSize, isName, isPhone, parseContact, phoneDigits } from './validate';
 import { submitBrief } from './submit';
 
@@ -150,6 +151,25 @@ if (brief && form) {
     error.textContent = message;
     error.hidden = !message;
   }
+
+  // Согласие на обработку данных — обязательная галочка (рассылка — по желанию, без проверки)
+  const consent = control('consent');
+  const consentError = () => (consent.checked ? '' : ERRORS.consent);
+
+  function showConsentError(message: string) {
+    const error = document.getElementById('brief-consent-error')!;
+    error.textContent = message;
+    error.hidden = !message;
+    if (message) {
+      consent.setAttribute('aria-invalid', 'true');
+      consent.setAttribute('aria-describedby', error.id);
+    } else {
+      consent.removeAttribute('aria-invalid');
+      consent.removeAttribute('aria-describedby');
+    }
+  }
+
+  consent.addEventListener('change', () => submitted && showConsentError(consentError()));
 
   // после первой отправки — перепроверка на лету
   for (const name of fields) {
@@ -326,11 +346,14 @@ if (brief && form) {
       showGroupError(name, message);
       if (message && !first) first = form!.querySelector<HTMLElement>(`input[name="${name}"]`);
     }
+    const message = consentError();
+    showConsentError(message);
+    if (message && !first) first = consent;
     return first;
   }
 
   function scrollToField(el: HTMLElement) {
-    const target = el.closest<HTMLElement>('.field, fieldset') ?? el;
+    const target = el.closest<HTMLElement>('.field, fieldset, .checkbox') ?? el;
     const top = target.getBoundingClientRect().top - brief!.getBoundingClientRect().top + brief!.scrollTop - 24;
     brief!.scrollTo({ top, behavior: reduced.matches ? 'auto' : 'smooth' });
     el.focus({ preventScroll: true });
@@ -348,6 +371,13 @@ if (brief && form) {
     data.set('task', (form!.elements.namedItem('task') as HTMLTextAreaElement).value.trim());
     data.set('budget', form!.querySelector<HTMLInputElement>('input[name="budget"]:checked')!.value);
     for (const { file, problem } of files) if (!problem) data.append('files', file, file.name);
+    // факт согласий и редакция их текстов — оператор обязан доказать согласие (ч. 3 ст. 9 152-ФЗ, ч. 1 ст. 18 38-ФЗ);
+    // время получения записывает сервер
+    data.set('consent', 'yes');
+    data.set('consent_version', LEGAL_EDITION);
+    data.set('marketing', control('marketing').checked ? 'yes' : 'no');
+    if (control('marketing').checked) data.set('marketing_version', LEGAL_EDITION);
+    data.set('website', control('website').value); // ловушка для ботов — у людей пустая
     return data;
   }
 
@@ -405,6 +435,7 @@ if (brief && form) {
     for (const name of fields) showFieldError(name, '');
     showGroupError('services', '');
     showGroupError('budget', '');
+    showConsentError('');
     formView.hidden = false;
     successView.hidden = true;
   }

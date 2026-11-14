@@ -33,22 +33,13 @@ npm run build      # статическая сборка в dist/
 | `PUBLIC_INDEXABLE=true` | Сайт открыт для поиска. Без неё на всех страницах `<meta name="robots" content="noindex, nofollow">` — так собираются превью. Ставить только для сборки, которая уходит на skoup.ru |
 | `PUBLIC_YANDEX_VERIFICATION` | Код подтверждения Яндекс.Вебмастера → `<meta name="yandex-verification">` |
 | `PUBLIC_GOOGLE_SITE_VERIFICATION` | Код Google Search Console → `<meta name="google-site-verification">` |
-| `PUBLIC_BRIEF_ENDPOINT` | Адрес отправки брифа (без неё — мок) |
+| `PUBLIC_BRIEF_ENDPOINT` | Адрес отправки брифа: на test и проде `/api/brief/` (без неё — мок) |
 
 - `robots.txt`, `sitemap-index.xml` (через `@astrojs/sitemap`, только реальные страницы), страница `404.html` — в сборке.
-- Адреса — со слешем на конце (`trailingSlash: 'always'`). Без слеша — 301: на Layero через `public/_redirects`.
+- Адреса — со слешем на конце (`trailingSlash: 'always'`). Без слеша — 301: в nginx (`deploy/nginx/skoup-site.conf`); `public/_redirects` — то же для статических хостингов.
 - Файлы, которые подключатся сами, как только появятся в `public/`: `favicon.svg`, `favicon.ico`, `apple-touch-icon.png` (180×180), `site.webmanifest`, `og/home.png` и `og/marketplaces-installments.png` (1200×630). Пока файла нет, тег не выводится.
 - JSON-LD: `Organization` и `WebSite` на всех страницах, `Article` и `BreadcrumbList` на статье (`src/components/Seo.astro`, данные — `src/data/seo.ts`).
 
-### Свой сервер (nginx)
-
-```nginx
-# адреса без слеша → со слешем
-rewrite ^(/[^.]*[^/])$ $1/ permanent;
-# своя страница 404
-error_page 404 /404.html;
-```
-
 ## Деплой
 
-Сборка: `npm ci && npm run build`, результат — `dist/`. Превью — Layero, каждая ветка получает свой адрес `skoup-<ветка>.layero.app` (Layero сам отдаёт превью с `X-Robots-Tag: noindex`).
+Сайт и сервис брифа — в Яндекс Облаке: шлюз `gw` (nginx, сертификаты, статика) и `brim` за ним (сервис брифа в Docker). Пуш в `main` → test.skoup.ru (под паролем, noindex); прод — вручную: Actions → Deploy site → Run workflow → `production`. Схема, секреты и разовая настройка серверов — `deploy/README.md`, сервис брифа — `server/`.

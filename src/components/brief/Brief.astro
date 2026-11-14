@@ -10,6 +10,7 @@ import Icon from '../Icon.astro';
 import Field from './Field.astro';
 import Chip from '../Chip.astro';
 import FileUpload from './FileUpload.astro';
+import Checkbox from './Checkbox.astro';
 import { EMAIL, LEGAL } from '../../data/site';
 import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/brief';
 ---
@@ -39,6 +40,10 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
       </h2>
 
       <form class="brief__form" novalidate data-brief-form>
+        <!-- Ловушка для ботов: людям не видна и не доступна с клавиатуры; заполненную сервер отбрасывает -->
+        <div class="visually-hidden" aria-hidden="true">
+          <label>Сайт <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+        </div>
         <section class="brief__section brief__reveal" style="--i: 1" aria-labelledby="brief-about">
           <h3 class="brief__heading t-h3" id="brief-about">О вас</h3>
           <div class="brief__content brief__fields">
@@ -81,14 +86,25 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
 
         <div class="brief__section brief__reveal" style="--i: 4">
           <div class="brief__content brief__submit">
+            <!-- Согласия: каждое — отдельная галочка со ссылкой на свой документ (152-ФЗ ст. 9, 38-ФЗ ст. 18) -->
+            <div class="brief__agreements">
+              <div>
+                <Checkbox name="consent" required>
+                  Я даю <a href={LEGAL.consent.href} target="_blank" rel="noopener">согласие на обработку персональных данных</a>
+                </Checkbox>
+                <p class="brief__group-error t-body-s" id="brief-consent-error" hidden></p>
+              </div>
+              <Checkbox name="marketing">
+                Я даю <a href={LEGAL.marketing.href} target="_blank" rel="noopener">согласие на получение писем Скоупа</a> о кейсах и статьях — по желанию
+              </Checkbox>
+              <p class="t-body-m">
+                Как мы обращаемся с данными — в <a href={LEGAL.privacy.href} target="_blank" rel="noopener">политике обработки персональных данных</a>.
+              </p>
+            </div>
             <div class="brief__send">
               <Button variant="primary" type="submit" class="brief__button" data-brief-submit>Отправить заявку</Button>
               <p class="brief__send-error t-body-s" role="alert" data-brief-send-error></p>
             </div>
-            <p class="brief__consent t-body-m">
-              Нажимая на кнопку, вы даёте согласие на <a href={LEGAL.consent.href} target="_blank" rel="noopener">обработку персональных данных</a>{" "}<br class="brief__br-desktop" />
-              и соглашаетесь с <a href={LEGAL.privacy.href} target="_blank" rel="noopener">политикой конфиденциальности</a>.
-            </p>
           </div>
         </div>
       </form>
@@ -437,22 +453,25 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
     display: none;
   }
 
-  .brief__consent {
+  .brief__agreements {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-2xs);
     color: var(--color-text-secondary);
   }
 
-  .brief__consent a {
+  .brief__agreements a {
     color: var(--color-text-accent-2);
     transition: color 150ms ease-out;
   }
 
-  .brief__consent a:focus-visible {
+  .brief__agreements a:focus-visible {
     outline: none;
     color: var(--color-text-accent-2-hover);
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .brief__consent a:hover {
+    .brief__agreements a:hover {
       color: var(--color-text-accent-2-hover);
     }
   }

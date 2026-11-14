@@ -1,0 +1,60 @@
+# Сайт: пуш в main → test.skoup.ru; кнопка «Run workflow» с target=production → skoup.ru
+# (окружение production в GitHub требует подтверждения). Выкладка — через deploy/bin/skoup-deploy на шлюзе gw.
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'server/**'
+      - 'deploy/brief/**'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Куда выложить
+        type: choice
+        options: [test, production]
+        default: test
+
+concurrency:
+  group: deploy-site-${{ inputs.target || 'test' }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target || 'test' }}
+    env:
+      TARGET: ${{ inputs.target == 'production' && 'prod' || 'test' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          PUBLIC_BRIEF_ENDPOINT: /api/brief/
+          # индексация открыта только у прода
+          PUBLIC_INDEXABLE: ${{ inputs.target == 'production' && 'true' || '' }}
+
+      - name: SSH key
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+
+      - name: Upload
+        run: tar -czf - -C dist . | ssh -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" "site $TARGET $GITHUB_SHA"
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}

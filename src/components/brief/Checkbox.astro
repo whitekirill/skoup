@@ -1,0 +1,94 @@
+---
+/**
+ * Галочка согласия в брифе. Макета нет — собрана по правилам Chip: без обводок; пустая — element/border-2,
+ * отмеченная — surface/primary-inversion с инверсной галкой; hover и фокус с клавиатуры — бледнеет только подпись,
+ * нажатие — квадрат scale 0.96. Внутри настоящий input (type=checkbox, value=yes), подпись — слот (со ссылкой
+ * на документ согласия). Галка нарисована здесь же: в паке Amicons проекта отдельной иконки галки нет.
+ */
+interface Props {
+  name: string;
+  required?: boolean;
+}
+
+const { name, required = false } = Astro.props;
+---
+
+<label class="checkbox t-body-m">
+  <input class="checkbox__input" type="checkbox" name={name} value="yes" required={required} />
+  <span class="checkbox__box" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M6.5 12.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+    </svg>
+  </span>
+  <span class="checkbox__label"><slot /></span>
+</label>
+
+<style>
+  .checkbox {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gap-3xs);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* input прячем визуально поверх квадрата: остаётся в фокусе и доступности */
+  .checkbox__input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--space-24);
+    height: var(--space-24);
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .checkbox__input:focus-visible {
+    outline: none;
+  }
+
+  /* квадрат по центру первой строки подписи (1lh — высота строки t-body-m на label) */
+  .checkbox__box {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: var(--space-24);
+    height: var(--space-24);
+    margin-block: calc((1lh - var(--space-24)) / 2);
+    border-radius: var(--radius-8);
+    /* surface/secondary на белом в 24 px почти не видно — заливка element/border-2, без обводки */
+    background: var(--color-element-border-2);
+    color: transparent;
+    transition-property: background-color, color, scale;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+
+  .checkbox:has(.checkbox__input:checked) .checkbox__box {
+    background: var(--color-surface-primary-inversion);
+    color: var(--color-text-primary-inversion);
+  }
+
+  /* Hover и фокус с клавиатуры — бледнеет только подпись, квадрат не меняется */
+  .checkbox__label {
+    transition: opacity 150ms ease-out;
+  }
+
+  .checkbox:has(.checkbox__input:focus-visible) .checkbox__label {
+    opacity: 0.6;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .checkbox:hover .checkbox__label {
+      opacity: 0.6;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .checkbox:active .checkbox__box {
+      scale: 0.96;
+    }
+  }
+</style>

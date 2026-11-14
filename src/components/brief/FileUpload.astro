@@ -20,6 +20,11 @@ const accept = FILES.extensions.map((ext) => `.${ext}`).join(',');
       <span class="upload__limit">до 50 МБ</span>
     </span>
   </button>
+  <!-- данные третьих лиц в файлах (152-ФЗ): просим не прикладывать лишнего; не в галочке согласия — оно отдельно -->
+  <p class="upload__hint t-body-s">
+    Не прикладывайте документы с персональными данными других людей, если они не нужны для оценки задачи. Прикладывая
+    такие данные, вы подтверждаете, что вправе их передать.
+  </p>
 
   <template data-upload-item>
     <li class="file">
@@ -42,6 +47,10 @@ const accept = FILES.extensions.map((ext) => `.${ext}`).join(',');
     flex-direction: column;
     align-items: flex-start;
     gap: var(--gap-3xs);
+  }
+
+  .upload__hint {
+    color: var(--color-text-secondary);
   }
 
   .upload__files:not([hidden]) {

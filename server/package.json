@@ -1,0 +1,16 @@
+{
+  "name": "skoup-brief",
+  "private": true,
+  "type": "module",
+  "description": "Приём брифа skoup.ru: заявки в SQLite, файлы на диске, письмо через Yandex Cloud Postbox",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "busboy": "1.6.0",
+    "nodemailer": "7.0.13"
+  }
+}

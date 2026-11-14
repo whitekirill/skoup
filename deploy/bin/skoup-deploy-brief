@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Обновление сервиса брифа — на brim (/usr/local/bin/skoup-deploy-brief).
+# Ключ шлюза в ~deploy/.ssh/authorized_keys на brim ограничен этой командой:
+#   restrict,command="/usr/local/bin/skoup-deploy-brief" ssh-ed25519 AAAA… gw-deploy
+# Команда: brief <test|prod> <sha>, на stdin tar.gz папок server/ и deploy/brief/.
+set -euo pipefail
+read -r action env sha _ <<<"${SSH_ORIGINAL_COMMAND:-}"
+[[ "$action" == brief && ( "$env" == test || "$env" == prod ) && "${sha:-}" =~ ^[0-9a-f]{7,40}$ ]] \
+  || { echo "команда: brief <test|prod> <sha>" >&2; exit 2; }
+
+case $env in
+  test) port=3201 url=https://test.skoup.ru ;;
+  prod) port=3200 url=https://skoup.ru ;;
+esac
+
+build=/srv/skoup/build/$sha
+rm -rf "$build" && mkdir -p "$build"
+trap 'rm -rf "$build"' EXIT
+tar -xz -C "$build"
+docker build -q -t "skoup-brief:$sha" "$build/server" >/dev/null
+APP_ENV=$env PORT=$port PUBLIC_URL=$url TAG=$sha \
+  docker stack deploy --resolve-image never -c "$build/deploy/brief/docker-stack.yml" "skoup-$env" >/dev/null
+# старые образы: оставляем 4 последних (занятые сервисами docker всё равно не удалит)
+docker image ls skoup-brief --format '{{.Repository}}:{{.Tag}}' | tail -n +5 | xargs -r docker rmi >/dev/null 2>&1 || true
+echo "бриф $env → $sha"

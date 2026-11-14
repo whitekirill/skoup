@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Выкладка из GitHub Actions — на шлюзе gw (/usr/local/bin/skoup-deploy).
+# Ключ Actions в ~deploy/.ssh/authorized_keys на gw ограничен этой командой:
+#   restrict,command="/usr/local/bin/skoup-deploy" ssh-ed25519 AAAA… skoup-deploy
+# Команды (SSH_ORIGINAL_COMMAND):
+#   site <test|prod> <sha>   — на stdin tar.gz содержимого dist/; новая версия сайта в /srv/skoup/<env>/releases/<sha>
+#   brief <test|prod> <sha>  — на stdin tar.gz папок server/ и deploy/brief/; уходит на brim (skoup-deploy-brief)
+#   rollback <test|prod>     — сайт на предыдущую версию
+set -euo pipefail
+read -r action env sha _ <<<"${SSH_ORIGINAL_COMMAND:-}"
+[[ "${env:-}" == test || "${env:-}" == prod ]] || { echo "окружение: test или prod" >&2; exit 2; }
+root=/srv/skoup/$env
+
+switch() { # атомарно переключает current на папку версии
+  ln -sfn "$1" "$root/current.tmp" && mv -T "$root/current.tmp" "$root/current"
+}
+
+case "$action" in
+  site)
+    [[ "${sha:-}" =~ ^[0-9a-f]{7,40}$ ]] || { echo "нужен sha коммита" >&2; exit 2; }
+    dir=$root/releases/$sha
+    rm -rf "$dir" && mkdir -p "$dir"
+    tar -xz -C "$dir"
+    [[ -f "$dir/index.html" ]] || { echo "в архиве нет index.html" >&2; rm -rf "$dir"; exit 3; }
+    switch "$dir"
+    # храним 5 последних версий
+    ls -1dt "$root"/releases/*/ | tail -n +6 | xargs -r rm -rf
+    echo "сайт $env → $sha"
+    ;;
+  brief)
+    [[ "${sha:-}" =~ ^[0-9a-f]{7,40}$ ]] || { echo "нужен sha коммита" >&2; exit 2; }
+    ssh -i "$HOME/.ssh/brim_deploy" -o BatchMode=yes deploy@10.128.0.4 "brief $env $sha"
+    ;;
+  rollback)
+    current=$(readlink -f "$root/current")
+    prev=$(ls -1dt "$root"/releases/*/ | sed 's:/$::' | grep -vxF "$current" | head -1)
+    [[ -n "$prev" ]] || { echo "нет предыдущей версии" >&2; exit 3; }
+    switch "$prev"
+    echo "сайт $env → $(basename "$prev")"
+    ;;
+  *)
+    echo "команды: site, brief, rollback" >&2
+    exit 2
+    ;;
+esac

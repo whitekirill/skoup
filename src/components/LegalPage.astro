@@ -1,23 +1,24 @@
 ---
 /**
  * Юридическая страница (политика, согласие): крошки «Главная / название», заголовок и текст в колонке 688,
- * как первый экран статьи. Пока документа нет — заглушка: страница закрыта от индексации (noindex)
- * и не попадает в sitemap (фильтр в astro.config.mjs). Когда появится текст — передать его в слот
- * и снять draft.
+ * как первый экран статьи. Под текстом — блок «Владелец сайта» (ч. 2 ст. 10 149-ФЗ) и оговорка об оферте.
+ * Без текста в слоте — заглушка «Документ готовится». draft — документ не окончательный: страница закрыта
+ * от индексации (noindex) и не попадает в sitemap (фильтр в astro.config.mjs).
  */
 import Base from '../layouts/Base.astro';
 import Crumbs from './article/Crumbs.astro';
 import Button from './Button.astro';
-import { EMAIL } from '../data/site';
+import { EMAIL, LEGAL_EDITION, OWNER } from '../data/site';
 
 interface Props {
   title: string;
   description: string;
-  /** документ ещё не готов: заглушка, noindex */
+  /** документ не окончательный: noindex */
   draft?: boolean;
 }
 
 const { title, description, draft = false } = Astro.props;
+const hasText = Astro.slots.has('default');
 ---
 
 <Base title={`${title} — Скоуп`} description={description} noindex={draft}>
@@ -26,17 +27,33 @@ const { title, description, draft = false } = Astro.props;
       <Crumbs title={title} />
       <h1 class="t-h3">{title}</h1>
       {
-        draft ? (
+        hasText ? (
+          <>
+            <div class="legal__text t-body-m">
+              <p class="legal__muted">Редакция от {LEGAL_EDITION}</p>
+              <slot />
+            </div>
+            <section class="legal__owner t-body-s" aria-labelledby="legal-owner">
+              <h2 class="t-body-m-bold" id="legal-owner">Владелец сайта</h2>
+              <p>
+                {OWNER.name}. ОГРНИП {OWNER.ogrnip}, ИНН {OWNER.inn}. Адрес для корреспонденции: {OWNER.address}.
+                Электронная почта: <a href={`mailto:${OWNER.email}`}>{OWNER.email}</a> — в том числе для заявлений
+                правообладателей по статье 15.7 Федерального закона № 149-ФЗ «Об информации, информационных технологиях
+                и о защите информации».
+              </p>
+              <p>
+                Информация на сайте носит справочный характер и не является публичной офертой. Условия работы
+                определяются договором, который заключается с каждым клиентом отдельно.
+              </p>
+            </section>
+          </>
+        ) : (
           <div class="legal__draft">
             <p class="t-body-l legal__muted">
               Документ готовится и скоро появится на этой странице. Если есть вопросы об обработке данных — напишите
-              {'на\u00a0'}<a href={`mailto:${EMAIL}`}>{EMAIL}</a>.
+              {'на '}<a href={`mailto:${EMAIL}`}>{EMAIL}</a>.
             </p>
             <Button variant="primary" href="/">На главную</Button>
-          </div>
-        ) : (
-          <div class="legal__text t-body-l">
-            <slot />
           </div>
         )
       }
@@ -70,13 +87,60 @@ const { title, description, draft = false } = Astro.props;
     color: var(--color-text-secondary);
   }
 
-  .legal__muted a {
+  /* Текст документа: разделы через gap-l, абзацы и списки раздела — paragraph-spacing */
+  .legal__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-l);
+  }
+
+  .legal__text :global(section) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--typography-body-m-paragraph-spacing);
+  }
+
+  .legal__text :global(ul) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    padding-left: 1.25em;
+    list-style: disc;
+  }
+
+  .legal__text :global(b) {
+    font-weight: var(--typography-body-m-weight-bold);
+  }
+
+  .legal__owner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    padding-top: var(--gap-xs);
+    border-top: 1px solid var(--color-element-border);
+    color: var(--color-text-secondary);
+  }
+
+  .legal__owner h2 {
     color: var(--color-text-primary);
+  }
+
+  /* ссылки: в тексте документа (слот — :global) и в блоке владельца подчёркнуты, в заглушке — нет */
+  .legal a,
+  .legal__text :global(a) {
+    color: var(--color-text-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
     transition: color 150ms ease-out;
   }
 
+  .legal__draft a {
+    text-decoration: none;
+  }
+
   @media (hover: hover) and (pointer: fine) {
-    .legal__muted a:hover {
+    .legal a:hover,
+    .legal__text :global(a:hover) {
       color: var(--color-text-secondary);
     }
   }

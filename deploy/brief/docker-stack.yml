@@ -1,0 +1,49 @@
+# Сервис брифа на brim (Docker Swarm), по стеку на окружение: skoup-test и skoup-prod.
+# Разворачивает deploy/bin/skoup-deploy-brief с переменными APP_ENV, PORT, PUBLIC_URL, TAG.
+# Секреты создаются один раз (см. deploy/README.md): skoup_<env>_postbox_user, _postbox_pass, _link_secret.
+version: "3.8"
+
+services:
+  brief:
+    image: skoup-brief:${TAG}
+    environment:
+      APP_ENV: ${APP_ENV}
+      PUBLIC_URL: ${PUBLIC_URL}
+      DATA_DIR: /data
+      MAIL_TO: in@skoup.ru
+      MAIL_FROM: "Скоуп <noreply@skoup.ru>"
+      SMTP_HOST: postbox.cloud.yandex.net
+      SMTP_PORT: "587"
+      SMTP_USER_FILE: /run/secrets/postbox_user
+      SMTP_PASS_FILE: /run/secrets/postbox_pass
+      LINK_SECRET_FILE: /run/secrets/link_secret
+    secrets:
+      - postbox_user
+      - postbox_pass
+      - link_secret
+    volumes:
+      # заявки и файлы — только на brim, которая не видна из интернета
+      - /srv/skoup/${APP_ENV}/data:/data
+    ports:
+      # доступен только во внутренней сети: nginx на gw проксирует /api/brief/ сюда
+      - "${PORT}:3200"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        order: stop-first
+      resources:
+        limits:
+          memory: 256M
+
+secrets:
+  postbox_user:
+    external: true
+    name: skoup_${APP_ENV}_postbox_user
+  postbox_pass:
+    external: true
+    name: skoup_${APP_ENV}_postbox_pass
+  link_secret:
+    external: true
+    name: skoup_${APP_ENV}_link_secret

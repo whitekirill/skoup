@@ -11,3 +11,6 @@ tests/.brief-dist
 tests/screens/
 tests/.lighthouse/
 tests/.videos/
+# исследования и отчёты — рабочие материалы, не часть сайта
+reports/
+research_notes/
