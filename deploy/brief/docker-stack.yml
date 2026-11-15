@@ -27,6 +27,12 @@ services:
     ports:
       # доступен только во внутренней сети: nginx на gw проксирует /api/brief/ сюда
       - "${PORT}:3200"
+    logging:
+      # журнал systemd, а не json-файлы: агент New Relic на brim пересылает за границу
+      # /var/lib/docker/containers/*/*.log, журнал он не читает. docker service logs работает и так.
+      driver: journald
+      options:
+        tag: skoup-brief-${APP_ENV}
     deploy:
       replicas: 1
       restart_policy:

@@ -14,7 +14,7 @@
                          заявки и файлы — /srv/skoup/<env>/data
 ```
 
-Почта на домене — VK WorkSpace. Письма о заявках сервис шлёт через Yandex Cloud Postbox на `in@skoup.ru`.
+Почта на домене — свой сервер на brim (Stalwart + веб-почта Roundcube, ещё не настроен), исходящие — через Yandex Cloud Postbox. Письма о заявках сервис тоже шлёт через Postbox на `in@skoup.ru`.
 
 ## Как выкладывается
 
@@ -58,7 +58,7 @@ Node 24, зависимости — `busboy` (файлы на диск пото�
 - `POST /api/brief/` — форма из `src/scripts/brief/index.ts`; хранит серверное время, отметки и редакции согласий; поле-ловушка `website` отсекает ботов.
 - Письмо на `in@skoup.ru` с текстом заявки и ссылками на файлы (подписаны, действуют 30 дней). Если Postbox недоступен — повтор каждые 10 минут, заявка уже сохранена.
 - Раз в сутки удаляет файлы старше 1 года и заявки старше 3 лет — сроки из политики.
-- В логах только id заявки, без персональных данных: `docker service logs skoup-prod_brief`.
+- В логах только id заявки, без персональных данных: `docker service logs skoup-prod_brief`. Логи пишутся в журнал systemd (драйвер `journald`), а не в файлы Docker: их читает и пересылает за границу агент New Relic на brim.
 - Ограничения файлов — `LIMITS` в `server/src/config.js`, те же, что `FILES` в `src/data/brief.ts`.
 
 Локально: `cd server && npm ci && DATA_DIR=/tmp/brief PORT=3299 node src/server.js` (без ключа Postbox письма не отправляются, заявки копятся).
