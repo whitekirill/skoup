@@ -27,7 +27,7 @@ export interface ArticleMeta {
 // Обновили текст статьи — поменяйте modified.
 export const ARTICLE_MARKETPLACES: ArticleMeta = {
   path: '/blog/marketplaces-installments/',
-  headline: 'Покупка частями в кредит на Ozon, Wildberries и Яндекс Маркете: как это выглядит и что говорит закон',
+  headline: 'UX рассрочки на маркетплейсах: Ozon, Wildberries и Яндекс Маркете: как это выглядит и что говорит закон',
   section: 'Финтех и регуляторика',
   published: '2026-11-06',
   modified: '2026-11-06',

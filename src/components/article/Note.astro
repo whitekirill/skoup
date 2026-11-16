@@ -41,6 +41,13 @@ const { law } = Astro.props;
     min-width: 0;
   }
 
+  /* несколько положений нормы — отдельными абзацами */
+  .note__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--typography-body-m-paragraph-spacing);
+  }
+
   .note__law {
     color: var(--color-text-secondary);
   }

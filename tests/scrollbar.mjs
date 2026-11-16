@@ -52,8 +52,10 @@ for (const reduced of [false, true]) {
   x = await st();
   ok(x.max - x.y < 5, `клик по дорожке внизу → конец страницы (y=${Math.round(x.y)} из ${x.max})`);
   await p.mouse.click(1434, 6);
-  await p.waitForTimeout(1200);
-  ok((await st()).y < 5, 'клик вверху → начало страницы');
+  // нативная плавная прокрутка через всю страницу дольше секунды
+  await p.waitForTimeout(2000);
+  const top = (await st()).y;
+  ok(top < 5, `клик вверху → начало страницы (y=${Math.round(top)})`);
 
   // Бриф: ползунок крутит бриф, страница стоит
   await p.mouse.move(700, 450);
