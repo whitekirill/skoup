@@ -17,33 +17,22 @@ export function parseContact(raw: string): { type: ContactType; value: string } 
   return null;
 }
 
-// Телефон: маска +7 (999) 123-45-67
+// Телефон: любой страны, без маски (пишут и из России, и из Узбекистана, и из других стран).
+// Можно «+», цифры, пробелы, скобки, дефисы и точки; цифр — от 7 до 15 (предел международного формата E.164).
 
-export const PHONE_PREFIX = '+7 ';
+const PHONE_CHARS = /^\+?[\d\s().-]+$/;
 
-/** Цифры номера без кода страны (до 10). Ведущие 7/8 в 11-значном номере — код страны. */
-export function phoneDigits(raw: string): string {
+/** Нормализованный номер: «+», если был, и цифры — так он уходит на сервер */
+export function normalizePhone(raw: string): string {
   const value = raw.trim();
-  let digits = value.replace(/\D/g, '');
-  if (value.startsWith('+7')) digits = digits.slice(1);
-  else if (digits.length === 11 && /^[78]/.test(digits)) digits = digits.slice(1);
-  return digits.slice(0, 10);
+  return (value.startsWith('+') ? '+' : '') + value.replace(/\D/g, '');
 }
 
-/** 10 цифр → «+7 (999) 123-45-67»; неполный номер — сколько набрано */
-export function formatPhone(digits: string): string {
-  const d = digits.slice(0, 10);
-  let out = PHONE_PREFIX;
-  if (d.length) out += `(${d.slice(0, 3)}`;
-  if (d.length >= 3) out += ')';
-  if (d.length > 3) out += ` ${d.slice(3, 6)}`;
-  if (d.length > 6) out += `-${d.slice(6, 8)}`;
-  if (d.length > 8) out += `-${d.slice(8, 10)}`;
-  return out;
+export function isPhone(raw: string): boolean {
+  const value = raw.trim();
+  const digits = value.replace(/\D/g, '').length;
+  return PHONE_CHARS.test(value) && digits >= 7 && digits <= 15;
 }
-
-/** Полный российский номер: +7 и 10 цифр */
-export const isPhone = (raw: string) => phoneDigits(raw).length === 10;
 
 export const isName = (raw: string) => raw.trim().length >= 2;
 

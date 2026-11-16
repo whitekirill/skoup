@@ -14,14 +14,8 @@ export const SERVICES = [
   'Сайт',
 ] as const;
 
-// Тексты — как в макете (581:20495)
-export const BUDGETS = [
-  'Менее 500 тыс ₽',
-  '500 тыс ₽ - 1 млн ₽',
-  '1,5 млн ₽ - 3 млн ₽',
-  '3 млн ₽ - 6 млн ₽',
-  'Более 6 млн ₽',
-] as const;
+/** Предпочтительный способ связи — вместо бюджета (по просьбе), один вариант */
+export const CONTACT_METHODS = ['Telegram', 'Email', 'Телефон', 'WhatsApp'] as const;
 
 export const FILES = {
   max: 5,
@@ -35,7 +29,7 @@ export const ERRORS = {
   contact: { empty: 'Укажите почту или другой контакт', invalid: 'Нужна почта, @ник или ссылка' },
   phone: { empty: 'Укажите телефон', invalid: 'Проверьте номер' },
   services: { empty: 'Выберите хотя бы одну услугу' },
-  budget: { empty: 'Выберите бюджет' },
+  contactMethod: { empty: 'Выберите способ связи' },
   consent: 'Отметьте согласие на обработку данных',
   fileSize: 'Файл больше 50 МБ',
   fileType: 'Формат не поддерживается',

@@ -15,7 +15,8 @@ export function openStore(path) {
       phone TEXT NOT NULL,
       services TEXT NOT NULL,             -- JSON-массив
       task TEXT NOT NULL,
-      budget TEXT NOT NULL,
+      budget TEXT NOT NULL,               -- больше не спрашиваем (заменили способом связи), у новых заявок пусто
+      contact_method TEXT,                -- предпочтительный способ связи: Telegram, Email, Телефон, WhatsApp
       files TEXT NOT NULL,                -- JSON: [{ name, size }], файлы — files/<id>/<номер>
       consent_version TEXT NOT NULL,      -- редакция согласия на обработку ПДн (ч. 3 ст. 9 152-ФЗ)
       marketing INTEGER NOT NULL,         -- 1 — дал согласие на рассылку
@@ -25,11 +26,14 @@ export function openStore(path) {
       files_deleted_at TEXT
     );
   `);
+  // база, созданная до способа связи, — добавляем колонку
+  const columns = db.prepare('PRAGMA table_info(briefs)').all().map((c) => c.name);
+  if (!columns.includes('contact_method')) db.exec('ALTER TABLE briefs ADD COLUMN contact_method TEXT');
 
   const insert = db.prepare(`
-    INSERT INTO briefs (id, received_at, name, company, contact, contact_type, phone, services, task, budget, files,
-                        consent_version, marketing, marketing_version)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO briefs (id, received_at, name, company, contact, contact_type, phone, services, task, budget, contact_method,
+                        files, consent_version, marketing, marketing_version)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, '', ?, ?, ?, ?, ?)
   `);
   const getOne = db.prepare('SELECT * FROM briefs WHERE id = ?');
   const pending = db.prepare(
@@ -50,7 +54,7 @@ export function openStore(path) {
     insert(b) {
       insert.run(
         b.id, b.receivedAt, b.name, b.company, b.contact, b.contactType, b.phone, JSON.stringify(b.services),
-        b.task, b.budget, JSON.stringify(b.files), b.consentVersion, b.marketing ? 1 : 0, b.marketingVersion ?? null,
+        b.task, b.contactMethod, JSON.stringify(b.files), b.consentVersion, b.marketing ? 1 : 0, b.marketingVersion ?? null,
       );
     },
     get: (id) => parse(getOne.get(id)),

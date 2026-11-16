@@ -1,7 +1,7 @@
 // Бриф: открытие/закрытие оверлея, валидация формы, файлы, отправка и экран успеха.
 import { ERRORS, FILES } from '../../data/brief';
 import { LEGAL_EDITION } from '../../data/site';
-import { PHONE_PREFIX, checkFile, formatPhone, formatSize, isName, isPhone, parseContact, phoneDigits } from './validate';
+import { checkFile, formatSize, isName, isPhone, normalizePhone, parseContact } from './validate';
 import { submitBrief } from './submit';
 
 const root = document.documentElement;
@@ -124,7 +124,6 @@ if (brief && form) {
     if (!value) return ERRORS[name].empty;
     if (name === 'name' || name === 'company') return isName(value) ? '' : ERRORS[name].invalid;
     if (name === 'contact') return parseContact(value) ? '' : ERRORS.contact.invalid;
-    if (!phoneDigits(value)) return ERRORS.phone.empty; // только «+7 »
     return isPhone(value) ? '' : ERRORS.phone.invalid;
   }
 
@@ -142,9 +141,9 @@ if (brief && form) {
     }
   }
 
-  type GroupName = 'services' | 'budget';
+  type GroupName = 'services' | 'contact_method';
   const groupError = (name: GroupName) =>
-    form.querySelector(`input[name="${name}"]:checked`) ? '' : ERRORS[name].empty;
+    form.querySelector(`input[name="${name}"]:checked`) ? '' : ERRORS[name === 'contact_method' ? 'contactMethod' : name].empty;
 
   function showGroupError(name: GroupName, message: string) {
     const error = document.getElementById(`brief-${name}-error`)!;
@@ -178,81 +177,9 @@ if (brief && form) {
     input.addEventListener('input', recheck);
     input.addEventListener('blur', recheck);
   }
-  for (const name of ['services', 'budget'] as GroupName[]) {
+  for (const name of ['services', 'contact_method'] as GroupName[]) {
     form.querySelector(`[data-group="${name}"]`)!.addEventListener('change', () => {
       if (submitted) showGroupError(name, groupError(name));
-    });
-  }
-
-  // Маска телефона: +7 (999) 123-45-67
-  {
-    const phone = control('phone');
-    let prevDigits = '';
-    // позиция в отформатированной строке сразу после n-й цифры номера
-    const caretAfter = (text: string, n: number) => {
-      if (n === 0) return PHONE_PREFIX.length + (text.length > PHONE_PREFIX.length ? 1 : 0);
-      let seen = 0;
-      for (let i = PHONE_PREFIX.length; i < text.length; i++) if (/\d/.test(text[i]) && ++seen === n) return i + 1;
-      return text.length;
-    };
-    phone.addEventListener('focus', () => {
-      if (!phone.value) phone.value = PHONE_PREFIX;
-      prevDigits = phoneDigits(phone.value);
-    });
-    phone.addEventListener('blur', () => {
-      if (!phoneDigits(phone.value)) phone.value = '';
-    });
-    // Вставка из буфера: целый номер заменяет поле, кусок цифр — встаёт на место курсора.
-    // Саму вставку не запрещаем (браузер вставит текст как есть) — разбираем её в input ниже
-    let paste: { text: string; head: string; tail: string } | null = null;
-    phone.addEventListener('paste', (event) => {
-      const caret = phone.selectionStart ?? phone.value.length;
-      const end = phone.selectionEnd ?? caret;
-      paste = {
-        text: event.clipboardData?.getData('text') ?? '',
-        head: phone.value.slice(0, caret).replace(/\D/g, '').slice(1),
-        tail: phone.value.slice(end).replace(/\D/g, ''),
-      };
-    });
-    phone.addEventListener('input', (event) => {
-      const inputType = (event as InputEvent).inputType ?? '';
-      if (paste) {
-        const { text, head, tail } = paste;
-        paste = null;
-        const pasted = text.replace(/\D/g, '');
-        const digits = pasted.length >= 10 ? phoneDigits(text.trim().startsWith('+') || pasted.length === 11 ? text : `+7${text}`) : (head + pasted + tail).slice(0, 10);
-        phone.value = formatPhone(digits);
-        const at = pasted.length >= 10 ? phone.value.length : caretAfter(phone.value, Math.min(head.length + pasted.length, digits.length));
-        phone.setSelectionRange(at, at);
-        prevDigits = digits;
-        return;
-      }
-      const raw = phone.value;
-      const caret = phone.selectionStart ?? raw.length;
-      let digits = phoneDigits(raw);
-      // вставили или подставили целый номер (автозаполнение, «+7 999…», «8 999…») — разбираем его отдельно
-      const data = (event as InputEvent).data ?? '';
-      if (data.replace(/\D/g, '').length >= 10) {
-        digits = phoneDigits(data.trim().startsWith('+') || data.replace(/\D/g, '').length === 11 ? data : `+7${data}`);
-        phone.value = formatPhone(digits);
-        prevDigits = digits;
-        return;
-      }
-      // сколько цифр номера стоит до курсора (без кода страны в «+7»)
-      const before = raw.slice(0, caret).replace(/\D/g, '').length - (raw.startsWith('+7') ? 1 : 0);
-      let pos = Math.max(0, before);
-      // привычка набирать 8/7 первой цифрой — это код страны, не часть номера
-      if (!prevDigits && inputType.startsWith('insert') && /^[78]$/.test(digits)) digits = '';
-      // Backspace по скобке, пробелу или дефису — стираем цифру перед ними
-      if (inputType === 'deleteContentBackward' && digits === prevDigits && pos > 0) {
-        digits = digits.slice(0, pos - 1) + digits.slice(pos);
-        pos -= 1;
-      }
-      const text = formatPhone(digits);
-      phone.value = text;
-      const at = caretAfter(text, Math.min(pos, digits.length));
-      phone.setSelectionRange(at, at);
-      prevDigits = digits;
     });
   }
 
@@ -341,7 +268,7 @@ if (brief && form) {
       showFieldError(name, message);
       if (message && !first) first = control(name);
     }
-    for (const name of ['services', 'budget'] as GroupName[]) {
+    for (const name of ['services', 'contact_method'] as GroupName[]) {
       const message = groupError(name);
       showGroupError(name, message);
       if (message && !first) first = form!.querySelector<HTMLElement>(`input[name="${name}"]`);
@@ -366,10 +293,10 @@ if (brief && form) {
     const contact = parseContact(control('contact').value)!;
     data.set('contact', contact.value);
     data.set('contact_type', contact.type);
-    data.set('phone', `+7${phoneDigits(control('phone').value)}`);
+    data.set('phone', normalizePhone(control('phone').value));
     for (const input of form!.querySelectorAll<HTMLInputElement>('input[name="services"]:checked')) data.append('services', input.value);
     data.set('task', (form!.elements.namedItem('task') as HTMLTextAreaElement).value.trim());
-    data.set('budget', form!.querySelector<HTMLInputElement>('input[name="budget"]:checked')!.value);
+    data.set('contact_method', form!.querySelector<HTMLInputElement>('input[name="contact_method"]:checked')!.value);
     for (const { file, problem } of files) if (!problem) data.append('files', file, file.name);
     // факт согласий и редакция их текстов — оператор обязан доказать согласие (ч. 3 ст. 9 152-ФЗ, ч. 1 ст. 18 38-ФЗ);
     // время получения записывает сервер
@@ -434,7 +361,7 @@ if (brief && form) {
     sendError.textContent = '';
     for (const name of fields) showFieldError(name, '');
     showGroupError('services', '');
-    showGroupError('budget', '');
+    showGroupError('contact_method', '');
     showConsentError('');
     formView.hidden = false;
     successView.hidden = true;

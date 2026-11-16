@@ -57,8 +57,9 @@ await page.evaluate(() => document.getElementById('brief').scrollTo(0, 0));
 await submit();
 const invalid = await page.evaluate(() => document.querySelectorAll('#brief [aria-invalid="true"]').length);
 const groups = await page.evaluate(() => [...document.querySelectorAll('.brief__group-error')].filter((e) => !e.hidden).length);
-check(invalid === 4 && groups === 2, `пустая отправка: полей с ошибкой ${invalid}, групп ${groups} (ждём 4 + 2)`);
-check((await errText('name')) === 'Укажите имя' && (await errText('services')) === 'Выберите хотя бы одну услугу' && (await errText('budget')) === 'Выберите бюджет', 'тексты ошибок как в ТЗ');
+// 4 поля + галочка согласия; группы — услуги, способ связи и ошибка согласия
+check(invalid === 5 && groups === 3, `пустая отправка: полей с ошибкой ${invalid}, групп ${groups} (ждём 5 + 3)`);
+check((await errText('name')) === 'Укажите имя' && (await errText('services')) === 'Выберите хотя бы одну услугу' && (await errText('contact_method')) === 'Выберите способ связи', 'тексты ошибок как в ТЗ');
 check(await page.evaluate(() => document.activeElement?.id === 'brief-name'), 'фокус на первом поле с ошибкой');
 check(await page.evaluate(() => document.getElementById('brief-name').getAttribute('aria-describedby') === 'brief-name-error'), 'aria-describedby на текст ошибки');
 
@@ -75,48 +76,33 @@ for (const [v, okExpected] of [['anna@company.ru', true], ['@anna_skoup', true],
 }
 await page.fill('#brief-contact', 't.me/anna_skoup');
 
-// 5a. Маска телефона +7
+// 5a. Телефон любой страны, без маски: что ввели, то и осталось
 const phoneVal = () => page.inputValue('#brief-phone');
+for (const v of ['+998 90 123-45-67', '+7 (999) 123-45-67', '8 999 123 45 67', '+1 212.555.0100']) {
+  await page.fill('#brief-phone', v);
+  check((await phoneVal()) === v && (await errText('phone')) === '', `телефон «${v}» — без маски и без ошибки`);
+}
 await page.fill('#brief-phone', '');
-await page.focus('#brief-phone');
-check((await phoneVal()) === '+7 ', 'фокус в пустом телефоне — «+7 »');
-await page.keyboard.type('9991234567');
-check((await phoneVal()) === '+7 (999) 123-45-67', `набор 9991234567 → ${await phoneVal()}`);
-await page.keyboard.type('8');
-check((await phoneVal()) === '+7 (999) 123-45-67', 'лишние цифры не добавляются');
-await page.fill('#brief-phone', ''); await page.focus('#brief-phone');
-await page.keyboard.type('89161234567');
-check((await phoneVal()) === '+7 (916) 123-45-67', `набор с 8 → ${await phoneVal()}`);
-await page.fill('#brief-phone', ''); await page.focus('#brief-phone');
-await page.keyboard.insertText('+7 999 123 45 67');
-check((await phoneVal()) === '+7 (999) 123-45-67', `вставка «+7 999 123 45 67» → ${await phoneVal()}`);
-// Backspace сразу после «)» стирает цифру
-await page.evaluate(() => { const i = document.getElementById('brief-phone'); i.setSelectionRange(8, 8); });
-await page.keyboard.press('Backspace');
-check((await phoneVal()) === '+7 (991) 234-56-7', `Backspace по «)» → ${await phoneVal()}`);
-// правка в середине: курсор остаётся у цифры
-await page.keyboard.type('9');
-check((await phoneVal()) === '+7 (999) 123-45-67' && (await page.evaluate(() => document.getElementById('brief-phone').selectionStart)) === 7, 'вставка цифры в середину — курсор сразу после неё');
-await page.fill('#brief-phone', ''); await page.focus('#brief-phone'); await page.locator('#brief-company').focus();
-check((await phoneVal()) === '', 'пустой «+7 » при уходе с поля убирается (виден плейсхолдер)');
-check((await errText('phone')) === 'Укажите телефон', 'только «+7 » — «Укажите телефон»');
+check((await errText('phone')) === 'Укажите телефон', 'пустой телефон — «Укажите телефон»');
+await page.fill('#brief-phone', '+998 90 abc');
+check((await errText('phone')) === 'Проверьте номер', 'буквы в телефоне → «Проверьте номер»');
 
 // 5. Короткий телефон
 await page.fill('#brief-phone', '+7 999');
 check((await errText('phone')) === 'Проверьте номер', 'короткий телефон → «Проверьте номер»');
-await page.fill('#brief-phone', '+7 (999) 123-45-67');
+await page.fill('#brief-phone', '+998 90 123-45-67');
 check((await errText('phone')) === '', 'корректный телефон — ошибки нет');
 
-// 6. Без услуг / без бюджета
+// 6. Без услуг / без способа связи
 await submit();
-check((await errText('services')) !== '' && (await errText('budget')) !== '', 'без услуг и бюджета — ошибки групп');
+check((await errText('services')) !== '' && (await errText('contact_method')) !== '', 'без услуг и способа связи — ошибки групп');
 check(await page.evaluate(() => document.activeElement?.name === 'services'), 'фокус на первой группе с ошибкой');
 await page.click('.chip:has(input[value="Стратегия"])');
 await page.click('.chip:has(input[value="Сайт"])');
 check((await errText('services')) === '', 'ошибка услуг исчезает после выбора');
-await page.click('.chip:has(input[value="3 млн ₽ - 6 млн ₽"])');
-await page.click('.chip:has(input[value="Более 6 млн ₽"])');
-check((await page.evaluate(() => document.querySelectorAll('input[name="budget"]:checked').length)) === 1, 'бюджет — ровно один вариант');
+await page.click('.chip:has(input[value="Telegram"])');
+await page.click('.chip:has(input[value="WhatsApp"])');
+check((await page.evaluate(() => document.querySelectorAll('input[name="contact_method"]:checked').length)) === 1, 'способ связи — ровно один вариант');
 
 // 7. Файлы
 const tmp = fs.mkdtempSync(path.join(OUT, 'files-'));
@@ -127,6 +113,9 @@ check(items.join() === 'brief-skoup.pdf|2,4 МБ|false,big.pdf|Файл боль
 check((await page.textContent('[data-upload-action]')) === 'Прикрепить ещё', 'после первого файла — «Прикрепить ещё»');
 await page.click('.file:nth-child(3) [data-file-remove]');
 check((await page.evaluate(() => document.querySelectorAll('.file').length)) === 2, 'файл удаляется крестиком');
+
+// согласие на обработку данных — обязательно
+await page.check('input[name="consent"]', { force: true });
 
 // 8. Ошибка сети — данные сохраняются
 failNext = true;
@@ -143,7 +132,7 @@ await page.click('[data-brief-submit]');
 await page.waitForSelector('[data-brief-view="success"]:not([hidden])', { timeout: 5000 });
 check(true, 'экран успеха показан');
 const has = (k, v) => lastBody.includes(`name="${k}"\r\n\r\n${v}`);
-check(has('phone', '+79991234567') && has('name', 'Анна') && has('company', 'Банк') && has('contact', 'https://t.me/anna_skoup') && has('contact_type', 'url') && has('budget', 'Более 6 млн ₽'), 'в заявке поля, телефон +79991234567, contact с https:// и contact_type=url');
+check(has('phone', '+998901234567') && has('name', 'Анна') && has('company', 'Банк') && has('contact', 'https://t.me/anna_skoup') && has('contact_type', 'url') && has('contact_method', 'WhatsApp'), 'в заявке поля, телефон +998901234567 (без пробелов и дефисов), способ связи, contact с https:// и contact_type=url');
 check((lastBody.match(/name="services"/g) || []).length === 2, 'в заявке две услуги');
 check(lastBody.includes('filename="brief-skoup.pdf"') && !lastBody.includes('big.pdf'), 'в заявку ушёл только файл без ошибки');
 check(lastBody.includes('multipart/form-data') || /^--/.test(lastBody), 'multipart/form-data');
@@ -187,10 +176,13 @@ await page.keyboard.press('Space'); // первая услуга
 await page.waitForTimeout(250);
 const chipFocus = await page.evaluate(() => { const c = getComputedStyle(document.activeElement.closest('.chip')); return { outline: c.outlineStyle, bg: c.backgroundColor }; });
 check(chipFocus.outline === 'none' && chipFocus.bg !== 'rgb(247, 247, 247)', `фокус на чипсе виден фоном, без обводки (${chipFocus.bg})`);
-// до бюджета: Tab по услугам → поле задачи → «Прикрепить» → первый вариант бюджета, стрелкой — выбор
-for (let i = 0; i < 9; i++) { await page.keyboard.press('Tab'); if (await page.evaluate(() => document.activeElement?.name === 'budget')) break; }
+// до способа связи: Tab по услугам → поле задачи → «Прикрепить» → первый вариант, Space — выбор
+for (let i = 0; i < 9; i++) { await page.keyboard.press('Tab'); if (await page.evaluate(() => document.activeElement?.name === 'contact_method')) break; }
 await page.keyboard.press('Space');
-await page.keyboard.press('Tab');
+// дальше — галочка согласия (Space), потом через ссылки и рассылку до кнопки
+for (let i = 0; i < 6; i++) { await page.keyboard.press('Tab'); if (await page.evaluate(() => document.activeElement?.name === 'consent')) break; }
+await page.keyboard.press('Space');
+for (let i = 0; i < 6; i++) { await page.keyboard.press('Tab'); if (await page.evaluate(() => document.activeElement?.matches('[data-brief-submit]'))) break; }
 check(await page.evaluate(() => document.activeElement?.matches('[data-brief-submit]')), 'Tab доходит до «Отправить заявку»');
 await page.keyboard.press('Enter');
 await page.waitForSelector('[data-brief-view="success"]:not([hidden])', { timeout: 5000 }).then(() => check(true, 'форма отправлена только с клавиатуры'), () => check(false, 'форма отправлена только с клавиатуры'));

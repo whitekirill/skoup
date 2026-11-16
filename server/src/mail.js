@@ -40,7 +40,8 @@ export function composeLetter(brief, { env, publicUrl, linkSecret, linkDays, fro
     `Контакт (${CONTACT[brief.contact_type] ?? brief.contact_type}): ${brief.contact}`,
     `Телефон: ${brief.phone}`,
     `Услуги: ${brief.services.join(', ')}`,
-    `Бюджет: ${brief.budget}`,
+    // старые заявки — с бюджетом, новые — со способом связи
+    brief.contact_method ? `Как связаться: ${brief.contact_method}` : `Бюджет: ${brief.budget}`,
     '',
     'Задача:',
     brief.task || '—',

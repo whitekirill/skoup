@@ -68,6 +68,9 @@ function cleanName(raw = '') {
   return name || 'file';
 }
 
+/** Предпочтительный способ связи — те же варианты, что CONTACT_METHODS в src/data/brief.ts */
+const CONTACT_METHODS = ['Telegram', 'Email', 'Телефон', 'WhatsApp'];
+
 const str = (v) => (typeof v === 'string' ? v.trim() : '');
 
 /** Проверка полей. Возвращает { spam } | { error } | { brief } */
@@ -81,20 +84,22 @@ export function validateBrief({ fields, files, problems }) {
   const contact = str(fields.contact);
   const contactType = str(fields.contact_type);
   const phone = str(fields.phone);
-  const budget = str(fields.budget);
+  const contactMethod = str(fields.contact_method);
   const task = str(fields.task);
   const services = fields.services.map(str).filter(Boolean);
   const consentVersion = str(fields.consent_version);
   const marketing = str(fields.marketing) === 'yes';
 
   if (str(fields.consent) !== 'yes' || !consentVersion) return { error: 'consent' };
-  if (!name || !company || !contact || !phone || !budget || !services.length) return { error: 'required' };
-  if ([name, company, contact, budget, consentVersion, ...services].some((v) => v.length > LIMITS.text)) {
+  if (!name || !company || !contact || !phone || !contactMethod || !services.length) return { error: 'required' };
+  if ([name, company, contact, consentVersion, ...services].some((v) => v.length > LIMITS.text)) {
     return { error: 'too_long' };
   }
   if (task.length > LIMITS.task || services.length > LIMITS.services) return { error: 'too_long' };
   if (!['email', 'telegram', 'url'].includes(contactType)) return { error: 'contact' };
-  if (!/^\+7\d{10}$/.test(phone)) return { error: 'phone' };
+  // телефон любой страны: «+», если был, и 7–15 цифр (сайт присылает уже без пробелов и скобок)
+  if (!/^\+?\d{7,15}$/.test(phone)) return { error: 'phone' };
+  if (!CONTACT_METHODS.includes(contactMethod)) return { error: 'contact_method' };
 
   return {
     brief: {
@@ -103,7 +108,7 @@ export function validateBrief({ fields, files, problems }) {
       contact,
       contactType,
       phone,
-      budget,
+      contactMethod,
       task,
       services,
       files,

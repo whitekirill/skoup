@@ -12,7 +12,7 @@ import Chip from '../Chip.astro';
 import FileUpload from './FileUpload.astro';
 import Checkbox from './Checkbox.astro';
 import { EMAIL, LEGAL } from '../../data/site';
-import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/brief';
+import { CONTACT_METHODS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/brief';
 ---
 
 <div class="brief-shade" aria-hidden="true"></div>
@@ -71,15 +71,15 @@ import { BUDGETS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../../data/br
           </div>
         </section>
 
-        <section class="brief__section brief__reveal" style="--i: 3" aria-labelledby="brief-budget">
-          <h3 class="brief__heading t-h3" id="brief-budget">Бюджет</h3>
+        <section class="brief__section brief__reveal" style="--i: 3" aria-labelledby="brief-contact-method">
+          <h3 class="brief__heading t-h3" id="brief-contact-method">Способ связи</h3>
           <div class="brief__content">
-            <fieldset class="brief__group" data-group="budget" aria-describedby="brief-budget-error">
-              <legend class="visually-hidden">Бюджет</legend>
+            <fieldset class="brief__group" data-group="contact_method" aria-describedby="brief-contact_method-error">
+              <legend class="visually-hidden">Предпочтительный способ связи</legend>
               <div class="brief__chips">
-                {BUDGETS.map((budget) => <Chip type="radio" name="budget" value={budget} />)}
+                {CONTACT_METHODS.map((method) => <Chip type="radio" name="contact_method" value={method} />)}
               </div>
-              <p class="brief__group-error t-body-s" id="brief-budget-error" hidden></p>
+              <p class="brief__group-error t-body-s" id="brief-contact_method-error" hidden></p>
             </fieldset>
           </div>
         </section>
