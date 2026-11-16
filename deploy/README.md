@@ -14,7 +14,7 @@
                          заявки и файлы — /srv/skoup/<env>/data
 ```
 
-Почта на домене — свой сервер на brim (Stalwart + веб-почта Roundcube, ещё не настроен), исходящие — через Yandex Cloud Postbox. Письма о заявках сервис тоже шлёт через Postbox на `in@skoup.ru`.
+Почта на домене — свой сервер на brim (Stalwart + веб-почта Roundcube на mail.skoup.ru), исходящие — через Yandex Cloud Postbox; её настройки и конфиги серверов, не относящиеся к сайту, — в репозитории `pavel-module/infra`. Письма о заявках сервис тоже шлёт через Postbox на `in@skoup.ru`.
 
 ## Как выкладывается
 
