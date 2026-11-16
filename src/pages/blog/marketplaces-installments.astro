@@ -477,8 +477,9 @@ const NAV = [
   }
 
   /*
-   * Заголовок этапа (Figma 801:11777): номер «1.», «2.»… цвета text/secondary-inversion висит слева за колонкой
-   * (отступ 8 px), сам заголовок начинается там же, где текст под ним.
+   * Заголовок этапа (Figma 808:12267): номер — в кружке 32 px (element-border, цифра Body/Medium
+   * text/secondary-inversion). Desktop — слева от заголовка, по центру первой строки, 22 px до текста
+   * (кружок в боксе 44 + gap 16), заголовок на одной линии с текстом. Mobile — над заголовком, gap-xs.
    */
   .article {
     counter-reset: art-step;
@@ -490,22 +491,27 @@ const NAV = [
   }
 
   .art-step::before {
-    content: counter(art-step) '.';
+    content: counter(art-step);
     position: absolute;
-    inset-inline-end: calc(100% + var(--space-8));
+    top: calc((var(--typography-h3-line-height) - var(--space-32)) / 2);
+    inset-inline-end: calc(100% + 22px); /* бокс 44 с кружком 32 по центру + gap 16 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--space-32);
+    height: var(--space-32);
+    border-radius: var(--radius-full);
+    background: var(--color-element-border);
     color: var(--color-text-secondary-inversion);
+    font-size: var(--typography-body-m-size);
+    line-height: var(--typography-body-m-line-height);
+    letter-spacing: var(--typography-body-m-letter-spacing);
   }
 
-  /*
-   * На мобильном номер тоже висит за линией текста, но поле страницы — 20 px: номер чуть мельче (0,75 кегля),
-   * отступ 4 px — так «1.»…«6.» помещаются в поле, базовая линия общая с заголовком.
-   */
   @media (max-width: 767px) {
     .art-step::before {
-      inset-inline-end: calc(100% + var(--space-4));
-      /* уменьшаем от правого края на уровне базовой линии первой строки */
-      scale: 0.75;
-      transform-origin: 100% 76%;
+      position: static;
+      margin-bottom: var(--gap-xs);
     }
   }
 
