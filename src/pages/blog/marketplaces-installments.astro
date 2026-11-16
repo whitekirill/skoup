@@ -476,7 +476,10 @@ const NAV = [
     list-style: decimal;
   }
 
-  /* Заголовок этапа: номер «1.», «2.»… слева, текст с отступом 1,5 кегля — как нумерованный список в макете */
+  /*
+   * Заголовок этапа (Figma 801:11777): номер «1.», «2.»… цвета text/secondary-inversion висит слева за колонкой
+   * (отступ 8 px), сам заголовок начинается там же, где текст под ним.
+   */
   .article {
     counter-reset: art-step;
   }
@@ -484,16 +487,21 @@ const NAV = [
   .art-step {
     counter-increment: art-step;
     position: relative;
-    padding-inline-start: 1.5em;
   }
 
   .art-step::before {
     content: counter(art-step) '.';
     position: absolute;
-    inset-inline-start: 0;
-    width: 1.5em;
-    padding-inline-end: 0.3em;
-    text-align: end;
+    inset-inline-end: calc(100% + var(--space-8));
+    color: var(--color-text-secondary-inversion);
+  }
+
+  /* на мобильном поле страницы уже номера — он стоит в строке перед заголовком */
+  @media (max-width: 767px) {
+    .art-step::before {
+      position: static;
+      margin-inline-end: var(--space-8);
+    }
   }
 
   /* Продукты площадок (вступление) */
