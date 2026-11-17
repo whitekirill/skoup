@@ -36,7 +36,7 @@ npm run build      # статическая сборка в dist/
 | `PUBLIC_BRIEF_ENDPOINT` | Адрес отправки брифа: на test и проде `/api/brief/` (без неё — мок) |
 
 - `robots.txt`, `sitemap-index.xml` (через `@astrojs/sitemap`, только реальные страницы), страница `404.html` — в сборке.
-- Адреса — со слешем на конце (`trailingSlash: 'always'`). Без слеша — 301: в nginx (`deploy/nginx/skoup-site.conf`); `public/_redirects` — то же для статических хостингов.
+- Адреса — со слешем на конце (`trailingSlash: 'always'`). Без слеша — 301: в nginx (`deploy/nginx/skoup-site.conf`).
 - Файлы, которые подключатся сами, как только появятся в `public/`: `favicon.svg`, `favicon.ico`, `apple-touch-icon.png` (180×180), `site.webmanifest`, `og/home.png` и `og/marketplaces-installments.png` (1200×630). Пока файла нет, тег не выводится.
 - JSON-LD: `Organization` и `WebSite` на всех страницах, `Article` и `BreadcrumbList` на статье (`src/components/Seo.astro`, данные — `src/data/seo.ts`).
 

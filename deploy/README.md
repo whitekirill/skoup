@@ -24,6 +24,16 @@
 
 Ключ GitHub Actions на gw может только выполнить `skoup-deploy`, ключ gw на brim — только `skoup-deploy-brief` (`restrict,command=…` в `authorized_keys`).
 
+## Запуск skoup.ru (один раз)
+
+1. Подано уведомление в Роскомнадзор и принято — без этого бриф на проде не включаем.
+2. Бриф: Actions → Deploy brief → `production` (стек `skoup-prod` на brim, порт 3200).
+3. `LEGAL_EDITION` в `src/data/site.ts` — дата редакции политики и согласий (ДД.ММ.ГГГГ), коммит в `main`. Без даты сборка для прода падает: дата уходит с каждой заявкой как версия согласия.
+4. Actions → Deploy site → `production` (сборка с `PUBLIC_INDEXABLE=true`).
+5. Cloud DNS: `skoup.ru` A → `51.250.12.139`, `www` — A на тот же адрес вместо CNAME Vercel (TTL уже 60).
+6. На gw: `certbot certonly --nginx -d skoup.ru -d www.skoup.ru`, ссылка `sites-available/skoup.ru` → `sites-enabled`, `nginx -t && systemctl reload nginx`.
+7. Проверить: страницы, переадресации http/www, 404, индексация открыта, sitemap, бриф с письмом на in@. Потом TTL — 3600, проект на Vercel — удалить.
+
 ## Секреты GitHub (Settings → Secrets and variables → Actions)
 
 | Имя | Что |

@@ -19,6 +19,11 @@ interface Props {
 
 const { title, description, draft = false } = Astro.props;
 const hasText = Astro.slots.has('default');
+
+// Дата редакции уходит с каждой заявкой брифа (consent_version) — на прод без настоящей даты не собираем
+if (hasText && import.meta.env.PUBLIC_INDEXABLE === 'true' && LEGAL_EDITION.includes('[')) {
+  throw new Error('LEGAL_EDITION в src/data/site.ts — проставьте дату редакции перед выкладкой на прод');
+}
 ---
 
 <Base title={`${title} — Скоуп`} description={description} noindex={draft}>
@@ -36,7 +41,7 @@ const hasText = Astro.slots.has('default');
             <section class="legal__owner t-body-s" aria-labelledby="legal-owner">
               <h2 class="t-body-m-bold" id="legal-owner">Владелец сайта</h2>
               <p>
-                {OWNER.name}. ОГРНИП {OWNER.ogrnip}, ИНН {OWNER.inn}. Адрес для корреспонденции: {OWNER.address}.
+                {OWNER.name}. ОГРНИП {OWNER.ogrnip}, ИНН {OWNER.inn}. Место нахождения: {OWNER.city}.
                 Электронная почта: <a href={`mailto:${OWNER.email}`}>{OWNER.email}</a> — в том числе для заявлений
                 правообладателей по статье 15.7 Федерального закона № 149-ФЗ «Об информации, информационных технологиях
                 и о защите информации».

@@ -19,7 +19,7 @@ const buildInfo = {
 export default defineConfig({
   site: 'https://skoup.ru',
   output: 'static',
-  // единый вид адресов — со слешем на конце; без слеша — 301 (nginx: deploy/nginx/skoup-site.conf; public/_redirects — для статических хостингов)
+  // единый вид адресов — со слешем на конце; без слеша — 301 (nginx: deploy/nginx/skoup-site.conf)
   trailingSlash: 'always',
   // панель разработчика Astro внизу страницы в `npm run dev` — выключена, чтобы не путать с интерфейсом сайта
   devToolbar: { enabled: false },
@@ -30,8 +30,8 @@ export default defineConfig({
   prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
   integrations: [
     buildInfo,
-    // sitemap: только страницы сайта (404 Astro не включает); юридические заглушки — пока без них
-    sitemap({ filter: (page) => !['/privacy/', '/consent/', '/marketing-consent/'].some((path) => page.endsWith(path)) }),
+    // sitemap: все страницы сайта (404 Astro не включает)
+    sitemap(),
     // неразрывные пробелы после предлогов и перед тире во всём тексте сайта
     typograph(),
   ],
