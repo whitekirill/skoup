@@ -2,7 +2,7 @@
 /**
  * Иллюстрация статьи «Image · …» (Figma 598:7137): экспорт кадра макета в 2x → AVIF / WebP + PNG.
  * Desktop — 1024 по центру (шире колонки текста), скругление radius/44.
- * Mobile — в масштабе 0.6, листается вбок на всю ширину экрана (от поля текста до краёв, без обрезки у поля).
+ * Mobile — в масштабе 0.72 (виден первый телефон макета и половина второго — понятно, что листается), листается вбок на всю ширину экрана (от поля текста до краёв, без обрезки у поля).
  */
 import { getImage } from 'astro:assets';
 import { srcset } from '../../utils/images';
@@ -15,7 +15,9 @@ interface Props {
 
 const { src, alt } = Astro.props;
 const w = src.width / 2; // ширина в макете
-const widths = [Math.round(w * 0.6), Math.round(w), Math.round(w * 1.2), Math.round(w * 2)];
+// на мобильном (393) картинка в масштабе 0.72: от поля 16 px до края экрана — первый телефон и половина второго
+const MOBILE_SCALE = 0.72; // = --scale в @media ниже
+const widths = [Math.round(w * MOBILE_SCALE), Math.round(w), Math.round(w * 1.2), Math.round(w * 2)];
 const build = (format: 'avif' | 'webp' | 'png') => srcset(src, widths, format);
 const [avif, webp, png] = await Promise.all([build('avif'), build('webp'), build('png')]);
 const fallback = await getImage({ src, width: Math.round(w), format: 'png' });
@@ -57,7 +59,7 @@ const sizes = `(max-width: 767px) ${widths[0]}px, ${Math.round(w)}px`;
   @media (max-width: 767px) {
     /* область прокрутки — на всю ширину экрана: картинка стоит по полю текста и уезжает до краёв, не обрезаясь у поля */
     .art-figure {
-      --scale: 0.6;
+      --scale: 0.72;
       width: calc(100% + 2 * var(--layout-page-padding));
       margin-inline: calc(-1 * var(--layout-page-padding));
     }
