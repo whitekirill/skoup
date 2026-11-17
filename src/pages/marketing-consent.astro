@@ -15,7 +15,7 @@ import { LEGAL, OWNER, PROCESSORS } from '../data/site';
 >
   <p>
     Отмечая в форме брифа на сайте skoup.ru галочку «Я даю согласие на получение писем Скоупа», я даю согласие
-    {OWNER.nameDative} (ОГРНИП {OWNER.ogrnip}, ИНН {OWNER.inn}, адрес для корреспонденции: {OWNER.address}) — далее
+    {OWNER.nameDative} (ОГРНИП {OWNER.ogrnip}, ИНН {OWNER.inn}) — далее
     «Скоуп» — присылать мне письма на условиях ниже. Это согласие на получение рекламы по сетям электросвязи (ч. 1 ст. 18
     Федерального закона № 38-ФЗ «О рекламе») и на обработку моих персональных данных для этого (ст. 15 Федерального
     закона № 152-ФЗ «О персональных данных»). Оно не обязательно: бриф отправляется и без него.
@@ -37,7 +37,7 @@ import { LEGAL, OWNER, PROCESSORS } from '../data/site';
       распространяются и не передаются за границу. По поручению Скоупа данные обрабатывают:
     </p>
     <ul>
-      {PROCESSORS.map((processor) => <li>{processor.role} — {processor.name}.</li>)}
+      {PROCESSORS.filter((processor) => processor.marketing).map((processor) => <li>{processor.role} — {processor.name}.</li>)}
     </ul>
   </section>
 
