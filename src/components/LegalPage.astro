@@ -19,6 +19,11 @@ interface Props {
 
 const { title, description, draft = false } = Astro.props;
 const hasText = Astro.slots.has('default');
+
+// Дата редакции уходит с каждой заявкой брифа (consent_version) — на прод без настоящей даты не собираем
+if (hasText && import.meta.env.PUBLIC_INDEXABLE === 'true' && LEGAL_EDITION.includes('[')) {
+  throw new Error('LEGAL_EDITION в src/data/site.ts — проставьте дату редакции перед выкладкой на прод');
+}
 ---
 
 <Base title={`${title} — Скоуп`} description={description} noindex={draft}>
