@@ -526,7 +526,8 @@ import { CONTACT_METHODS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../..
     /* × — отдельной строкой сверху и закреплён при прокрутке */
     /* крестик в потоке, не залипает: при прокрутке перекрывал поля */
     .brief__bar {
-      position: relative;
+      position: static;
+      inset: auto; /* сброс десктопных top / right — иначе кнопка съезжала на заголовок */
       display: flex;
       justify-content: flex-end;
     }
@@ -550,16 +551,16 @@ import { CONTACT_METHODS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../..
       gap: var(--gap-xs);
     }
 
-    /* зазор между строками 4 — полями у слов, а не row-gap: пустой перенос .brief__break занимает
-       свою строку флекса, и row-gap под первой строкой выходил двойным */
+    /* зазор строк 4 — полем под словами, а не row-gap: пустой перенос .brief__break занимает свою строку
+       флекса, и row-gap под первой строкой выходил двойным. Поле под последней строкой гасит −4 у заголовка */
     .brief__title {
       --brief-icon: var(--space-32);
       gap: 0 var(--gap-4xs);
-      margin-block: calc(-1 * var(--space-4) / 2);
+      margin-bottom: calc(-1 * var(--space-4));
     }
 
     .brief__title > :not(.brief__break) {
-      margin-block: calc(var(--space-4) / 2);
+      margin-bottom: var(--space-4);
     }
 
     .brief__break--desktop {
