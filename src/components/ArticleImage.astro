@@ -3,13 +3,16 @@
  * Article image (Figma 606:11834). Type: Marketplaces / Passkeys (тизер); Breakpoint: Desktop 220 / Mobile 132.
  * Marketplaces — экспорт макета картинкой (@2x, desktop и mobile отдельно).
  * Passkeys — фон tint/blue и иконка Amicons key (как в макете 640:10461) 96 / 56 цвета icon/blue.
+ * UX rules — три круга с иконками щит / глаз / рукопожатие, экспорт SVG (desktop 897:15236, mobile 897:15258).
  */
 import { getImage } from 'astro:assets';
 import marketDesktop from '../assets/blog/marketplaces-desktop.png';
 import marketMobile from '../assets/blog/marketplaces-mobile.png';
+import uxDesktop from '../assets/blog/ux-rules-desktop.svg?url';
+import uxMobile from '../assets/blog/ux-rules-mobile.svg?url';
 import Icon from './Icon.astro';
 
-export type ArticleImageType = 'marketplaces' | 'passkeys';
+export type ArticleImageType = 'marketplaces' | 'ux-rules' | 'passkeys';
 
 interface Props {
   type: ArticleImageType;
@@ -35,7 +38,12 @@ const images =
 ---
 
 {
-  images ? (
+  type === 'ux-rules' ? (
+    <picture class="art-image">
+      <source media="(max-width: 767px)" srcset={uxMobile} />
+      <img src={uxDesktop} alt={alt} width="220" height="220" loading="lazy" decoding="async" />
+    </picture>
+  ) : images ? (
     <picture class="art-image">
       <source media="(max-width: 767px)" type="image/avif" srcset={images.mAvif} />
       <source media="(max-width: 767px)" type="image/webp" srcset={images.mWebp} />

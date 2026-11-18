@@ -190,9 +190,19 @@ html::-webkit-scrollbar,
  * перетекает в заголовок статьи и обратно, остальная страница мягко сменяется — старая гаснет,
  * новая проявляется с небольшим подъёмом. Браузеры без поддержки открывают страницу как обычно.
  * При reduced motion — без перехода.
+ * Имя перехода у каждой статьи своё (на главной несколько карточек: одинаковые имена отменили бы переход),
+ * общий класс article-title — для анимации.
  */
 [data-vt-title] {
-  view-transition-name: article-title;
+  view-transition-class: article-title;
+}
+
+[data-vt-title='marketplaces'] {
+  view-transition-name: article-title-marketplaces;
+}
+
+[data-vt-title='ux-levels'] {
+  view-transition-name: article-title-ux-levels;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -208,17 +218,17 @@ html::-webkit-scrollbar,
     animation: vt-fade-in 500ms cubic-bezier(0.2, 0, 0, 1) 100ms both;
   }
 
-  ::view-transition-group(article-title) {
+  ::view-transition-group(*.article-title) {
     animation-duration: 600ms;
     animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
   }
 
   /* строки заголовка переносятся по-разному — старый гаснет быстро, новый проявляется следом, без наложения */
-  ::view-transition-old(article-title) {
+  ::view-transition-old(*.article-title) {
     animation: vt-fade-out 200ms ease-out both;
   }
 
-  ::view-transition-new(article-title) {
+  ::view-transition-new(*.article-title) {
     animation: vt-appear 350ms ease-out 150ms both;
   }
 

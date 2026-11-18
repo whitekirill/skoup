@@ -1,7 +1,7 @@
 ---
-/** «Блог» (Figma: desktop 593:1279, mobile 604:9616): статья и тизер следующей (606:12160 / 634:10370) */
+/** «Блог» (Figma: desktop 593:1279, mobile 604:9616): две статьи и тизер следующей (список 593:1331 / 604:9618) */
 import ArticleCard from '../ArticleCard.astro';
-import { ARTICLE_HREF } from '../../data/site';
+import { ARTICLE_HREF, ARTICLE_UX_HREF } from '../../data/site';
 ---
 
 <section class="blog container" id="blog" aria-labelledby="blog-title">
@@ -12,6 +12,14 @@ import { ARTICLE_HREF } from '../../data/site';
       title="Покупка частями в кредит "
       rest="на Ozon, Wildberries и Яндекс Маркете: как это выглядит и что говорит закон"
       image="marketplaces"
+      vt="marketplaces"
+    />
+    <ArticleCard
+      href={ARTICLE_UX_HREF}
+      title="Три уровня проектирования UX, "
+      rest="на которых строится фундамент финтех-сервисов"
+      image="ux-rules"
+      vt="ux-levels"
     />
     <ArticleCard title="Passkeys в финтехе" rest=": вход безопаснее, интерфейс удобнее, шагов меньше" image="passkeys" />
   </div>

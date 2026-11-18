@@ -14,16 +14,18 @@ interface Props {
   image: ArticleImageType;
   imageAlt?: string;
   href?: string;
+  /** ключ перехода заголовка в статью (View Transitions): тот же data-vt-title у H1 статьи, имя — в base.css */
+  vt?: string;
 }
 
-const { title, rest, image, imageAlt, href } = Astro.props;
+const { title, rest, image, imageAlt, href, vt } = Astro.props;
 const Tag = href ? 'a' : 'article';
 ---
 
 <Tag class:list={['article-card', { 'article-card--soon': !href }]} href={href} data-astro-prefetch={href ? 'viewport' : undefined}>
   <ArticleImage type={image} alt={imageAlt} />
   <div class="article-card__content">
-    <p class="article-card__title t-body-m" data-vt-title={href ? '' : undefined}>{title}<span class="article-card__rest">{rest}</span></p>
+    <p class="article-card__title t-body-m" data-vt-title={href ? vt : undefined}>{title}<span class="article-card__rest">{rest}</span></p>
     {href ? <ButtonSmall as="span">Читать статью</ButtonSmall> : <ButtonSmall disabled as="span">Скоро</ButtonSmall>}
   </div>
 </Tag>
