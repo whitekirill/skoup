@@ -8,7 +8,7 @@ CHROME=${CHROME_PATH:-/opt/pw-browsers/chromium-1194/chrome-linux/chrome}
 npx -y serve@14 dist -l 4321 >/dev/null 2>&1 &
 SERVER=$!
 sleep 4
-for page in "home|/" "article|/blog/marketplaces-installments/" "brief|/#brief"; do
+for page in "home|/" "article|/blog/marketplaces-installments/" "article-ux|/blog/three-levels-of-ux/" "brief|/#brief"; do
   name=${page%%|*}; url=${page#*|}
   for preset in mobile desktop; do
     extra=""; [ "$preset" = desktop ] && extra="--preset=desktop"
