@@ -257,13 +257,20 @@ const LABEL = { yes: 'есть', no: 'нет', unknown: 'не дошли или 
       box-shadow: inset -1px 0 0 var(--color-element-border-2);
     }
 
-    /* ячейка над логотипами: фон продлён на 1 px вверх и вниз — на iOS Safari при листании полоска
-       логотипов толщиной в полпикселя проглядывала над закреплённой колонкой */
-    .summary__table thead .summary__label {
-      box-shadow:
-        inset -1px 0 0 var(--color-element-border-2),
-        0 -1px 0 var(--color-element-border),
-        0 1px 0 var(--color-element-border);
+    /* логотипы на 2 px внутри строки: у верхней кромки закреплённой колонки iOS Safari оставляет щель
+       в полпикселя, и край логотипа проглядывал над ней при листании. Высота таблицы та же:
+       строка +4, сверху −2 полем таблицы, снизу −2 у первой группы */
+    .summary__table thead th,
+    .summary__table thead td {
+      padding-block: 2px;
+    }
+
+    .summary__table {
+      margin-top: -2px;
+    }
+
+    .summary__table .summary__group--first th {
+      padding-top: calc(var(--space-16) - 2px);
     }
 
     .summary__keys {
