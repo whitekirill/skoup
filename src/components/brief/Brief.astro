@@ -5,7 +5,6 @@
  * Desktop — две колонки (заголовок секции 440 слева, поля 782 справа), Mobile — одна. Футера нет.
  */
 import Button from '../Button.astro';
-import RoundButton from '../RoundButton.astro';
 import Icon from '../Icon.astro';
 import Field from './Field.astro';
 import Chip from '../Chip.astro';
@@ -19,7 +18,7 @@ import { CONTACT_METHODS, PRESENTATION_URL, SERVICES, TELEGRAM_URL } from '../..
 <dialog class="brief" id="brief" aria-labelledby="brief-title" aria-modal="true" data-brief>
   <div class="brief__main">
     <div class="brief__bar">
-      <RoundButton variant="filled" icon="x-line" label="Закрыть бриф" class="brief__close" data-brief-close />
+      <Button variant="secondary" iconLeft="x-line" label="Закрыть бриф" class="brief__close" data-brief-close />
     </div>
 
     <!-- Форма -->
