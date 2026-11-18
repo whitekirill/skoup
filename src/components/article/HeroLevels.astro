@@ -1,0 +1,112 @@
+---
+/**
+ * Шапка статьи «Три уровня UX» — «Строим с фундамента» (Figma: статичный оригинал 886:13090, анимация 910:13438).
+ * Три столбца по трети ширины, выровнены по низу: Регуляторика 387, Прозрачность 291, Доверие 187.
+ * Фон столбца — градиент цвета уровня сверху в прозрачный книзу (отдельный слой: растёт через clip-path,
+ * подписи и иконки не сплющиваются). Подпись — Geist Mono 16/20 капсом, иконка Amicons 48 с градиентом.
+ * Размеры — в единицах макета 688 (--u = 100cqw / 688). Без JS и при reduced motion — финал (столбцы выросли);
+ * анимация — scripts/hero-motion.ts.
+ */
+import shield from '../../assets/article/hero/shield.svg?raw';
+import eye from '../../assets/article/hero/eye.svg?raw';
+import handshake from '../../assets/article/hero/handshake.svg?raw';
+
+interface Props {
+  label: string;
+}
+const { label } = Astro.props;
+
+const LEVELS = [
+  { title: 'Регуляторика', height: 387, color: '#d2ff77', ink: '#405d05', icon: shield },
+  { title: 'Прозрачность', height: 291, color: '#77e1ff', ink: '#05515d', icon: eye },
+  { title: 'Доверие', height: 187, color: '#77ff87', ink: '#055d18', icon: handshake },
+];
+---
+
+<div class="hero-levels art-hero__media" role="img" aria-label={label} data-hero-motion="levels">
+  <div class="hero-levels__stage" aria-hidden="true">
+    {
+      LEVELS.map((level) => (
+        <div class="level" style={`--h: ${level.height}; --c: ${level.color}; --ink: ${level.ink};`} data-level>
+          <span class="level__bg" data-level-bg />
+          <span class="level__title" data-level-title>{level.title}</span>
+          <span class="level__icon" data-level-icon set:html={level.icon} />
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .hero-levels {
+    position: relative;
+    container-type: inline-size;
+    aspect-ratio: 688 / 387;
+    overflow: hidden;
+    border-radius: var(--radius-24);
+    background: var(--color-surface-primary);
+  }
+
+  .hero-levels__stage {
+    --u: calc(100cqw / 688);
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .level {
+    position: relative;
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    justify-content: space-between;
+    height: calc(var(--h) * var(--u));
+    padding: calc(24 * var(--u));
+  }
+
+  .level__bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, var(--c), transparent); /* градиенты интерполируются с учётом прозрачности — без серого */
+  }
+
+  .level__title {
+    position: relative;
+    color: var(--ink);
+    font-family: var(--typography-family-mono);
+    font-size: calc(16 * var(--u));
+    font-weight: 500;
+    line-height: calc(20 * var(--u));
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .level__icon {
+    position: relative;
+    display: block;
+    width: calc(48 * var(--u));
+    height: calc(48 * var(--u));
+  }
+
+  .level__icon :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (max-width: 767px) {
+    .hero-levels {
+      border-radius: var(--radius-16);
+    }
+  }
+</style>
+
+<!-- Переход с карточки (View Transitions): запоминаем его, чтобы анимация стартовала после него -->
+<script is:inline>
+  addEventListener('pagereveal', (e) => { if (e.viewTransition) window.__heroVT = e.viewTransition; }, { once: true });
+</script>
+
+<script>
+  import '../../scripts/hero-motion';
+</script>

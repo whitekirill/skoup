@@ -67,13 +67,6 @@
   color: var(--color-text-secondary);
 }
 
-.article .art-hero__image img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: var(--radius-24);
-}
-
 /* Текст: блоки через gap-xs, абзацы одного текста — paragraph-spacing */
 .article .stack {
   display: flex;
@@ -154,9 +147,5 @@
 @media (max-width: 767px) {
   .article .br-desktop {
     display: none;
-  }
-
-  .article .art-hero__image img {
-    border-radius: var(--radius-16);
   }
 }

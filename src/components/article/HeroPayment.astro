@@ -1,0 +1,243 @@
+---
+/**
+ * Шапка статьи про маркетплейсы — «Платёж проходит» (Figma: статичный оригинал 828:25713, анимация 910:13308).
+ * Ряд из 8 карточек-«пилюль» 125 × 221 через 24: две «Оплачен», зелёная «Внести» (поднята на 32), дальше даты
+ * с пунктирной обводкой снаружи. Размеры — в единицах макета 688 (--u = 100cqw / 688): картинка масштабируется
+ * целиком, как растр. Без JS — исходный макет; анимация и финал для reduced motion — scripts/hero-motion.ts.
+ * Слои «после» (вторая подпись и иконка) лежат под первыми с opacity 0.
+ */
+interface Props {
+  /** описание картинки для скринридера */
+  label: string;
+}
+const { label } = Astro.props;
+
+const DATES = ['1 нояб', '1 дек', '1 янв', '1 фев', '1 мар'];
+---
+
+<div class="hero-pay art-hero__media" role="img" aria-label={label} data-hero-motion="payment">
+  <div class="hero-pay__stage" aria-hidden="true">
+    <div class="hero-pay__row" data-row>
+      {[0, 1].map(() => (
+        <div class="pill pill--paid">
+          <span class="pill__body">
+            <span class="pill__text">
+              <span>750 ₽</span>
+              <span class="pill__muted">Оплачен</span>
+            </span>
+            <span class="pill__icon"><svg viewBox="0 0 55.67 55.67" class="ico-check"><circle cx="27.835" cy="27.835" r="22.618" fill="none" stroke="currentColor" stroke-width="3.48" /><path transform="translate(11.2 11.47)" fill="currentColor" d="M26.8317 7.70667C27.0262 7.49789 27.2608 7.33043 27.5215 7.21429C27.7821 7.09814 28.0635 7.03569 28.3489 7.03066C28.6342 7.02562 28.9176 7.07811 29.1822 7.18499C29.4468 7.29186 29.6872 7.45094 29.8889 7.65272C30.0907 7.85451 30.2498 8.09487 30.3567 8.35947C30.4636 8.62407 30.516 8.90749 30.511 9.19281C30.506 9.47814 30.4435 9.75953 30.3274 10.0202C30.2112 10.2809 30.0438 10.5155 29.835 10.71L14.2517 26.2933C13.8532 26.6913 13.3131 26.9148 12.75 26.9148C12.1869 26.9148 11.6468 26.6913 11.2483 26.2933L4.165 19.21L4.01767 19.0485C3.68632 18.6405 3.51796 18.1241 3.54511 17.5992C3.57226 17.0743 3.793 16.578 4.16467 16.2063C4.53635 15.8347 5.03258 15.6139 5.55751 15.5868C6.08243 15.5596 6.5988 15.728 7.00683 16.0593L7.16975 16.2067L12.75 21.7869L26.8317 7.70667Z" /></svg></span>
+          </span>
+        </div>
+      ))}
+
+      <!-- текущий платёж: «Внести» → «Оплачен», опускается в ряд, белеет -->
+      <div class="pill pill--now" data-now>
+        <span class="pill__body" data-now-body>
+          <span class="pill__text">
+            <span>750 ₽</span>
+            <span class="swap">
+              <span data-now-a>Внести</span>
+              <span class="pill__muted swap__b" data-now-b>Оплачен</span>
+            </span>
+          </span>
+          <span class="pill__icon swap">
+            <svg viewBox="0 0 55.67 55.67" class="ico-plus" data-now-a><path fill="currentColor" d="M27.835 6.95875C28.4502 6.95875 29.0402 7.20313 29.4752 7.63814C29.9102 8.07315 30.1546 8.66314 30.1546 9.27833V25.5154H46.3917C47.0069 25.5154 47.5969 25.7598 48.0319 26.1948C48.4669 26.6298 48.7112 27.2198 48.7112 27.835C48.7112 28.4502 48.4669 29.0402 48.0319 29.4752C47.5969 29.9102 47.0069 30.1546 46.3917 30.1546H30.1546V46.3917C30.1546 47.0069 29.9102 47.5969 29.4752 48.0319C29.0402 48.4669 28.4502 48.7112 27.835 48.7112C27.2198 48.7112 26.6298 48.4669 26.1948 48.0319C25.7598 47.5969 25.5154 47.0069 25.5154 46.3917V30.1546H9.27833C8.66314 30.1546 8.07315 29.9102 7.63814 29.4752C7.20313 29.0402 6.95875 28.4502 6.95875 27.835C6.95875 27.2198 7.20313 26.6298 7.63814 26.1948C8.07315 25.7598 8.66314 25.5154 9.27833 25.5154H25.5154V9.27833C25.5154 8.66314 25.7598 8.07315 26.1948 7.63814C26.6298 7.20313 27.2198 6.95875 27.835 6.95875Z" /></svg>
+            <svg viewBox="0 0 55.67 55.67" class="ico-check swap__b" data-now-b data-now-icon><circle cx="27.835" cy="27.835" r="22.618" fill="none" stroke="currentColor" stroke-width="3.48" /><path transform="translate(11.2 11.47)" fill="currentColor" d="M26.8317 7.70667C27.0262 7.49789 27.2608 7.33043 27.5215 7.21429C27.7821 7.09814 28.0635 7.03569 28.3489 7.03066C28.6342 7.02562 28.9176 7.07811 29.1822 7.18499C29.4468 7.29186 29.6872 7.45094 29.8889 7.65272C30.0907 7.85451 30.2498 8.09487 30.3567 8.35947C30.4636 8.62407 30.516 8.90749 30.511 9.19281C30.506 9.47814 30.4435 9.75953 30.3274 10.0202C30.2112 10.2809 30.0438 10.5155 29.835 10.71L14.2517 26.2933C13.8532 26.6913 13.3131 26.9148 12.75 26.9148C12.1869 26.9148 11.6468 26.6913 11.2483 26.2933L4.165 19.21L4.01767 19.0485C3.68632 18.6405 3.51796 18.1241 3.54511 17.5992C3.57226 17.0743 3.793 16.578 4.16467 16.2063C4.53635 15.8347 5.03258 15.6139 5.55751 15.5868C6.08243 15.5596 6.5988 15.728 7.00683 16.0593L7.16975 16.2067L12.75 21.7869L26.8317 7.70667Z" /></svg>
+          </span>
+        </span>
+      </div>
+
+      {DATES.map((date, i) => (
+        <div class:list={['pill', 'pill--next']} data-next={i === 0 ? '' : undefined}>
+          <svg class="pill__dash" viewBox="0 0 129.27 225" preserveAspectRatio="none" data-next-dash={i === 0 ? '' : undefined}><rect x="1" y="1" width="127.27" height="223" rx="63.63" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="6.96 6.96" /></svg>
+          <span class="pill__body" data-next-body={i === 0 ? '' : undefined}>
+            <span class="pill__text">
+              <span class="pill__amount" data-next-amount={i === 0 ? '' : undefined}>750 ₽</span>
+              <span class="swap">
+                <span class="pill__muted" data-next-a={i === 0 ? '' : undefined}>{date}</span>
+                {i === 0 && <span class="swap__b" data-next-b>Внести</span>}
+              </span>
+            </span>
+            <span class="pill__icon swap">
+              <svg viewBox="0 0 55.67 55.67" class="ico-ring" data-next-a={i === 0 ? '' : undefined}><circle cx="27.835" cy="27.835" r="22.618" fill="none" stroke="currentColor" stroke-width="3.48" /></svg>
+              {i === 0 && <svg viewBox="0 0 55.67 55.67" class="ico-plus swap__b" data-next-b data-next-icon><path fill="currentColor" d="M27.835 6.95875C28.4502 6.95875 29.0402 7.20313 29.4752 7.63814C29.9102 8.07315 30.1546 8.66314 30.1546 9.27833V25.5154H46.3917C47.0069 25.5154 47.5969 25.7598 48.0319 26.1948C48.4669 26.6298 48.7112 27.2198 48.7112 27.835C48.7112 28.4502 48.4669 29.0402 48.0319 29.4752C47.5969 29.9102 47.0069 30.1546 46.3917 30.1546H30.1546V46.3917C30.1546 47.0069 29.9102 47.5969 29.4752 48.0319C29.0402 48.4669 28.4502 48.7112 27.835 48.7112C27.2198 48.7112 26.6298 48.4669 26.1948 48.0319C25.7598 47.5969 25.5154 47.0069 25.5154 46.3917V30.1546H9.27833C8.66314 30.1546 8.07315 29.9102 7.63814 29.4752C7.20313 29.0402 6.95875 28.4502 6.95875 27.835C6.95875 27.2198 7.20313 26.6298 7.63814 26.1948C8.07315 25.7598 8.66314 25.5154 9.27833 25.5154H25.5154V9.27833C25.5154 8.66314 25.7598 8.07315 26.1948 7.63814C26.6298 7.20313 27.2198 6.95875 27.835 6.95875Z" /></svg>}
+            </span>
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .hero-pay {
+    --accent: #d2ff77; /* лайм шапки; токена нет — цвет иллюстрации */
+    position: relative;
+    container-type: inline-size;
+    aspect-ratio: 688 / 387;
+    overflow: hidden;
+    border-radius: var(--radius-24);
+    background: var(--color-surface-secondary);
+  }
+
+  .hero-pay__stage {
+    --u: calc(100cqw / 688);
+    position: absolute;
+    inset: 0;
+  }
+
+  /* ряд: от левого края 44, по центру по высоте (221 из 387) */
+  .hero-pay__row {
+    position: absolute;
+    top: calc(83 * var(--u));
+    left: calc(44 * var(--u));
+    display: flex;
+    gap: calc(24 * var(--u));
+    align-items: flex-end;
+    height: calc(221 * var(--u));
+  }
+
+  .pill {
+    position: relative;
+    flex-shrink: 0;
+    width: calc(125.27 * var(--u));
+    height: calc(220.58 * var(--u));
+  }
+
+  .pill__body {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(31.32 * var(--u));
+    padding-top: calc(34.8 * var(--u));
+    border-radius: calc(76.55 * var(--u));
+    color: var(--color-text-primary);
+    font-family: var(--typography-family-sans);
+    font-size: calc(24.36 * var(--u));
+    font-weight: 500;
+    line-height: calc(31.32 * var(--u));
+    letter-spacing: calc(-0.696 * var(--u));
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .pill__text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pill__muted {
+    color: var(--color-text-secondary-inversion);
+  }
+
+  .pill__icon svg {
+    display: block;
+    width: calc(55.67 * var(--u));
+    height: calc(55.67 * var(--u));
+  }
+
+  /* две подписи / иконки в одной ячейке: «после» — под первой, скрыта */
+  .swap {
+    display: grid;
+    justify-items: center;
+  }
+
+  .swap > * {
+    grid-area: 1 / 1;
+  }
+
+  .swap__b {
+    opacity: 0;
+  }
+
+  .pill--paid .pill__body {
+    background: var(--color-surface-primary);
+  }
+
+  .ico-check,
+  .ico-ring {
+    color: var(--color-element-border-2);
+  }
+
+  .ico-plus {
+    color: var(--gray-900);
+  }
+
+  /* текущий платёж поднят на 32 */
+  .pill--now {
+    transform: translateY(calc(-32 * var(--u)));
+  }
+
+  .pill--now .pill__body {
+    background: var(--accent);
+  }
+
+  .pill--next .pill__amount,
+  .pill--next .pill__muted {
+    color: var(--color-text-secondary-inversion);
+  }
+
+  /* пунктир 2 px снаружи карточки (штрих 6,96 / 6,96 — как в макете) */
+  .pill__dash {
+    position: absolute;
+    inset: calc(-2 * var(--u));
+    width: calc(100% + 4 * var(--u));
+    height: calc(100% + 4 * var(--u));
+    color: var(--color-element-border-2);
+    overflow: visible;
+  }
+
+  /* финальный кадр без анимации (reduced motion) — те же значения, что в конце анимации */
+  .hero-pay.is-final [data-row] {
+    transform: translateX(calc(-149 * var(--u)));
+  }
+
+  .hero-pay.is-final [data-now] {
+    transform: none;
+  }
+
+  .hero-pay.is-final [data-now-body] {
+    background: var(--color-surface-primary);
+  }
+
+  .hero-pay.is-final [data-now-a],
+  .hero-pay.is-final [data-next-a],
+  .hero-pay.is-final [data-next-dash] {
+    opacity: 0;
+  }
+
+  .hero-pay.is-final [data-now-b],
+  .hero-pay.is-final [data-next-b] {
+    opacity: 1;
+  }
+
+  .hero-pay.is-final [data-next] {
+    transform: translateY(calc(-32 * var(--u)));
+  }
+
+  .hero-pay.is-final [data-next-body] {
+    background: var(--accent);
+  }
+
+  .hero-pay.is-final [data-next-amount] {
+    color: var(--color-text-primary);
+  }
+
+  @media (max-width: 767px) {
+    .hero-pay {
+      border-radius: var(--radius-16);
+    }
+  }
+</style>
+
+<!-- Переход с карточки (View Transitions): запоминаем его, чтобы анимация стартовала после него -->
+<script is:inline>
+  addEventListener('pagereveal', (e) => { if (e.viewTransition) window.__heroVT = e.viewTransition; }, { once: true });
+</script>
+
+<script>
+  import '../../scripts/hero-motion';
+</script>
