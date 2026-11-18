@@ -2,7 +2,7 @@
 /**
  * Article image (Figma 606:11834). Type: Marketplaces / Passkeys (тизер); Breakpoint: Desktop 220 / Mobile 132.
  * Marketplaces — экспорт макета картинкой (@2x, desktop и mobile отдельно).
- * Passkeys — фон tint/blue и иконка Amicons key (как в макете 640:10461) 96 / 56 цвета icon/blue.
+ * Passkeys — фон tint/blue и иконка Amicons key, стиль Line (на desktop и mobile одинаково), 96 / 56 цвета icon/blue.
  * UX rules — три круга с иконками щит / глаз / рукопожатие, экспорт SVG (desktop 897:15236, mobile 897:15258).
  */
 import { getImage } from 'astro:assets';
@@ -53,7 +53,7 @@ const images =
     </picture>
   ) : (
     <div class="art-image art-image--passkeys" role={alt ? 'img' : undefined} aria-label={alt || undefined}>
-      <Icon name="key" size={96} class="art-image__icon icon-blue" />
+      <Icon name="key-line" size={96} class="art-image__icon icon-blue" />
     </div>
   )
 }

@@ -43,7 +43,7 @@ const LEVELS = [
     container-type: inline-size;
     aspect-ratio: 688 / 387;
     overflow: hidden;
-    border-radius: var(--radius-24);
+    /* без скругления (по просьбе): иначе скругляется только угол высокого столбца */
     background: var(--color-surface-primary);
   }
 
@@ -93,12 +93,6 @@ const LEVELS = [
     display: block;
     width: 100%;
     height: 100%;
-  }
-
-  @media (max-width: 767px) {
-    .hero-levels {
-      border-radius: var(--radius-16);
-    }
   }
 </style>
 

@@ -31,10 +31,12 @@ const hero = img('00-levels');
 // растровая версия шапки — только для поисковиков (JSON-LD image); на странице — HTML с анимацией
 const heroFallback = await getImage({ src: hero, width: 688, format: 'webp' });
 
+// номер пункта = индекс: 0 — введение, дальше совпадает с номерами разделов (.art-step); подписи короткие
 const NAV = [
-  { id: 'regulatory', label: 'Регуляторный уровень' },
-  { id: 'operations', label: 'Операционная прозрачность' },
-  { id: 'trust', label: 'Уровень доверия пользователей' },
+  { id: 'intro', label: 'Введение' },
+  { id: 'regulatory', label: 'Регуляторика' },
+  { id: 'operations', label: 'Прозрачность' },
+  { id: 'trust', label: 'Доверие' },
 ];
 ---
 
