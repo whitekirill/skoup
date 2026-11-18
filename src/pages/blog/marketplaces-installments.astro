@@ -25,6 +25,7 @@ const files = import.meta.glob<{ default: ImageMetadata }>('../../assets/article
 const img = (name: string) => files[`../../assets/article/img/${name}.png`].default;
 import type { ImageMetadata } from 'astro';
 import { getImage } from 'astro:assets';
+import '../../styles/article.css';
 
 const CRUMB = 'UX рассрочки на маркетплейсах';
 const hero = img('00-hero');
@@ -378,143 +379,6 @@ const NAV = [
 </Base>
 
 <style>
-  /* Секции: поля layout/article-padding, колонка 688, иллюстрации 1024 */
-  .art-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--gap-l);
-    padding: var(--layout-section-padding) var(--layout-page-padding);
-  }
-
-  /* колонка текста: поля layout/article-padding (688 на 1440) */
-  .art-section > :global(*) {
-    width: calc(100% - 2 * (var(--layout-article-padding) - var(--layout-page-padding)));
-    max-width: var(--layout-column-width);
-  }
-
-  /* иллюстрации и таблица шире колонки: 1024 = 688 + 2 × 168 */
-  .art-section > .art-wide {
-    width: 100%;
-    max-width: calc(var(--layout-column-width) + 2 * (var(--space-160) + var(--space-8)));
-  }
-
-  @media (min-width: 768px) {
-    .art-section > :global(.art-figure) {
-      width: 100%;
-      max-width: calc(var(--layout-column-width) + 2 * (var(--space-160) + var(--space-8)));
-    }
-  }
-
-  /* на мобильном иллюстрация выходит на всю ширину экрана (поля — внутри её прокрутки) */
-  @media (max-width: 767px) {
-    .art-section > :global(.art-figure) {
-      width: calc(100% + 2 * var(--layout-page-padding));
-      max-width: none;
-    }
-  }
-
-  .art-section--primary {
-    background: var(--color-surface-primary);
-  }
-
-  .art-section--tertiary {
-    background: var(--color-surface-tertiary);
-  }
-
-  /* Первый экран */
-  .art-hero {
-    gap: var(--space-44);
-    padding-top: var(--space-32);
-    padding-bottom: var(--space-44);
-  }
-
-  .art-hero__head {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-44);
-  }
-
-  .muted {
-    color: var(--color-text-secondary);
-  }
-
-  .art-hero__image img {
-    display: block;
-    width: 100%;
-    height: auto;
-    border-radius: var(--radius-24);
-  }
-
-  /* Текст: блоки через gap-xs, абзацы одного текста — paragraph-spacing */
-  .stack {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-xs);
-  }
-
-  .prose {
-    display: flex;
-    flex-direction: column;
-    gap: var(--typography-body-m-paragraph-spacing);
-  }
-
-  .article b {
-    font-weight: var(--typography-body-m-weight-bold);
-  }
-
-  /* Списки в тексте (Figma: list-disc / list-decimal, отступ — 1,5 кегля, пункты без промежутков) */
-  .prose :is(ul, ol) {
-    padding-inline-start: 1.5em;
-  }
-
-  .prose ul {
-    list-style: disc;
-  }
-
-  .prose ol {
-    list-style: decimal;
-  }
-
-  /*
-   * Заголовок этапа (Figma 808:12267): номер — в кружке 32 px (element-border, цифра Body/Medium
-   * text/secondary-inversion). Desktop — слева от заголовка, по центру первой строки, 22 px до текста
-   * (кружок в боксе 44 + gap 16), заголовок на одной линии с текстом. Mobile — над заголовком, gap-xs.
-   */
-  .article {
-    counter-reset: art-step;
-  }
-
-  .art-step {
-    counter-increment: art-step;
-    position: relative;
-  }
-
-  .art-step::before {
-    content: counter(art-step);
-    position: absolute;
-    top: calc((var(--typography-h3-line-height) - var(--space-32)) / 2);
-    inset-inline-end: calc(100% + 22px); /* бокс 44 с кружком 32 по центру + gap 16 */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--space-32);
-    height: var(--space-32);
-    border-radius: var(--radius-full);
-    background: var(--color-element-border);
-    color: var(--color-text-secondary-inversion);
-    font-size: var(--typography-body-m-size);
-    line-height: var(--typography-body-m-line-height);
-    letter-spacing: var(--typography-body-m-letter-spacing);
-  }
-
-  @media (max-width: 767px) {
-    .art-step::before {
-      position: static;
-      margin-bottom: var(--gap-xs);
-    }
-  }
-
   /* Продукты площадок (вступление) */
   .products {
     display: flex;
@@ -561,14 +425,7 @@ const NAV = [
     color: var(--color-text-secondary);
   }
 
-  /* CTA и источники */
-  .art-cta {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--gap-xs);
-  }
-
+  /* Источники */
   .art-sources {
     color: var(--color-text-secondary-inversion);
   }
@@ -577,14 +434,6 @@ const NAV = [
     /* таблица «Итог» на всю ширину — сразу за ней следующий раздел, без белого поля */
     #compare {
       padding-bottom: 0;
-    }
-
-    .br-desktop {
-      display: none;
-    }
-
-    .art-hero__image img {
-      border-radius: var(--radius-16);
     }
 
     .products__list {

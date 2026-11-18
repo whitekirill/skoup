@@ -1,0 +1,162 @@
+/*
+ * Общий шаблон статей блога (/blog/*): секции, колонка 688, иллюстрации 1024, первый экран,
+ * текст (.stack / .prose), номера разделов .art-step, финальный оффер .art-cta.
+ * Подключается на страницах статей; у страницы — <main class="article">.
+ * Селекторы начинаются с .article — та же специфичность, что у прежних scoped-стилей страницы.
+ */
+
+/* Секции: поля layout/article-padding, колонка 688, иллюстрации 1024 */
+.article .art-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-l);
+  padding: var(--layout-section-padding) var(--layout-page-padding);
+}
+
+/* колонка текста: поля layout/article-padding (688 на 1440) */
+.article .art-section > * {
+  width: calc(100% - 2 * (var(--layout-article-padding) - var(--layout-page-padding)));
+  max-width: var(--layout-column-width);
+}
+
+/* иллюстрации и таблица шире колонки: 1024 = 688 + 2 × 168 */
+.article .art-section > .art-wide {
+  width: 100%;
+  max-width: calc(var(--layout-column-width) + 2 * (var(--space-160) + var(--space-8)));
+}
+
+@media (min-width: 768px) {
+  .article .art-section > .art-figure {
+    width: 100%;
+    max-width: calc(var(--layout-column-width) + 2 * (var(--space-160) + var(--space-8)));
+  }
+}
+
+/* на мобильном иллюстрация со скроллом выходит на всю ширину экрана (поля — внутри её прокрутки);
+   картинка с подписью (art-figure--fit) остаётся в колонке */
+@media (max-width: 767px) {
+  .article .art-section > .art-figure:not(.art-figure--fit) {
+    width: calc(100% + 2 * var(--layout-page-padding));
+    max-width: none;
+  }
+}
+
+.article .art-section--primary {
+  background: var(--color-surface-primary);
+}
+
+.article .art-section--tertiary {
+  background: var(--color-surface-tertiary);
+}
+
+/* Первый экран */
+.article .art-hero {
+  gap: var(--space-44);
+  padding-top: var(--space-32);
+  padding-bottom: var(--space-44);
+}
+
+.article .art-hero__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-44);
+}
+
+.article .muted {
+  color: var(--color-text-secondary);
+}
+
+.article .art-hero__image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-24);
+}
+
+/* Текст: блоки через gap-xs, абзацы одного текста — paragraph-spacing */
+.article .stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-xs);
+}
+
+.article .prose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--typography-body-m-paragraph-spacing);
+}
+
+.article b {
+  font-weight: var(--typography-body-m-weight-bold);
+}
+
+/* Списки в тексте (Figma: list-disc / list-decimal, отступ — 1,5 кегля, пункты без промежутков) */
+.article .prose :is(ul, ol) {
+  padding-inline-start: 1.5em;
+}
+
+.article .prose ul {
+  list-style: disc;
+}
+
+.article .prose ol {
+  list-style: decimal;
+}
+
+/*
+ * Заголовок раздела (Figma 808:12267): номер — в кружке 32 px (element-border, цифра Body/Medium
+ * text/secondary-inversion). Desktop — слева от заголовка, по центру первой строки, 22 px до текста
+ * (кружок в боксе 44 + gap 16), заголовок на одной линии с текстом. Mobile — над заголовком, gap-xs.
+ */
+.article {
+  counter-reset: art-step;
+}
+
+.article .art-step {
+  counter-increment: art-step;
+  position: relative;
+}
+
+.article .art-step::before {
+  content: counter(art-step);
+  position: absolute;
+  top: calc((var(--typography-h3-line-height) - var(--space-32)) / 2);
+  inset-inline-end: calc(100% + 22px); /* бокс 44 с кружком 32 по центру + gap 16 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-32);
+  height: var(--space-32);
+  border-radius: var(--radius-full);
+  background: var(--color-element-border);
+  color: var(--color-text-secondary-inversion);
+  font-size: var(--typography-body-m-size);
+  line-height: var(--typography-body-m-line-height);
+  letter-spacing: var(--typography-body-m-letter-spacing);
+}
+
+@media (max-width: 767px) {
+  .article .art-step::before {
+    position: static;
+    margin-bottom: var(--gap-xs);
+  }
+}
+
+/* Финальный оффер статьи: иконка, текст Body/Large, кнопка «Заполнить бриф» */
+.article .art-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--gap-xs);
+}
+
+@media (max-width: 767px) {
+  .article .br-desktop {
+    display: none;
+  }
+
+  .article .art-hero__image img {
+    border-radius: var(--radius-16);
+  }
+}
