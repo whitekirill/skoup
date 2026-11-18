@@ -257,6 +257,15 @@ const LABEL = { yes: 'есть', no: 'нет', unknown: 'не дошли или 
       box-shadow: inset -1px 0 0 var(--color-element-border-2);
     }
 
+    /* ячейка над логотипами: фон продлён на 1 px вверх и вниз — на iOS Safari при листании полоска
+       логотипов толщиной в полпикселя проглядывала над закреплённой колонкой */
+    .summary__table thead .summary__label {
+      box-shadow:
+        inset -1px 0 0 var(--color-element-border-2),
+        0 -1px 0 var(--color-element-border),
+        0 1px 0 var(--color-element-border);
+    }
+
     .summary__keys {
       flex-direction: column;
       gap: var(--space-8);

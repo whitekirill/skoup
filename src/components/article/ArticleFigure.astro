@@ -106,6 +106,13 @@ const fitSizes = `(max-width: 767px) calc(100vw - 2 * 20px), ${Math.round(w)}px`
       flex: 0 0 var(--layout-page-padding);
     }
 
+    /* picture не сжимается до ширины экрана — иначе картинка вылезает из него,
+       и правое поле (::after) оказывается внутри картинки, а не после неё */
+    .art-figure__scroll picture {
+      flex-shrink: 0;
+      max-width: none;
+    }
+
     .art-figure img {
       flex-shrink: 0;
       max-width: none;
