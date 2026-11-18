@@ -1,0 +1,38 @@
+---
+/**
+ * Цитата-кейс (Figma «Цитата», например 864:20267, 871:11991): фон tint/green, radius/24, поля 24.
+ * Слева полоса 4 px element/success на всю высоту (radius/full), до текста — size/note/gap (20 / 16).
+ * Внутри — абзацы Body/Medium через gap/xs; название компании в начале абзаца — <b> в той же строке.
+ * Несколько кейсов подряд — несколько <p> в одной цитате.
+ */
+---
+
+<div class="callout">
+  <div class="callout__text t-body-m"><slot /></div>
+</div>
+
+<style>
+  .callout {
+    display: flex;
+    gap: var(--size-note-gap);
+    padding: var(--space-24);
+    border-radius: var(--radius-24);
+    background: var(--color-tint-green);
+  }
+
+  .callout::before {
+    content: '';
+    flex-shrink: 0;
+    width: 4px;
+    border-radius: var(--radius-full);
+    background: var(--color-element-success);
+  }
+
+  .callout__text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    min-width: 0;
+  }
+</style>

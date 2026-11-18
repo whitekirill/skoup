@@ -3,6 +3,10 @@
  * Иллюстрация статьи «Image · …» (Figma 598:7137): экспорт кадра макета в 2x → AVIF / WebP + PNG.
  * Desktop — 1024 по центру (шире колонки текста), скругление radius/44.
  * Mobile — в масштабе 0.72 (виден первый телефон макета и половина второго — понятно, что листается), листается вбок на всю ширину экрана (от поля текста до краёв, без обрезки у поля).
+ *
+ * fit — картинка с подписью (Figma «Image · …» статьи «Три уровня UX», 868:12731): desktop — 936 по центру
+ * блока 1024, скругление radius/24 в самой картинке, подпись Body/Small text/secondary по центру, отступ 32;
+ * mobile — без скролла, на всю ширину колонки, radius/16, отступ gap/s (24). alt = подпись.
  */
 import { getImage } from 'astro:assets';
 import { srcset } from '../../utils/images';
@@ -11,9 +15,11 @@ import type { ImageMetadata } from 'astro';
 interface Props {
   src: ImageMetadata;
   alt: string;
+  /** картинка с подписью в колонке, без горизонтального скролла на мобильном */
+  fit?: boolean;
 }
 
-const { src, alt } = Astro.props;
+const { src, alt, fit = false } = Astro.props;
 const w = src.width / 2; // ширина в макете
 // на мобильном (393) картинка в масштабе 0.72: от поля 16 px до края экрана — первый телефон и половина второго
 const MOBILE_SCALE = 0.72; // = --scale в @media ниже
@@ -22,7 +28,24 @@ const build = (format: 'avif' | 'webp' | 'png') => srcset(src, widths, format);
 const [avif, webp, png] = await Promise.all([build('avif'), build('webp'), build('png')]);
 const fallback = await getImage({ src, width: Math.round(w), format: 'png' });
 const sizes = `(max-width: 767px) ${widths[0]}px, ${Math.round(w)}px`;
+
+// fit: на мобильном — ширина колонки (экран минус поля 2 × 20)
+const fitWidths = [353, 706, Math.round(w), Math.round(w * 2)];
+const fitBuild = (format: 'avif' | 'webp' | 'png') => srcset(src, fitWidths, format);
+const [fitAvif, fitWebp, fitPng] = fit ? await Promise.all([fitBuild('avif'), fitBuild('webp'), fitBuild('png')]) : [];
+const fitSizes = `(max-width: 767px) calc(100vw - 2 * 20px), ${Math.round(w)}px`;
 ---
+
+{fit ? (
+<figure class="art-figure art-figure--fit" style={`--w: ${w};`}>
+  <picture>
+    <source type="image/avif" srcset={fitAvif} sizes={fitSizes} />
+    <source type="image/webp" srcset={fitWebp} sizes={fitSizes} />
+    <img src={fallback.src} srcset={fitPng} sizes={fitSizes} alt={alt} width={Math.round(w)} height={Math.round(src.height / 2)} loading="lazy" decoding="async" />
+  </picture>
+  <figcaption class="t-body-s">{alt}</figcaption>
+</figure>
+) : (
 
 <figure class="art-figure" style={`--w: ${w}; --h: ${src.height / 2};`}>
   <div class="art-figure__scroll" tabindex="0" role="group" aria-label={alt}>
@@ -33,6 +56,7 @@ const sizes = `(max-width: 767px) ${widths[0]}px, ${Math.round(w)}px`;
     </picture>
   </div>
 </figure>
+)}
 
 <style>
   .art-figure {
@@ -85,6 +109,45 @@ const sizes = `(max-width: 767px) ${widths[0]}px, ${Math.round(w)}px`;
     .art-figure img {
       flex-shrink: 0;
       max-width: none;
+    }
+  }
+
+  /* Картинка с подписью */
+  .art-figure--fit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-s);
+  }
+
+  .art-figure--fit picture {
+    display: block;
+    width: 100%;
+    max-width: calc(var(--w) * 1px);
+  }
+
+  .art-figure--fit figcaption {
+    color: var(--color-text-secondary);
+    text-align: center;
+  }
+
+  @media (max-width: 767px) {
+    .art-figure.art-figure--fit {
+      width: 100%;
+      margin-inline: 0;
+    }
+
+    .art-figure.art-figure--fit img {
+      width: 100%;
+      max-width: 100%;
+      border-radius: var(--radius-16);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .art-figure--fit img {
+      width: 100%;
+      max-width: 100%;
     }
   }
 </style>

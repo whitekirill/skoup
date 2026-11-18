@@ -34,3 +34,13 @@ export const ARTICLE_MARKETPLACES: ArticleMeta = {
   ogImage: '/og/marketplaces-installments.png',
   ogImageAlt: 'Покупка частями в кредит на Ozon, Wildberries и Яндекс Маркете',
 };
+
+export const ARTICLE_UX_LEVELS: ArticleMeta = {
+  path: '/blog/three-levels-of-ux/',
+  headline: 'Три уровня проектирования UX, на которых строится фундамент финтех-сервисов',
+  section: 'Финтех и регуляторика',
+  published: '2026-11-18',
+  modified: '2026-11-18',
+  ogImage: '/og/three-levels-of-ux.png',
+  ogImageAlt: 'Три уровня UX для финтеха: регуляторика, прозрачность, доверие',
+};

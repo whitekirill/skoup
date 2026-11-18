@@ -71,3 +71,6 @@ export const PROCESSORS = [
 
 /** Статья блога (главная → карточка «Покупка частями в кредит…») */
 export const ARTICLE_HREF = '/blog/marketplaces-installments/';
+
+/** Статья блога (главная → карточка «Три уровня проектирования UX…») */
+export const ARTICLE_UX_HREF = '/blog/three-levels-of-ux/';
