@@ -53,7 +53,8 @@ for (const [width, kind] of [[1440, 'desktop'], [393, 'mobile']]) {
   await page.fill('#brief-contact', 'anna@company.ru');
   await page.fill('#brief-phone', '+7 999 123-45-67');
   await page.click('.chip:has(input[value="Стратегия"])');
-  await page.click('.chip:has(input[value="Более 6 млн ₽"])');
+  await page.click('.chip:has(input[value="Telegram"])');
+  await page.check('input[name="consent"]', { force: true });
   await page.click('[data-brief-submit]');
   await page.waitForSelector('[data-brief-view="success"]:not([hidden])', { timeout: 5000 });
   await page.waitForTimeout(400);

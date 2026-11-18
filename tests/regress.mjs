@@ -1,4 +1,4 @@
-// Регресс «ни пикселя не изменилось»: полные скриншоты главной, статьи, брифа и экрана успеха
+// Регресс «ни пикселя не изменилось»: полные скриншоты главной, статей, брифа и экрана успеха
 // на 1440 и 393 (reduced motion — всё в покое) и попиксельное сравнение с базой.
 // Запуск: npm run build && node tests/regress.mjs shoot <dir>   — снять
 //         npm run build && node tests/regress.mjs compare <baseDir> <dir> — снять и сравнить
@@ -26,6 +26,7 @@ const base = `http://localhost:${server.address().port}`;
 const SHOTS = [
   ['home', '/'],
   ['article', '/blog/marketplaces-installments/'],
+  ['article-ux', '/blog/three-levels-of-ux/'],
   ['brief', '/#brief'],
 ];
 const browser = await chromium.launch();
