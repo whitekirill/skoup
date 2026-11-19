@@ -2,13 +2,13 @@
 /** «Что мы умеем» (Figma: desktop 581:19367, mobile 604:9427): 5 Service card, 2 колонки в 688 / столбик */
 import ServiceCard from '../ServiceCard.astro';
 
-// Переносы <br> — из макета, только desktop. «Регулиторика» в макете — опечатка, исправлено
+// Переносы <br> — из макета, только desktop. Тексты карточек 1 и 3 изменены 19.11.2026 (Павел) — в макете старые
 const SERVICES = [
-  { icon: 'magnifying-glass', color: 'green', title: 'Стратегия и исследования.', description: 'Изучаем бизнес<br>и клиентов, строим план продукта с учётом закона' },
+  { icon: 'magnifying-glass', color: 'green', title: 'Стратегия и исследования.', description: 'Изучаем бизнес и клиентов,<br>строим план продукта' },
   { icon: 'toggle-left', color: 'purple', title: 'Интерфейсы и дизайн-системы.', description: 'Проектируем экраны и сценарии, которые разработка берёт без правок' },
-  { icon: 'graduation-cap', color: 'yellow', title: 'Регуляторика.', description: 'Встраиваем требования регуляторов<br>в интерфейс и готовим документы' },
+  { icon: 'graduation-cap', color: 'yellow', title: 'Требования регулятора.', description: 'Учитываем при проектировании с самого первого&nbsp;экрана' },
   { icon: 'bolt-vertical', color: 'blue', title: 'Аналитика и рост.', description: 'Изучаем данные<br> и проводим A/B-тесты, чтобы конверсия росла дальше' },
-  { icon: 'wrench', color: 'pink', title: 'Аудит и исправления.', description: 'Проверяем удобство<br>и соответствие закону, помогаем всё исправить' },
+  { icon: 'wrench', color: 'pink', title: 'Аудит и улучшения.', description: 'Проверяем&nbsp;UX и комплаенс, составляем план доработок и помогаем&nbsp;внедрить' },
 ] as const;
 ---
 

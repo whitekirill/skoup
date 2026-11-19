@@ -18,7 +18,7 @@ import { CTA } from '../../data/site';
 
   <div class="hero__content">
     <div class="hero__main">
-      <h1 class="hero__title t-h2" id="hero-title">Проектируем финтех, который проходит<br class="hero__br" /> проверку регулятора</h1>
+      <h1 class="hero__title t-h2" id="hero-title">Проектируем <span class="hero__nowrap">финтех-интерфейсы</span>&nbsp;—<br class="hero__br" /> под&nbsp;конверсию и&nbsp;требования регулятора</h1>
       <div class="hero__buttons">
         <Button variant="primary" href={CTA.discuss.href} data-brief-open>{CTA.discuss.label}</Button>
         <Button variant="secondary" href={CTA.presentation.href} target="_blank" rel="noopener" iconRight="arrow-to-bracket-down-line">{CTA.presentation.label}</Button>
@@ -93,8 +93,23 @@ import { CTA } from '../../data/site';
     text-wrap: balance;
   }
 
-  /* перенос из макета — только у ширины макета, уже — строки выравниваются сами */
-  @media (max-width: 1279px) {
+  /* «финтех-интерфейсы» не рвётся по дефису */
+  .hero__nowrap {
+    white-space: nowrap;
+  }
+
+  /*
+   * Таглайн (с 19.11.2026) длиннее колонки 688: на десктопе — две строки шире колонки (вторая ~935 px при 48 px),
+   * по центру — заголовок выходит за колонку поровну с обеих сторон. Уже 1024 — строки выравниваются сами.
+   */
+  @media (min-width: 1024px) {
+    .hero__title {
+      flex-shrink: 0;
+      width: min(960px, 100vw - 2 * var(--layout-page-padding));
+    }
+  }
+
+  @media (max-width: 1023px) {
     .hero__br {
       display: none;
     }

@@ -22,6 +22,9 @@ const TEAM = [
   { name: 'Андрей', role: 'Юрист', photo: andrey },
 ];
 
+// Блок «Отзывы» скрыт по решению Павла 19.11.2026 — вернуть: true (в HTML его сейчас нет совсем)
+const SHOW_REVIEWS = false;
+
 // Отзывы клиентов; стрелки переключают, на краях неактивны
 const REVIEWS = [
   {
@@ -69,6 +72,8 @@ const REVIEWS = [
     </div>
   </div>
 
+  {SHOW_REVIEWS && (
+  <Fragment>
   <h2 class="section-label t-button-l" id="reviews-title">Отзывы</h2>
 
   <div class="reviews" data-reviews aria-labelledby="reviews-title" aria-roledescription="карусель">
@@ -93,6 +98,8 @@ const REVIEWS = [
       <Button variant="secondary" iconLeft="chevron-small-right-line" label="Следующий отзыв" disabled={REVIEWS.length < 2} data-reviews-next />
     </div>
   </div>
+  </Fragment>
+  )}
 </section>
 
 <script>
