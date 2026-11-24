@@ -24,8 +24,10 @@ interface Props {
 
 const { title, client, logo, media, wide = false, offset = false, id } = Astro.props;
 
-const desktopWidths = wide ? [1352, 2704] : [660, 1320];
-const mobileWidths = [369, 738];
+// Экспорты могут быть 1x или 2x: дескриптор srcset должен совпадать
+// с фактической шириной файла, даже если оптимизатор не увеличивает исходник.
+const desktopWidths = [...new Set((wide ? [1352, 2704] : [660, 1320]).map(width => Math.min(width, media.desktop.width)))];
+const mobileWidths = [...new Set([369, 738].map(width => Math.min(width, media.mobile.width)))];
 const desktopSizes = wide ? '(max-width: 1440px) 94vw, 1352px' : '(max-width: 1440px) 46vw, 660px';
 
 

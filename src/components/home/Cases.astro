@@ -11,6 +11,10 @@ import installmentsDesktop from '../../assets/cases/installments-desktop.png';
 import installmentsMobile from '../../assets/cases/installments-mobile.png';
 import loansDesktop from '../../assets/cases/business-loans-desktop.png';
 import loansMobile from '../../assets/cases/business-loans-mobile.png';
+import cashDesktop from '../../assets/cases/cash-loan-desktop.png';
+import cashMobile from '../../assets/cases/cash-loan-mobile.png';
+import crmDesktop from '../../assets/cases/crm-desktop.png';
+import crmMobile from '../../assets/cases/crm-mobile.png';
 import cardDesktop from '../../assets/cases/card-loans-desktop.png';
 import cardMobile from '../../assets/cases/card-loans-mobile.png';
 import investorDesktop from '../../assets/cases/investor-desktop.png';
@@ -32,10 +36,24 @@ const installments = {
 };
 const loans = {
   id: 'case-business-loans',
-  title: 'Кредиты для бизнеса онлайн',
-  client: 'Банк «Раунд» · Бизнес-кредиты',
+  title: 'Редизайн сайта для частных клиентов и бизнеса',
+  client: 'Банк «Раунд» · $412 млн активов',
   logo: round,
-  media: { desktop: loansDesktop, mobile: loansMobile, alt: 'Интерфейс кредитного калькулятора банка «Раунд» на мониторе' },
+  media: { desktop: loansDesktop, mobile: loansMobile, alt: 'Сайт банка «Раунд» для частных клиентов и бизнеса на мониторе' },
+};
+const cash = {
+  id: 'case-cash-loan',
+  title: 'Кредит наличными с подписью через Госключ',
+  client: 'Банк «Раунд» · $412 млн активов',
+  logo: round,
+  media: { desktop: cashDesktop, mobile: cashMobile, alt: 'Форма выбора условий кредита наличными и серебряные монеты' },
+};
+const crm = {
+  id: 'case-crm',
+  title: 'CRM для команды кредитных продуктов',
+  client: 'Банк «Раунд» · $412 млн активов',
+  logo: round,
+  media: { desktop: crmDesktop, mobile: crmMobile, alt: 'Интерфейс CRM кредитных продуктов банка «Раунд» на ноутбуке' },
 };
 const card = {
   id: 'case-card-loans',
@@ -65,6 +83,10 @@ const investor = {
       <CaseCard {...installments} offset />
     </div>
     <CaseCard {...loans} wide />
+    <div class="cases__row">
+      <CaseCard {...cash} />
+      <CaseCard {...crm} offset />
+    </div>
     <div class="cases__row">
       <CaseCard {...card} />
       <CaseCard {...investor} offset />
