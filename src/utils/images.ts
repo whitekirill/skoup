@@ -4,7 +4,7 @@ import type { ImageMetadata } from 'astro';
 
 export type ImageFormat = 'avif' | 'webp' | 'png';
 
-export async function srcset(src: ImageMetadata, widths: number[], format: ImageFormat) {
-  const images = await Promise.all(widths.map((width) => getImage({ src, width, format })));
+export async function srcset(src: ImageMetadata, widths: number[], format: ImageFormat, quality?: number) {
+  const images = await Promise.all(widths.map((width) => getImage({ src, width, format, quality })));
   return images.map((image, i) => `${image.src} ${widths[i]}w`).join(', ');
 }

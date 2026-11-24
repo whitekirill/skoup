@@ -26,31 +26,35 @@ const { title, client, logo, media, wide = false, offset = false, id } = Astro.p
 
 // Экспорты могут быть 1x или 2x: дескриптор srcset должен совпадать
 // с фактической шириной файла, даже если оптимизатор не увеличивает исходник.
-const desktopWidths = [...new Set((wide ? [1352, 2704] : [660, 1320]).map(width => Math.min(width, media.desktop.width)))];
-const mobileWidths = [...new Set([369, 738].map(width => Math.min(width, media.mobile.width)))];
-const desktopSizes = wide ? '(max-width: 1440px) 94vw, 1352px' : '(max-width: 1440px) 46vw, 660px';
+const desktopWidths = [...new Set((wide ? [1392, 2784, 4176] : [680, 1360, 2040]).map(width => Math.min(width, media.desktop.width)))];
+const mobileWidths = [...new Set([369, 738, 1107].map(width => Math.min(width, media.mobile.width)))];
+// object-fit: cover и hover увеличивают картинку относительно ширины рамки.
+// Резерв по разрешению учитывает и это увеличение, и плотность экрана.
+const desktopSizes = wide
+  ? '(min-width: 1440px) 1587px, (min-width: 1100px) 114vw, 154vw'
+  : '(min-width: 1440px) 776px, 80vw';
 
 
 const [mobileAvif, mobileWebp, desktopAvif, desktopWebp] = await Promise.all([
-  build(media.mobile, mobileWidths, 'avif'),
-  build(media.mobile, mobileWidths, 'webp'),
-  build(media.desktop, desktopWidths, 'avif'),
-  build(media.desktop, desktopWidths, 'webp'),
+  build(media.mobile, mobileWidths, 'avif', 90),
+  build(media.mobile, mobileWidths, 'webp', 95),
+  build(media.desktop, desktopWidths, 'avif', 90),
+  build(media.desktop, desktopWidths, 'webp', 95),
 ]);
-const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], format: 'webp' });
+const fallback = await getImage({ src: media.desktop, width: desktopWidths[0], format: 'webp', quality: 95 });
 ---
 
 <article class:list={['case', { 'case--offset': offset }]} id={id} data-case>
   <picture class="case__media">
-    <source media="(max-width: 767px)" type="image/avif" srcset={mobileAvif} sizes="100vw" />
-    <source media="(max-width: 767px)" type="image/webp" srcset={mobileWebp} sizes="100vw" />
+    <source media="(max-width: 767px)" type="image/avif" srcset={mobileAvif} sizes="114vw" />
+    <source media="(max-width: 767px)" type="image/webp" srcset={mobileWebp} sizes="114vw" />
     <source type="image/avif" srcset={desktopAvif} sizes={desktopSizes} />
     <source type="image/webp" srcset={desktopWebp} sizes={desktopSizes} />
     <img
       src={fallback.src}
       alt={media.alt}
-      width={media.desktop.width / 2}
-      height={media.desktop.height / 2}
+      width={fallback.attributes.width}
+      height={fallback.attributes.height}
       loading="lazy"
       decoding="async"
     />
